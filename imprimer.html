@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>WENDIO — Impression des cartes</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ── Écran ── */
+    body { font-family: 'Segoe UI', sans-serif; background: #f4e7d3; padding: 16px; }
+
+    .controls {
+      max-width: 210mm;
+      margin: 0 auto 14px;
+      background: white;
+      border-radius: 10px;
+      padding: 14px 16px;
+      box-shadow: 0 2px 6px rgba(0,0,0,.1);
+    }
+    .controls-titre { font-size: .75rem; text-transform: uppercase; letter-spacing: .08em; color: #999; margin-bottom: 10px; }
+
+    .clan-selector { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .btn-clan {
+      padding: 8px 14px; border: 2px solid #ddd; border-radius: 6px;
+      background: #fafafa; cursor: pointer; font-size: .9rem; font-weight: bold;
+      transition: .2s; display: flex; align-items: center; gap: 6px;
+    }
+    .btn-clan:hover { border-color: var(--c); }
+    .btn-clan.actif { background: var(--c); color: white; border-color: var(--c); }
+    .btn-clan.actif .wendat { opacity: .85; }
+    .wendat { font-size: .72rem; font-weight: normal; font-style: italic; }
+
+    .btn-bar { display: flex; gap: 10px; }
+    .btn-bar button { padding: 10px 22px; border: none; border-radius: 6px; font-weight: bold; font-size: .95rem; cursor: pointer; }
+    .btn-regen { background: #5d4037; color: white; }
+    .btn-print { background: #d35400; color: white; }
+    .btn-regen:hover, .btn-print:hover { opacity: .85; }
+
+    /* ── Page A4 — hauteur fixe ── */
+    .page {
+      background: white;
+      width: 210mm; height: 297mm;
+      margin: 0 auto;
+      padding: 6mm;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      gap: 4mm;
+    }
+
+    /* ── Carte ── */
+    .carte {
+      border: 1.5px solid #5d4037;
+      border-radius: 2mm;
+      padding: 2.5mm;
+      display: flex; flex-direction: column; gap: 1.8mm;
+      min-height: 0; overflow: hidden;
+    }
+    /* Bordure colorée si clan sélectionné */
+    .carte.avec-clan { border-width: 2px; border-color: var(--clan-c); }
+
+    /* ── En-tête ── */
+    .carte-entete { flex-shrink: 0; text-align: center; }
+    .carte-jeu    { font-size: 10pt; font-weight: 900; letter-spacing: .06em; }
+    .carte-consigne { font-size: 6.5pt; color: #888; margin-top: 1px; }
+
+    /* Bandeau clan (visible seulement si clan choisi) */
+    .clan-bandeau {
+      display: none;
+      align-items: center; justify-content: center; gap: 5px;
+      padding: 2mm 3mm;
+      border-radius: 1.5mm;
+      color: white;
+      flex-shrink: 0;
+    }
+    .clan-bandeau.visible { display: flex; }
+    .clan-bandeau .clan-icone  { font-size: 13pt; }
+    .clan-bandeau .clan-nom    { font-size: 9pt; font-weight: 800; letter-spacing: .03em; }
+    .clan-bandeau .clan-wendat { font-size: 7pt; font-style: italic; opacity: .9; }
+    .clan-bandeau .clan-obj    { font-size: 7pt; background: rgba(255,255,255,.22); padding: 1px 5px; border-radius: 3px; }
+
+    /* ── Grille bingo ── */
+    .bingo-grid {
+      display: grid;
+      grid-template-columns: 1.3rem repeat(6, 1fr);
+      grid-template-rows: repeat(6, 1fr);
+      gap: 1.5px;
+      background: #5d4037;
+      padding: 2px;
+      border-radius: 2px;
+      flex: 1; min-height: 0;
+    }
+    .row-label {
+      color: white; font-weight: bold; font-size: 8pt;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .cell {
+      background: white;
+      display: flex; justify-content: center; align-items: center;
+      font-size: 8pt; font-weight: bold;
+    }
+    .coeur  { background: #f2ede8; font-size: 10pt; }
+
+    /* Cases cibles selon le clan */
+    .cell.cible {
+      background: var(--clan-bg, #fff8e1);
+      font-weight: 900;
+      outline: 1.5px solid var(--clan-c, #d35400);
+      outline-offset: -1.5px;
+    }
+
+    /* ── Légende ── */
+    .legende { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5mm; flex-shrink: 0; }
+    .clan-item {
+      font-size: 6pt; border: 1.2px solid #ddd;
+      border-radius: 1.5mm; padding: 1mm 1.5mm;
+    }
+    /* Clan actif dans la légende : cerclé */
+    .clan-item.actif {
+      border-color: var(--clan-c);
+      background: var(--clan-bg);
+      font-weight: bold;
+      box-shadow: 0 0 0 1px var(--clan-c);
+    }
+
+    /* ── Impression ── */
+    @media print {
+      body { background: white; padding: 0; }
+      .controls { display: none; }
+      .page { margin: 0; }
+      @page { size: A4 portrait; margin: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="controls">
+  <div class="controls-titre">Choisissez le clan à imprimer</div>
+  <div class="clan-selector" id="clan-selector">
+    <!-- boutons générés en JS -->
+  </div>
+  <div class="btn-bar">
+    <button class="btn-regen" onclick="regenerer()">🔄 Nouvelles cartes aléatoires</button>
+    <button class="btn-print" onclick="window.print()">🖨️ Imprimer</button>
+  </div>
+</div>
+
+<div class="page" id="page"></div>
+
+<script src="data.js"></script>
+<script>
+  let clanChoisi = null; // null = générique, 'melange' = un de chaque, ou nom de clan
+
+  // ── Sélecteurs de clan ──────────────────────────────────────────────
+  function initSelector() {
+    const sel = document.getElementById('clan-selector');
+
+    // Bouton générique
+    const btnGen = document.createElement('button');
+    btnGen.className = 'btn-clan actif';
+    btnGen.id = 'btn-generique';
+    btnGen.style.setProperty('--c', '#5d4037');
+    btnGen.innerHTML = '📋 <span>Générique</span>';
+    btnGen.onclick = () => setClan(null);
+    sel.appendChild(btnGen);
+
+    // Un de chaque
+    const btnMix = document.createElement('button');
+    btnMix.className = 'btn-clan';
+    btnMix.id = 'btn-melange';
+    btnMix.style.setProperty('--c', '#555');
+    btnMix.innerHTML = '🔀 <span>Un de chaque clan</span>';
+    btnMix.onclick = () => setClan('melange');
+    sel.appendChild(btnMix);
+
+    // Un bouton par clan
+    Object.entries(CLANS).forEach(([nom, clan]) => {
+      const btn = document.createElement('button');
+      btn.className = 'btn-clan';
+      btn.id = `btn-${nom}`;
+      btn.style.setProperty('--c', CONFIG['W'].couleur); // couleur par défaut
+      btn.style.setProperty('--c', clanCouleur(nom));
+      btn.innerHTML = `${clan.icon} <span>${nom} <span class="wendat">${clan.wendat}</span></span>`;
+      btn.onclick = () => setClan(nom);
+      sel.appendChild(btn);
+    });
+  }
+
+  function setClan(clan) {
+    clanChoisi = clan;
+    // Mise à jour des boutons
+    document.querySelectorAll('.btn-clan').forEach(b => b.classList.remove('actif'));
+    const id = clan === null ? 'btn-generique' : clan === 'melange' ? 'btn-melange' : `btn-${clan}`;
+    document.getElementById(id).classList.add('actif');
+    regenerer();
+  }
+
+  function clanCouleur(nom) {
+    const couleurs = { Chevreuil: '#27ae60', Loup: '#2980b9', Ours: '#8e44ad', Tortue: '#d35400' };
+    return couleurs[nom] || '#5d4037';
+  }
+
+  function clanCouleurBg(nom) {
+    const bgs = { Chevreuil: '#eafaf1', Loup: '#eaf3fb', Ours: '#f5eef8', Tortue: '#fef5ec' };
+    return bgs[nom] || '#fff8e1';
+  }
+
+  // ── Génération des cartes ───────────────────────────────────────────
+  function regenerer() {
+    const page = document.getElementById('page');
+    page.innerHTML = '';
+    if (clanChoisi === 'melange') {
+      Object.keys(CLANS).forEach(nom => page.appendChild(creerCarte(nom)));
+    } else {
+      for (let i = 0; i < 4; i++) page.appendChild(creerCarte(clanChoisi));
+    }
+  }
+
+  function creerCarte(clan) {
+    const donnees = genererCarte();
+    const couleur = clan ? clanCouleur(clan) : '#5d4037';
+    const couleurBg = clan ? clanCouleurBg(clan) : '#fff8e1';
+    const infoClan = clan ? CLANS[clan] : null;
+
+    const div = document.createElement('div');
+    div.className = clan ? 'carte avec-clan' : 'carte';
+    div.style.setProperty('--clan-c', couleur);
+    div.style.setProperty('--clan-bg', couleurBg);
+
+    // ── En-tête ──
+    const entete = document.createElement('div');
+    entete.className = 'carte-entete';
+    entete.innerHTML = `<div class="carte-jeu">WENDIO — Le Jeu des Clans</div>
+      <div class="carte-consigne">Marquez les cases avec un grain de maïs 🌽</div>`;
+    div.appendChild(entete);
+
+    // ── Bandeau clan ──
+    const bandeau = document.createElement('div');
+    bandeau.className = clan ? 'clan-bandeau visible' : 'clan-bandeau';
+    bandeau.style.background = couleur;
+    if (infoClan) {
+      bandeau.innerHTML = `
+        <span class="clan-icone">${infoClan.icon}</span>
+        <span class="clan-nom">${clan}</span>
+        <span class="clan-wendat">${infoClan.wendat}</span>
+        <span class="clan-obj">${infoClan.label}</span>`;
+    }
+    div.appendChild(bandeau);
+
+    // ── Grille ──
+    const grid = document.createElement('div');
+    grid.className = 'bingo-grid';
+
+    LIGNES.forEach((ligne, ligneIdx) => {
+      const label = document.createElement('div');
+      label.className = 'row-label';
+      label.style.background = CONFIG[ligne].couleur;
+      label.textContent = ligne;
+      grid.appendChild(label);
+
+      for (let col = 0; col < 6; col++) {
+        const cell = document.createElement('div');
+        const id = ligne + col;
+        if (estCoeur(ligne, col)) {
+          cell.className = 'cell coeur';
+          cell.textContent = COEUR[id] || '';
+        } else {
+          const val = valeurCase(donnees, ligne, col);
+          cell.className = estCible(clan, ligneIdx, col) ? 'cell cible' : 'cell';
+          cell.textContent = val || '';
+        }
+        grid.appendChild(cell);
+      }
+    });
+    div.appendChild(grid);
+
+    // ── Légende ──
+    const legende = document.createElement('div');
+    legende.className = 'legende';
+    Object.entries(CLANS).forEach(([nom, c]) => {
+      const item = document.createElement('div');
+      item.className = nom === clan ? 'clan-item actif' : 'clan-item';
+      item.style.setProperty('--clan-c', clanCouleur(nom));
+      item.style.setProperty('--clan-bg', clanCouleurBg(nom));
+      item.innerHTML = `${c.icon} <strong>${nom}</strong> — ${c.label}`;
+      legende.appendChild(item);
+    });
+    div.appendChild(legende);
+
+    return div;
+  }
+
+  // Cases cibles à surligner selon le clan et la victoire
+  function estCible(clan, ligneIdx, colIdx) {
+    if (!clan || clan === 'melange') return false;
+    const ligne = LIGNES[ligneIdx];
+    const v = CLANS[clan].victoire;
+    if (v === 'coins')  return (ligneIdx === 0 || ligneIdx === 5) && (colIdx === 0 || colIdx === 5);
+    if (v === 'carre')  return ligneIdx >= 1 && ligneIdx <= 4 && colIdx >= 1 && colIdx <= 4 && !estCoeur(ligne, colIdx);
+    if (v === 'pleine') return !estCoeur(ligne, colIdx);
+    if (v === 'ligne')  return false; // aucune ligne prédéfinie à surligner
+    return false;
+  }
+
+  initSelector();
+  regenerer();
+</script>
+</body>
+</html>
