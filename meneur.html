@@ -21,13 +21,27 @@
       --green-lt:#28c86a;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
       font-family: 'Inter', 'Segoe UI', sans-serif;
       background: var(--bg);
       background-image: radial-gradient(ellipse 100% 50% at 50% 0%, #1c1005 0%, #0c0a07 65%);
       color: var(--text);
       min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       padding: 20px 16px 48px;
+      gap: 0;
+    }
+
+    /* ── Colonne gauche (portrait = pleine largeur, paysage = sidebar) ── */
+    #colonne-gauche {
+      width: 100%;
+      max-width: 680px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
     }
 
     h1 {
@@ -39,7 +53,6 @@
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      margin-bottom: 22px;
       filter: drop-shadow(0 0 18px rgba(192,120,8,.22));
     }
 
@@ -47,12 +60,12 @@
     .mode-bar {
       display: flex;
       justify-content: center;
-      margin: 0 auto 22px;
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 50px;
       padding: 4px;
       max-width: 300px;
+      margin: 0 auto;
     }
     .btn-mode {
       flex: 1;
@@ -82,10 +95,10 @@
       border-radius: 16px;
       border: 1px solid var(--border);
       padding: 20px;
-      margin-bottom: 20px;
       box-shadow: 0 4px 24px rgba(0,0,0,.4);
     }
     #panneau-online.visible { display: block; }
+
     .btn-creer {
       background: linear-gradient(135deg, var(--green) 0%, var(--green-lt) 100%);
       color: white;
@@ -107,7 +120,7 @@
     .online-actif { display: none; }
     .online-actif.visible { display: grid; grid-template-columns: 1fr auto; gap: 20px; align-items: start; }
 
-    .code-label { font-size: .68rem; text-transform: uppercase; letter-spacing: .14em; color: var(--muted); margin-bottom: 6px; font-weight: 600; }
+    .code-label  { font-size: .68rem; text-transform: uppercase; letter-spacing: .14em; color: var(--muted); margin-bottom: 6px; font-weight: 600; }
     .code-valeur {
       font-family: 'Cinzel', serif;
       font-size: 3rem;
@@ -120,14 +133,14 @@
       margin-bottom: 8px;
       line-height: 1;
     }
-    .lien-rejoin { font-size: .7rem; color: var(--dim); word-break: break-all; margin-bottom: 14px; font-family: monospace; }
+    .lien-rejoin  { font-size: .7rem; color: var(--dim); word-break: break-all; margin-bottom: 14px; font-family: monospace; }
     .joueurs-titre { font-size: .72rem; color: var(--muted); margin-bottom: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
-    .joueur-item { display: flex; align-items: center; gap: 8px; font-size: .88rem; padding: 7px 0; border-bottom: 1px solid var(--border); }
+    .joueur-item  { display: flex; align-items: center; gap: 8px; font-size: .88rem; padding: 7px 0; border-bottom: 1px solid var(--border); }
     .joueur-item:last-child { border: none; }
 
-    .qr-bloc { text-align: center; }
+    .qr-bloc       { text-align: center; }
     .qr-bloc small { display: block; font-size: .68rem; color: var(--muted); margin-top: 6px; letter-spacing: .05em; }
-    #qr-rejoindre { background: white; padding: 8px; border-radius: 10px; display: inline-block; box-shadow: 0 4px 16px rgba(0,0,0,.5); }
+    #qr-rejoindre  { background: white; padding: 8px; border-radius: 10px; display: inline-block; box-shadow: 0 4px 16px rgba(0,0,0,.5); }
 
     .btn-arreter {
       background: transparent;
@@ -148,7 +161,7 @@
     .btn-arreter:hover { background: #5a2020; border-color: #e05040; color: white; }
 
     /* ── Boutons d'action ── */
-    .btn-bar { display: flex; gap: 10px; justify-content: center; margin-bottom: 22px; }
+    .btn-bar { display: flex; gap: 10px; justify-content: center; }
     .btn-tirer {
       background: linear-gradient(135deg, var(--gold) 0%, var(--gold-lt) 100%);
       color: #0c0a07;
@@ -163,7 +176,7 @@
       box-shadow: 0 4px 20px rgba(192,120,8,.4);
       font-family: inherit;
     }
-    .btn-tirer:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(192,120,8,.5); }
+    .btn-tirer:hover  { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(192,120,8,.5); }
     .btn-tirer:active { transform: translateY(0); }
     .btn-tirer:disabled { opacity: .28; cursor: default; transform: none; box-shadow: none; }
     .btn-reset {
@@ -186,12 +199,12 @@
       border-radius: 16px;
       border: 1px solid var(--border);
       padding: 22px 24px;
-      margin-bottom: 22px;
       display: none;
       box-shadow: 0 4px 24px rgba(0,0,0,.5);
       position: relative;
       overflow: hidden;
     }
+    #carte-numero.visible { display: block; }
     #carte-numero::before {
       content: '';
       position: absolute;
@@ -201,7 +214,7 @@
       border-radius: 16px 16px 0 0;
     }
     .carte-interieur { display: flex; gap: 24px; align-items: flex-start; }
-    .carte-texte { flex: 1; }
+    .carte-texte  { flex: 1; }
     .badge-ligne {
       display: inline-block;
       color: white;
@@ -213,18 +226,12 @@
       letter-spacing: .14em;
       font-family: 'Cinzel', serif;
     }
-    .grand-num {
-      font-family: 'Cinzel', serif;
-      font-size: 5.5rem;
-      font-weight: 900;
-      line-height: 1;
-      margin-bottom: 8px;
-    }
-    .wendat-nom { font-size: 1.25rem; font-style: italic; color: var(--gold-lt); margin-bottom: 4px; font-weight: 500; }
+    .grand-num   { font-family: 'Cinzel', serif; font-size: 5.5rem; font-weight: 900; line-height: 1; margin-bottom: 8px; }
+    .wendat-nom  { font-size: 1.25rem; font-style: italic; color: var(--gold-lt); margin-bottom: 4px; font-weight: 500; }
     .wendat-phon { font-size: .84rem; color: var(--muted); margin-bottom: 12px; letter-spacing: .04em; }
-    .langues { display: flex; gap: 20px; }
-    .lang-fr { color: #70b8e0; font-weight: 600; font-size: .88rem; }
-    .lang-en { color: #68d898; font-weight: 600; font-size: .88rem; }
+    .langues     { display: flex; gap: 20px; }
+    .lang-fr     { color: #70b8e0; font-weight: 600; font-size: .88rem; }
+    .lang-en     { color: #68d898; font-weight: 600; font-size: .88rem; }
     .msg-manquant { color: var(--dim); font-style: italic; font-size: .8rem; margin-top: 8px; }
     .carte-droite { display: flex; flex-direction: column; align-items: center; gap: 12px; flex-shrink: 0; }
     #qrcode { background: white; padding: 8px; border-radius: 10px; box-shadow: 0 4px 16px rgba(0,0,0,.4); }
@@ -244,11 +251,14 @@
 
     /* ── Tableau de suivi ── */
     #tableau {
+      width: 100%;
+      max-width: 680px;
       background: var(--card);
       border-radius: 16px;
       padding: 20px;
       border: 1px solid var(--border);
       box-shadow: 0 4px 24px rgba(0,0,0,.4);
+      margin-top: 18px;
     }
     #tableau h2 { font-size: .7rem; color: var(--muted); margin-bottom: 14px; text-transform: uppercase; letter-spacing: .16em; font-weight: 600; }
     .suivi-grille { display: grid; grid-template-columns: 2rem repeat(12, 1fr); gap: 3px; }
@@ -275,12 +285,12 @@
       transition: all .15s;
       border: 1px solid transparent;
     }
-    .suivi-cell.tire { color: white; cursor: pointer; border-color: rgba(255,255,255,.07); box-shadow: 0 1px 4px rgba(0,0,0,.3); }
+    .suivi-cell.tire  { color: white; cursor: pointer; border-color: rgba(255,255,255,.07); box-shadow: 0 1px 4px rgba(0,0,0,.3); }
     .suivi-cell.tire:hover { opacity: .78; transform: scale(.94); }
     .suivi-cell.actuel { outline: 2px solid rgba(255,255,255,.8); outline-offset: 1px; box-shadow: 0 0 8px rgba(255,255,255,.18); }
     .compteur { text-align: center; margin-top: 14px; font-size: .8rem; color: var(--muted); font-weight: 500; letter-spacing: .05em; }
 
-    /* ── Bandeau classement dans le tableau ── */
+    /* ── Bandeau classement ── */
     #bandeau-gagnant {
       display: none;
       background: linear-gradient(135deg, #0d3820 0%, #1a5c35 100%);
@@ -303,17 +313,12 @@
       border-bottom: 1px solid rgba(46,204,113,.12);
       animation: slideIn .4s cubic-bezier(.175,.885,.32,1.275);
     }
-    .bandeau-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .bandeau-item:last-child  { border-bottom: none; padding-bottom: 0; }
     .bandeau-item:first-child { padding-top: 0; }
-    .bandeau-rang {
-      font-size: 1.3rem; flex-shrink: 0; width: 28px; text-align: center;
-    }
-    .bandeau-nom { font-size: .95rem; font-weight: 700; color: white; }
+    .bandeau-rang     { font-size: 1.3rem; flex-shrink: 0; width: 28px; text-align: center; }
+    .bandeau-nom      { font-size: .95rem; font-weight: 700; color: white; }
     .bandeau-clan-info { font-size: .75rem; color: #80edb5; margin-top: 1px; }
-    @keyframes slideIn {
-      from { transform: translateY(-8px); opacity: 0; }
-      to   { transform: translateY(0);    opacity: 1; }
-    }
+    @keyframes slideIn { from { transform: translateY(-8px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
     /* ── Gagnant overlay ── */
     #win-overlay {
@@ -322,6 +327,7 @@
       backdrop-filter: blur(6px);
       z-index: 100; justify-content: center; align-items: center;
     }
+    #win-overlay.visible { display: flex; }
     .win-card {
       background: linear-gradient(160deg, #1a5c35 0%, #0d3820 100%);
       padding: 50px;
@@ -332,13 +338,12 @@
       max-width: 480px; width: 90%;
       box-shadow: 0 0 60px rgba(46,204,113,.25), 0 24px 60px rgba(0,0,0,.7);
     }
-    .win-card h1 {
+    .win-card h2 {
       font-family: 'Cinzel', serif;
       font-size: 3rem;
       margin-bottom: 14px;
       letter-spacing: .1em;
       color: white;
-      -webkit-text-fill-color: white;
     }
     .win-joueur { font-size: 1.5rem; font-weight: 700; margin-bottom: 6px; color: #80edb5; }
     .win-clan   { font-size: 1rem; color: #58b880; margin-bottom: 28px; }
@@ -358,13 +363,65 @@
     }
     .win-card button:hover { background: rgba(255,255,255,.2); }
     @keyframes pop { from { transform: scale(.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+    /* ── Paysage tablette ── */
+    @media (orientation: landscape) and (min-height: 400px) {
+      body {
+        flex-direction: row;
+        align-items: stretch;
+        justify-content: center;
+        padding: 12px;
+        gap: 14px;
+      }
+
+      #colonne-gauche {
+        width: 260px;
+        max-width: none;
+        flex-shrink: 0;
+        gap: 12px;
+      }
+
+      h1 {
+        font-size: 1.2rem;
+        letter-spacing: .18em;
+        margin-bottom: 0;
+      }
+
+      .mode-bar { max-width: none; margin: 0; }
+
+      /* Numéro plus compact en sidebar */
+      .grand-num { font-size: 4rem; }
+      .wendat-nom { font-size: 1rem; }
+      .carte-droite { display: none; } /* cache QR en sidebar paysage, trop serré */
+
+      #carte-numero.visible {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+
+      #tableau {
+        flex: 1;
+        max-width: none;
+        margin-top: 0;
+        display: flex;
+        flex-direction: column;
+      }
+      .suivi-grille { flex: 1; grid-auto-rows: 1fr; align-content: stretch; }
+
+      /* Code online plus compact */
+      .code-valeur { font-size: 2.2rem; }
+      .online-actif.visible { grid-template-columns: 1fr; }
+      .qr-bloc { display: none; } /* QR masqué en paysage sidebar, déjà visible au centre */
+    }
   </style>
 </head>
 <body>
 
 <div id="win-overlay">
   <div class="win-card">
-    <h1>🌽 WENDIO ! 🌽</h1>
+    <h2>&#127805; WENDIO ! &#127805;</h2>
     <div class="win-joueur" id="win-joueur"></div>
     <div class="win-clan"   id="win-clan"></div>
     <button onclick="fermerWin()">Continuer</button>
@@ -372,81 +429,89 @@
   </div>
 </div>
 
-<h1>WENDIO — Meneur de Jeu</h1>
+<!-- ── Colonne gauche ── -->
+<div id="colonne-gauche">
 
-<!-- Mode local / en ligne -->
-<div class="mode-bar">
-  <button class="btn-mode actif" id="btn-local"  onclick="setMode('local')">📴 Mode local</button>
-  <button class="btn-mode"       id="btn-online" onclick="setMode('online')">🌐 Mode en ligne</button>
-</div>
+  <h1>WENDIO &#8212; Meneur</h1>
 
-<!-- Panneau en ligne -->
-<div id="panneau-online">
-  <div id="online-creation" style="text-align:center;">
-    <p style="color:var(--muted);font-size:.9rem;">Créez une partie pour obtenir un code à partager avec vos joueurs.</p>
-    <button class="btn-creer" onclick="creerPartie()">✚ Créer une partie en ligne</button>
+  <div class="mode-bar">
+    <button class="btn-mode actif" id="btn-local"  onclick="setMode('local')">&#128244; Local</button>
+    <button class="btn-mode"       id="btn-online" onclick="setMode('online')">&#127760; En ligne</button>
   </div>
-  <div class="online-actif" id="online-actif">
-    <div>
-      <div class="code-label">Code de la partie</div>
-      <div class="code-valeur" id="code-affiche">----</div>
-      <div class="lien-rejoin" id="lien-rejoin"></div>
-      <div class="joueurs-titre">Joueurs connectés : <strong id="joueurs-count">0</strong></div>
-      <div id="joueurs-items"></div>
-      <button class="btn-arreter" id="btn-arreter" onclick="arreterPartie()">⏹ Terminer la partie</button>
-    </div>
-    <div class="qr-bloc">
-      <div id="qr-rejoindre"></div>
-      <small>Lien joueur</small>
-    </div>
-  </div>
-</div>
 
-<!-- Boutons d'action -->
-<div class="btn-bar">
-  <button class="btn-tirer" id="btn-tirer" onclick="actionTirer()">🎲 TIRER UN NUMÉRO</button>
-  <button class="btn-reset"               onclick="resetJeu()">↺ Réinitialiser</button>
-</div>
-
-<!-- Carte numéro tiré -->
-<div id="carte-numero">
-  <div class="carte-interieur">
-    <div class="carte-texte">
-      <span class="badge-ligne" id="badge-ligne">W</span>
-      <div class="grand-num"    id="grand-num">—</div>
-      <div class="wendat-nom"   id="wendat-nom"></div>
-      <div class="wendat-phon"  id="wendat-phon"></div>
-      <div class="langues"><span class="lang-fr" id="lang-fr"></span><span class="lang-en" id="lang-en"></span></div>
-      <div class="msg-manquant" id="msg-manquant"></div>
+  <!-- Panel online -->
+  <div id="panneau-online">
+    <div id="online-creation" style="text-align:center;">
+      <p style="color:var(--muted);font-size:.9rem;">Cr&#233;ez une partie pour obtenir un code &#224; partager.</p>
+      <button class="btn-creer" onclick="creerPartie()">&#10010; Cr&#233;er une partie</button>
     </div>
-    <div class="carte-droite">
-      <div id="qrcode"></div>
-      <button class="btn-rejouer" onclick="rejouerSon()">▶ Rejouer</button>
+    <div class="online-actif" id="online-actif">
+      <div>
+        <div class="code-label">Code de la partie</div>
+        <div class="code-valeur" id="code-affiche">----</div>
+        <div class="lien-rejoin" id="lien-rejoin"></div>
+        <div class="joueurs-titre">Joueurs connect&#233;s : <strong id="joueurs-count">0</strong></div>
+        <div id="joueurs-items"></div>
+        <button class="btn-arreter" id="btn-arreter" onclick="arreterPartie()">&#9646; Terminer la partie</button>
+      </div>
+      <div class="qr-bloc">
+        <div id="qr-rejoindre"></div>
+        <small>Lien joueur</small>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- Tableau de suivi -->
+  <!-- Boutons action -->
+  <div class="btn-bar">
+    <button class="btn-tirer" id="btn-tirer" onclick="actionTirer()">&#127922; TIRER UN NUM&#201;RO</button>
+    <button class="btn-reset"               onclick="resetJeu()">&#8635; R&#233;init.</button>
+  </div>
+
+  <!-- Carte numéro tiré -->
+  <div id="carte-numero">
+    <div class="carte-interieur">
+      <div class="carte-texte">
+        <span class="badge-ligne" id="badge-ligne">W</span>
+        <div class="grand-num"    id="grand-num">&#8212;</div>
+        <div class="wendat-nom"   id="wendat-nom"></div>
+        <div class="wendat-phon"  id="wendat-phon"></div>
+        <div class="langues">
+          <span class="lang-fr" id="lang-fr"></span>
+          <span class="lang-en" id="lang-en"></span>
+        </div>
+        <div class="msg-manquant" id="msg-manquant"></div>
+        <button class="btn-rejouer" onclick="rejouerSon()" style="margin-top:12px;">&#9654; Rejouer</button>
+      </div>
+      <div class="carte-droite">
+        <div id="qrcode"></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /colonne-gauche -->
+
+<!-- ── Tableau de suivi ── -->
 <div id="tableau">
   <h2>Tableau des tirages</h2>
   <div id="bandeau-gagnant">
-    <div class="bandeau-titre">🌽 Classement</div>
+    <div class="bandeau-titre">&#127805; Classement</div>
     <div id="gagnants-liste"></div>
   </div>
   <div class="suivi-grille" id="suivi-grille"></div>
-  <div class="compteur" id="compteur">0 / 72 numéros tirés</div>
+  <div class="compteur" id="compteur">0 / 72 num&#233;ros tir&#233;s</div>
 </div>
 
 <script src="qrcode.min.js"></script>
 <script src="data.js"></script>
 <script>
+  'use strict';
   let tirages      = [];
   let numeroActuel = null;
   let modeOnline   = false;
   let socket       = null;
   let codePartie   = null;
 
-  // ── Mode ──────────────────────────────────────────────────────────
+  // ── Mode ──────────────────────────────────────────────────────────────
   function setMode(mode) {
     modeOnline = (mode === 'online');
     document.getElementById('btn-local').classList.toggle('actif', !modeOnline);
@@ -456,27 +521,28 @@
   }
 
   function chargerSocket() {
-    const s = document.createElement('script');
-    s.src = '/socket.io/socket.io.js';
+    const s   = document.createElement('script');
+    s.src     = '/socket.io/socket.io.js';
     s.onload  = connecterSocket;
     s.onerror = () => alert('Serveur introuvable. Lancez server.js avec Node.js.');
     document.head.appendChild(s);
   }
 
   function connecterSocket() {
-    socket = io();
+    socket = io();  // eslint-disable-line no-undef
 
     socket.on('partie-creee', ({ code }) => {
       codePartie = code;
-      const lien = `${window.location.origin}/joueur.html?code=${code}`;
+      const lien = window.location.origin + '/joueur.html?code=' + code;
       document.getElementById('code-affiche').textContent = code;
       document.getElementById('lien-rejoin').textContent  = lien;
       document.getElementById('online-creation').style.display = 'none';
       document.getElementById('online-actif').classList.add('visible');
       document.getElementById('btn-arreter').classList.add('visible');
-      document.getElementById('qr-rejoindre').innerHTML = '';
+      const qrEl = document.getElementById('qr-rejoindre');
+      qrEl.replaceChildren();
       if (typeof QRCode !== 'undefined') {
-        new QRCode(document.getElementById('qr-rejoindre'), { text: lien, width: 120, height: 120 });
+        new QRCode(qrEl, { text: lien, width: 120, height: 120 });  // eslint-disable-line no-undef
       }
     });
 
@@ -485,11 +551,17 @@
       const c    = CLANS[clan] || {};
       const item = document.createElement('div');
       item.className = 'joueur-item';
-      item.innerHTML = `${c.icon || ''}  <strong>${nom}</strong> <span style="color:var(--muted);font-size:.8rem">${clan}</span>`;
+      const icon   = document.createTextNode((c.icon || '') + '\u00a0');
+      const strong = document.createElement('strong');
+      strong.textContent = nom;
+      const muted  = document.createElement('span');
+      muted.style.cssText = 'color:var(--muted);font-size:.8rem';
+      muted.textContent   = '\u00a0' + clan;
+      item.append(icon, strong, muted);
       document.getElementById('joueurs-items').appendChild(item);
     });
 
-    socket.on('joueur-deconnecte', ({ nom, count }) => {
+    socket.on('joueur-deconnecte', ({ count }) => {
       document.getElementById('joueurs-count').textContent = count;
     });
 
@@ -501,26 +573,26 @@
       mettreAJourSuivi(num);
     });
 
-    socket.on('gagnant', ({ nom, clan, rang }) => afficherGagnant(nom, clan, rang));
+    socket.on('gagnant',    ({ nom, clan, rang }) => afficherGagnant(nom, clan, rang));
     socket.on('tous-tires', () => { document.getElementById('btn-tirer').disabled = true; });
   }
 
-  function creerPartie() { if (socket) socket.emit('creer'); }
+  function creerPartie()  { if (socket) socket.emit('creer'); }
 
   function arreterPartie() {
     if (!socket || !codePartie) return;
-    if (!confirm('Terminer la partie ? Tous les joueurs seront déconnectés.')) return;
+    if (!confirm('Terminer la partie\u00a0? Tous les joueurs seront d\u00e9connect\u00e9s.')) return;
     socket.emit('terminer', { code: codePartie });
     codePartie = null;
     document.getElementById('online-actif').classList.remove('visible');
     document.getElementById('btn-arreter').classList.remove('visible');
     document.getElementById('online-creation').style.display = '';
-    document.getElementById('joueurs-items').innerHTML = '';
+    document.getElementById('joueurs-items').replaceChildren();
     document.getElementById('joueurs-count').textContent = '0';
     resetJeu();
   }
 
-  // ── Tirer ─────────────────────────────────────────────────────────
+  // ── Tirer ─────────────────────────────────────────────────────────────
   function actionTirer() {
     if (modeOnline && socket && codePartie) {
       socket.emit('tirer', { code: codePartie });
@@ -529,54 +601,65 @@
       for (let i = 1; i <= 72; i++) { if (!tirages.includes(i)) restants.push(i); }
       if (!restants.length) { document.getElementById('btn-tirer').disabled = true; return; }
       const num = restants[Math.floor(Math.random() * restants.length)];
-      tirages.push(num); numeroActuel = num;
-      afficherCarte(num); jouerSon(num); mettreAJourSuivi(num);
+      tirages.push(num);
+      numeroActuel = num;
+      afficherCarte(num);
+      jouerSon(num);
+      mettreAJourSuivi(num);
     }
   }
 
-  // ── Carte numéro ──────────────────────────────────────────────────
+  // ── Carte numéro ──────────────────────────────────────────────────────
   function afficherCarte(num) {
-    document.getElementById('carte-numero').style.display = 'block';
-    const ligne   = ligneDeNumero(num);
+    const carte  = document.getElementById('carte-numero');
+    const ligne  = ligneDeNumero(num);
     const couleur = CONFIG[ligne].couleur;
-    const data    = NOMBRES[num];
-    document.getElementById('carte-numero').style.setProperty('--ligne-couleur', couleur);
-    document.getElementById('badge-ligne').textContent       = ligne;
-    document.getElementById('badge-ligne').style.background  = couleur;
-    document.getElementById('grand-num').textContent         = num;
-    document.getElementById('grand-num').style.color         = couleur;
+    const data   = NOMBRES[num];
+
+    carte.classList.add('visible');
+    carte.style.setProperty('--ligne-couleur', couleur);
+
+    document.getElementById('badge-ligne').textContent      = ligne;
+    document.getElementById('badge-ligne').style.background = couleur;
+    document.getElementById('grand-num').textContent        = num;
+    document.getElementById('grand-num').style.color        = couleur;
+
     if (data) {
-      document.getElementById('wendat-nom').textContent  = data.wendat;
-      document.getElementById('wendat-phon').textContent = data.phon;
-      document.getElementById('lang-fr').textContent     = '🇫🇷 ' + data.fr;
-      document.getElementById('lang-en').textContent     = '🇬🇧 ' + data.en;
+      document.getElementById('wendat-nom').textContent   = data.wendat;
+      document.getElementById('wendat-phon').textContent  = data.phon;
+      document.getElementById('lang-fr').textContent      = '\uD83C\uDDEB\uD83C\uDDF7 ' + data.fr;
+      document.getElementById('lang-en').textContent      = '\uD83C\uDDEC\uD83C\uDDE7 ' + data.en;
       document.getElementById('msg-manquant').textContent = '';
     } else {
-      ['wendat-nom','wendat-phon','lang-fr','lang-en'].forEach(id => document.getElementById(id).textContent = '');
-      document.getElementById('msg-manquant').textContent = '— vocabulaire Wendat à compléter —';
+      ['wendat-nom','wendat-phon','lang-fr','lang-en'].forEach(id => {
+        document.getElementById(id).textContent = '';
+      });
+      document.getElementById('msg-manquant').textContent = '\u2014 vocabulaire Wendat \u00e0 compl\u00e9ter \u2014';
     }
-    const base = window.location.href.replace(/[^/]*$/, '');
-    document.getElementById('qrcode').innerHTML = '';
+
+    const base  = window.location.href.replace(/[^/]*$/, '');
+    const qrEl  = document.getElementById('qrcode');
+    qrEl.replaceChildren();
     if (typeof QRCode !== 'undefined') {
-      new QRCode(document.getElementById('qrcode'), { text: base + cheminAudio(num), width: 100, height: 100 });
+      new QRCode(qrEl, { text: base + cheminAudio(num), width: 100, height: 100 });  // eslint-disable-line no-undef
     }
   }
 
-  // ── Suivi ─────────────────────────────────────────────────────────
+  // ── Suivi ─────────────────────────────────────────────────────────────
   function initialiser() {
     const grille = document.getElementById('suivi-grille');
-    grille.innerHTML = '';
+    grille.replaceChildren();
     LIGNES.forEach(ligne => {
       const lbl = document.createElement('div');
-      lbl.className = 'suivi-label';
+      lbl.className        = 'suivi-label';
       lbl.style.background = CONFIG[ligne].couleur;
-      lbl.textContent = ligne;
+      lbl.textContent      = ligne;
       grille.appendChild(lbl);
       for (let i = 0; i < 12; i++) {
         const num  = CONFIG[ligne].min + i;
         const cell = document.createElement('div');
-        cell.className = 'suivi-cell';
-        cell.id = `cell-${num}`;
+        cell.className   = 'suivi-cell';
+        cell.id          = 'cell-' + num;
         cell.textContent = num;
         cell.onclick = () => { if (tirages.includes(num)) { jouerSon(num); surlignerActuel(num); } };
         grille.appendChild(cell);
@@ -586,50 +669,69 @@
 
   function mettreAJourSuivi(num) {
     document.querySelectorAll('.suivi-cell.actuel').forEach(c => c.classList.remove('actuel'));
-    const cell = document.getElementById(`cell-${num}`);
-    if (cell) { cell.classList.add('tire','actuel'); cell.style.background = CONFIG[ligneDeNumero(num)].couleur; }
-    document.getElementById('compteur').textContent = `${tirages.length} / 72 numéros tirés`;
+    const cell = document.getElementById('cell-' + num);
+    if (cell) {
+      cell.classList.add('tire', 'actuel');
+      cell.style.background = CONFIG[ligneDeNumero(num)].couleur;
+    }
+    document.getElementById('compteur').textContent = tirages.length + ' / 72 num\u00e9ros tir\u00e9s';
     if (tirages.length >= 72) document.getElementById('btn-tirer').disabled = true;
   }
 
   function surlignerActuel(num) {
     document.querySelectorAll('.suivi-cell.actuel').forEach(c => c.classList.remove('actuel'));
-    document.getElementById(`cell-${num}`).classList.add('actuel');
-    afficherCarte(num); numeroActuel = num;
+    document.getElementById('cell-' + num).classList.add('actuel');
+    afficherCarte(num);
+    numeroActuel = num;
   }
 
   function rejouerSon() { if (numeroActuel) jouerSon(numeroActuel); }
 
-  // ── Gagnant ───────────────────────────────────────────────────────
-  const MEDAILLES = ['🥇','🥈','🥉'];
+  // ── Gagnant ───────────────────────────────────────────────────────────
+  const MEDAILLES = ['\uD83E\uDD47', '\uD83E\uDD48', '\uD83E\uDD49'];
+
   function afficherGagnant(nom, clan, rang) {
-    const c = CLANS[clan] || {};
+    const c       = CLANS[clan] || {};
+    const medaille = MEDAILLES[rang - 1] || '#' + rang;
+
     // Grand overlay
-    const medaille = MEDAILLES[rang - 1] || `#${rang}`;
-    document.getElementById('win-joueur').textContent = `${medaille} ${c.icon || ''} ${nom}`;
-    document.getElementById('win-clan').textContent   = `${clan} — ${c.label || ''}`;
-    document.getElementById('win-overlay').style.display = 'flex';
-    // Ajouter au classement
+    document.getElementById('win-joueur').textContent = medaille + ' ' + (c.icon || '') + ' ' + nom;
+    document.getElementById('win-clan').textContent   = clan + ' \u2014 ' + (c.label || '');
+    document.getElementById('win-overlay').classList.add('visible');
+
+    // Bandeau classement
     const item = document.createElement('div');
     item.className = 'bandeau-item';
-    item.innerHTML = `<span class="bandeau-rang">${medaille}</span>
-      <div><div class="bandeau-nom">${nom}</div>
-      <div class="bandeau-clan-info">${c.icon || ''} ${clan} — ${c.label || ''}</div></div>`;
+    const rangEl = document.createElement('span');
+    rangEl.className   = 'bandeau-rang';
+    rangEl.textContent = medaille;
+    const infoDiv  = document.createElement('div');
+    const nomDiv   = document.createElement('div');
+    nomDiv.className   = 'bandeau-nom';
+    nomDiv.textContent = nom;
+    const clanDiv  = document.createElement('div');
+    clanDiv.className   = 'bandeau-clan-info';
+    clanDiv.textContent = (c.icon || '') + ' ' + clan + ' \u2014 ' + (c.label || '');
+    infoDiv.append(nomDiv, clanDiv);
+    item.append(rangEl, infoDiv);
     document.getElementById('gagnants-liste').appendChild(item);
     document.getElementById('bandeau-gagnant').classList.add('visible');
   }
 
-  function fermerWin() { document.getElementById('win-overlay').style.display = 'none'; }
+  function fermerWin() { document.getElementById('win-overlay').classList.remove('visible'); }
 
   function resetJeu() {
     tirages = []; numeroActuel = null;
     fermerWin();
-    document.getElementById('btn-tirer').disabled = false;
-    document.getElementById('carte-numero').style.display = 'none';
-    document.getElementById('compteur').textContent = '0 / 72 numéros tirés';
-    document.getElementById('gagnants-liste').innerHTML = '';
+    document.getElementById('btn-tirer').disabled          = false;
+    document.getElementById('carte-numero').classList.remove('visible');
+    document.getElementById('compteur').textContent        = '0 / 72 num\u00e9ros tir\u00e9s';
+    document.getElementById('gagnants-liste').replaceChildren();
     document.getElementById('bandeau-gagnant').classList.remove('visible');
-    document.querySelectorAll('.suivi-cell').forEach(c => { c.classList.remove('tire','actuel'); c.style.background = ''; });
+    document.querySelectorAll('.suivi-cell').forEach(c => {
+      c.classList.remove('tire', 'actuel');
+      c.style.background = '';
+    });
   }
 
   initialiser();

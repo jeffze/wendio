@@ -25,10 +25,10 @@
       background-image: radial-gradient(ellipse 120% 50% at 50% 0%, #e4d0a8 0%, #ede0c8 55%);
       color: var(--primary);
       min-height: 100vh;
-      padding: 16px 16px 40px;
       display: flex;
       flex-direction: column;
       align-items: center;
+      padding: 16px 16px 32px;
     }
 
     h1 {
@@ -39,8 +39,320 @@
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
       filter: drop-shadow(0 1px 3px rgba(184,104,8,.18));
+    }
+
+    /* ── Toggle local / en ligne ── */
+    .mode-bar {
+      display: flex;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 50px;
+      padding: 4px;
+      margin-bottom: 18px;
+      box-shadow: 0 1px 8px rgba(60,30,10,.08);
+    }
+    .btn-mode {
+      padding: 9px 22px;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      font-weight: 600;
+      font-size: .88rem;
+      border-radius: 50px;
+      transition: all .2s;
+      letter-spacing: .03em;
+      font-family: inherit;
+    }
+    .btn-mode.actif {
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-lt) 100%);
+      color: white;
+      box-shadow: 0 2px 10px rgba(184,104,8,.35);
+      font-weight: 700;
+    }
+
+    /* ── Vue setup ── */
+    #vue-setup {
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+    .setup-panel {
+      background: var(--surface);
+      border-radius: 16px;
+      box-shadow: 0 2px 16px rgba(60,30,10,.1);
+      border: 1px solid var(--border);
+      padding: 20px;
+      width: 100%;
+    }
+    .section-titre {
+      font-size: .7rem;
+      text-transform: uppercase;
+      letter-spacing: .13em;
+      color: var(--muted);
+      margin-bottom: 12px;
+      font-weight: 700;
+    }
+
+    /* Clan grid */
+    .clan-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 12px; }
+    .btn-clan {
+      background: #fdf7ee;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 8px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: .88rem;
+      transition: all .2s;
+      text-align: center;
+      line-height: 1.4;
+      font-family: inherit;
+      color: var(--primary);
+    }
+    .btn-clan:hover { border-color: var(--accent); background: #fef3e2; }
+    .btn-clan.actif {
+      background: linear-gradient(135deg, var(--accent), var(--accent-lt));
+      color: white;
+      border-color: transparent;
+      box-shadow: 0 3px 12px rgba(184,104,8,.28);
+    }
+    .objectif { font-size: .83rem; font-style: italic; color: var(--muted); min-height: 18px; margin-bottom: 14px; font-weight: 500; }
+
+    /* Code input */
+    .code-entree { display: flex; gap: 10px; margin-top: 8px; }
+    .code-entree input {
+      flex: 0 0 auto;
+      width: 108px;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 8px;
+      font-family: 'Cinzel', serif;
+      font-size: 1.4rem;
+      font-weight: 900;
+      letter-spacing: .22em;
+      text-transform: uppercase;
+      text-align: center;
+      outline: none;
+      transition: border-color .2s;
+      color: var(--primary);
+      background: var(--surface);
+    }
+    .code-entree input:focus { border-color: var(--accent); }
+
+    /* Boutons principaux */
+    .btn-principal {
+      width: 100%;
+      border: none;
+      border-radius: 12px;
+      padding: 14px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: .05em;
+      transition: all .2s;
+      font-family: inherit;
+    }
+    .btn-principal.vert {
+      background: linear-gradient(135deg, var(--vert), var(--vert-lt));
+      color: white;
+      box-shadow: 0 4px 16px rgba(30,144,80,.32);
+    }
+    .btn-principal.vert:hover  { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(30,144,80,.42); }
+    .btn-principal.vert:disabled { opacity: .38; cursor: default; transform: none; box-shadow: none; }
+    .btn-principal.brun {
+      background: var(--primary);
+      color: white;
+    }
+    .btn-principal.brun:hover { opacity: .84; transform: translateY(-1px); }
+    .btn-principal.brun:disabled { opacity: .38; cursor: default; transform: none; }
+
+    .msg-erreur { color: #c0392b; font-size: .83rem; margin-top: 8px; display: none; font-weight: 500; }
+    .msg-erreur.visible { display: block; }
+
+    /* ── Vue jeu ── */
+    #vue-jeu {
+      display: none;
+      width: 100%;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+    #vue-jeu.visible { display: flex; }
+
+    /* Barre d'info (en jeu) */
+    #jeu-sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 100%;
+      max-width: 560px;
+    }
+    #jeu-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .info-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: .8rem;
+      font-weight: 700;
+      letter-spacing: .04em;
+    }
+    .info-badge.clan {
+      background: linear-gradient(135deg, var(--accent), var(--accent-lt));
+      color: white;
+      box-shadow: 0 2px 8px rgba(184,104,8,.25);
+    }
+    .info-badge.online {
+      background: linear-gradient(135deg, var(--vert), var(--vert-lt));
+      color: white;
+      box-shadow: 0 2px 8px rgba(30,144,80,.25);
+    }
+    .btn-retour {
+      padding: 6px 14px;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      background: var(--surface);
+      color: var(--muted);
+      font-size: .8rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all .2s;
+      margin-left: auto;
+    }
+    .btn-retour:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* Numéro annoncé */
+    #annonce {
+      display: none;
+      background: var(--primary);
+      color: white;
+      border-radius: 14px;
+      padding: 12px 20px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(44,26,14,.28);
+    }
+    #annonce.visible { display: block; }
+    .annonce-label  { font-size: .65rem; color: #b8956a; margin-bottom: 3px; text-transform: uppercase; letter-spacing: .12em; font-weight: 600; }
+    .annonce-num    { font-family: 'Cinzel', serif; font-size: 3rem; font-weight: 900; color: var(--accent-lt); line-height: 1; }
+    .annonce-wendat { font-size: .88rem; font-style: italic; color: #c4905a; margin-top: 4px; }
+
+    /* Grille bingo */
+    .bingo-wrap { width: 100%; max-width: 560px; }
+    .bingo-grid {
+      display: grid;
+      grid-template-columns: 2.4rem repeat(6, 1fr);
+      gap: 5px;
+      background: var(--primary);
+      padding: 12px;
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(44,26,14,.32), inset 0 1px 0 rgba(255,255,255,.04);
+    }
+    .row-label {
+      color: white;
+      font-family: 'Cinzel', serif;
+      font-size: 1.2rem;
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      letter-spacing: .04em;
+    }
+    .cell {
+      background: white;
+      aspect-ratio: 1/1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      position: relative;
+      transition: all .12s;
+      user-select: none;
+      box-shadow: 0 1px 3px rgba(0,0,0,.1);
+      border: 2px solid transparent;
+    }
+    .cell:hover { transform: scale(.94); border-color: rgba(184,104,8,.35); }
+    .cell:active { transform: scale(.86); }
+    .cell.cible { border-color: var(--accent-lt); background: #fffbf2; box-shadow: 0 0 0 1px var(--accent-lt), 0 2px 8px rgba(224,144,48,.2); }
+    .cell.marque::after { content: '🌽'; position: absolute; font-size: 1.65rem; z-index: 2; }
+    .cell.auto-marque { background: #fff8e8; border-color: rgba(224,144,48,.28); }
+    .cell.coeur { background: #f5f0e8; font-size: 1.5rem; cursor: default; border-color: transparent; }
+    .cell.coeur:hover { transform: none; border-color: transparent; }
+    .cell.coeur:active { transform: none; }
+
+    /* Bouton WENDIO ! */
+    #btn-wendio {
+      display: none;
+      width: 100%;
+      background: linear-gradient(135deg, var(--vert), var(--vert-lt));
+      color: white;
+      border: none;
+      border-radius: 14px;
+      padding: 20px;
+      font-family: 'Cinzel', serif;
+      font-size: 1.4rem;
+      font-weight: 900;
+      letter-spacing: .1em;
+      cursor: pointer;
+      animation: pulse 1.2s infinite;
+      box-shadow: 0 6px 24px rgba(30,144,80,.48);
+    }
+    #btn-wendio.visible { display: block; }
+    @keyframes pulse {
+      0%,100% { transform: scale(1);     box-shadow: 0 6px 24px rgba(30,144,80,.48); }
+      50%      { transform: scale(1.025); box-shadow: 0 10px 32px rgba(30,144,80,.68); }
+    }
+
+    /* ── Paysage tablette ── */
+    @media (orientation: landscape) and (min-height: 400px) {
+      body {
+        flex-direction: row;
+        align-items: flex-start;
+        justify-content: center;
+        padding: 12px;
+        gap: 14px;
+        min-height: 100dvh;
+      }
+      h1 { font-size: 1.5rem; margin-bottom: 8px; }
+      .mode-bar { margin-bottom: 12px; }
+
+      #vue-jeu {
+        flex-direction: row;
+        align-items: flex-start;
+        justify-content: center;
+        gap: 14px;
+        width: 100%;
+        max-width: 900px;
+      }
+      #jeu-sidebar {
+        width: 200px;
+        flex-shrink: 0;
+        max-width: none;
+        padding-top: 4px;
+      }
+      #jeu-info { flex-direction: column; align-items: flex-start; }
+      .btn-retour { margin-left: 0; }
+      #annonce { max-width: none; border-radius: 12px; padding: 10px 14px; }
+      .annonce-num { font-size: 2.4rem; }
+      #btn-wendio { max-width: none; font-size: 1.1rem; padding: 14px; }
+      .bingo-wrap { flex: 1; max-width: none; max-height: calc(100dvh - 24px); }
     }
 
     /* ── Overlay connexion ── */
@@ -100,6 +412,7 @@
       transition: border-color .2s;
       font-family: inherit;
       color: var(--primary);
+      background: var(--surface);
     }
     .form-rejoindre input:focus { border-color: var(--accent); }
     .form-clan { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px; }
@@ -124,232 +437,6 @@
       border-color: transparent;
       box-shadow: 0 3px 12px rgba(184,104,8,.3);
     }
-    .btn-rejoindre {
-      width: 100%;
-      margin-top: 20px;
-      background: linear-gradient(135deg, var(--vert), var(--vert-lt));
-      color: white;
-      border: none;
-      border-radius: 12px;
-      padding: 14px;
-      font-size: 1rem;
-      font-weight: 700;
-      cursor: pointer;
-      letter-spacing: .05em;
-      box-shadow: 0 4px 16px rgba(30,144,80,.32);
-      transition: all .2s;
-      font-family: inherit;
-    }
-    .btn-rejoindre:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(30,144,80,.42); }
-    .btn-rejoindre:disabled { opacity: .38; cursor: default; transform: none; box-shadow: none; }
-    .msg-erreur { color: #c0392b; font-size: .83rem; margin-top: 8px; display: none; font-weight: 500; }
-    .msg-erreur.visible { display: block; }
-
-    /* ── Badge en ligne ── */
-    .online-badge {
-      display: none;
-      background: linear-gradient(135deg, var(--vert), var(--vert-lt));
-      color: white;
-      font-size: .76rem;
-      font-weight: 700;
-      padding: 5px 16px;
-      border-radius: 20px;
-      margin-bottom: 12px;
-      letter-spacing: .07em;
-      box-shadow: 0 2px 10px rgba(30,144,80,.28);
-    }
-    .online-badge.visible { display: inline-block; }
-
-    /* ── Contrôles ── */
-    .controles {
-      background: var(--surface);
-      border-radius: 14px;
-      box-shadow: 0 2px 16px rgba(60,30,10,.1);
-      border: 1px solid var(--border);
-      padding: 16px 18px;
-      margin-bottom: 14px;
-      width: 100%; max-width: 560px;
-    }
-    .section-titre {
-      font-size: .7rem;
-      text-transform: uppercase;
-      letter-spacing: .13em;
-      color: var(--muted);
-      margin-bottom: 10px;
-      font-weight: 700;
-    }
-    .clan-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 12px; }
-    .btn-clan {
-      background: #fdf7ee;
-      border: 2px solid var(--border);
-      border-radius: 10px;
-      padding: 10px 8px;
-      cursor: pointer;
-      font-weight: 700;
-      font-size: .88rem;
-      transition: all .2s;
-      text-align: center;
-      line-height: 1.4;
-      font-family: inherit;
-      color: var(--primary);
-    }
-    .btn-clan:hover { border-color: var(--accent); background: #fef3e2; }
-    .btn-clan.actif {
-      background: linear-gradient(135deg, var(--accent), var(--accent-lt));
-      color: white;
-      border-color: transparent;
-      box-shadow: 0 3px 12px rgba(184,104,8,.28);
-    }
-    .objectif { font-size: .83rem; font-style: italic; color: var(--muted); min-height: 18px; margin-bottom: 12px; font-weight: 500; }
-    .btn-nouvelle {
-      width: 100%;
-      background: var(--primary);
-      color: white;
-      border: none;
-      border-radius: 10px;
-      padding: 12px;
-      font-weight: 700;
-      font-size: .95rem;
-      cursor: pointer;
-      transition: all .2s;
-      letter-spacing: .04em;
-      font-family: inherit;
-    }
-    .btn-nouvelle:hover { opacity: .84; transform: translateY(-1px); }
-
-    /* ── Section code ── */
-    .section-code {
-      background: var(--surface);
-      border-radius: 14px;
-      box-shadow: 0 2px 16px rgba(60,30,10,.1);
-      border: 1px solid var(--border);
-      padding: 16px 18px;
-      margin-bottom: 14px;
-      width: 100%; max-width: 560px;
-    }
-    .code-entree { display: flex; gap: 10px; margin-top: 8px; }
-    .code-entree input {
-      flex: 0 0 auto;
-      width: 108px;
-      border: 2px solid var(--border);
-      border-radius: 10px;
-      padding: 10px 8px;
-      font-family: 'Cinzel', serif;
-      font-size: 1.4rem;
-      font-weight: 900;
-      letter-spacing: .22em;
-      text-transform: uppercase;
-      text-align: center;
-      outline: none;
-      transition: border-color .2s;
-      color: var(--primary);
-    }
-    .code-entree input:focus { border-color: var(--accent); }
-    .btn-entrer-code {
-      flex: 1;
-      background: linear-gradient(135deg, var(--vert), var(--vert-lt));
-      color: white;
-      border: none;
-      border-radius: 10px;
-      padding: 10px 16px;
-      font-weight: 700;
-      font-size: .95rem;
-      cursor: pointer;
-      transition: all .2s;
-      letter-spacing: .04em;
-      font-family: inherit;
-      box-shadow: 0 3px 12px rgba(30,144,80,.28);
-    }
-    .btn-entrer-code:hover { transform: translateY(-1px); box-shadow: 0 5px 16px rgba(30,144,80,.38); }
-    .btn-entrer-code:disabled { opacity: .38; cursor: default; transform: none; box-shadow: none; }
-
-    /* ── Numéro annoncé ── */
-    #annonce {
-      display: none;
-      background: var(--primary);
-      color: white;
-      border-radius: 14px;
-      padding: 14px 20px;
-      margin-bottom: 14px;
-      width: 100%; max-width: 560px;
-      text-align: center;
-      box-shadow: 0 4px 20px rgba(44,26,14,.28);
-    }
-    #annonce.visible { display: block; }
-    .annonce-label { font-size: .68rem; color: #b8956a; margin-bottom: 4px; text-transform: uppercase; letter-spacing: .12em; font-weight: 600; }
-    .annonce-num { font-family: 'Cinzel', serif; font-size: 3.5rem; font-weight: 900; color: var(--accent-lt); line-height: 1; }
-    .annonce-wendat { font-size: .92rem; font-style: italic; color: #c4905a; margin-top: 5px; }
-
-    /* ── Grille bingo ── */
-    .bingo-wrap { width: 100%; max-width: 560px; }
-    .bingo-grid {
-      display: grid;
-      grid-template-columns: 2.4rem repeat(6, 1fr);
-      gap: 5px;
-      background: var(--primary);
-      padding: 12px;
-      border-radius: 16px;
-      box-shadow: 0 8px 32px rgba(44,26,14,.32), inset 0 1px 0 rgba(255,255,255,.04);
-    }
-    .row-label {
-      color: white;
-      font-family: 'Cinzel', serif;
-      font-size: 1.2rem;
-      font-weight: 900;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 8px;
-      letter-spacing: .04em;
-    }
-    .cell {
-      background: white;
-      aspect-ratio: 1/1;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      border-radius: 8px;
-      font-size: 1rem;
-      font-weight: 700;
-      cursor: pointer;
-      position: relative;
-      transition: all .12s;
-      user-select: none;
-      box-shadow: 0 1px 3px rgba(0,0,0,.1);
-      border: 2px solid transparent;
-    }
-    .cell:hover { transform: scale(.94); border-color: rgba(184,104,8,.35); }
-    .cell:active { transform: scale(.86); }
-    .cell.cible { border-color: var(--accent-lt); background: #fffbf2; box-shadow: 0 0 0 1px var(--accent-lt), 0 2px 8px rgba(224,144,48,.2); }
-    .cell.marque::after { content: '🌽'; position: absolute; font-size: 1.65rem; z-index: 2; }
-    .cell.auto-marque { background: #fff8e8; border-color: rgba(224,144,48,.28); }
-    .cell.coeur { background: #f5f0e8; font-size: 1.5rem; cursor: default; border-color: transparent; }
-    .cell.coeur:hover { transform: none; border-color: transparent; }
-    .cell.coeur:active { transform: none; }
-
-    /* ── Bouton WENDIO ── */
-    #btn-wendio {
-      display: none;
-      width: 100%; max-width: 560px;
-      margin-top: 14px;
-      background: linear-gradient(135deg, var(--vert), var(--vert-lt));
-      color: white;
-      border: none;
-      border-radius: 14px;
-      padding: 20px;
-      font-family: 'Cinzel', serif;
-      font-size: 1.4rem;
-      font-weight: 900;
-      letter-spacing: .1em;
-      cursor: pointer;
-      animation: pulse 1.2s infinite;
-      box-shadow: 0 6px 24px rgba(30,144,80,.48);
-    }
-    #btn-wendio.visible { display: block; }
-    @keyframes pulse {
-      0%,100% { transform: scale(1); box-shadow: 0 6px 24px rgba(30,144,80,.48); }
-      50% { transform: scale(1.025); box-shadow: 0 10px 32px rgba(30,144,80,.68); }
-    }
 
     /* ── Victoire overlay ── */
     #win-overlay {
@@ -369,7 +456,7 @@
       max-width: 480px; width: 90%;
       box-shadow: 0 0 60px rgba(46,204,113,.22), 0 24px 60px rgba(0,0,0,.7);
     }
-    .win-card h1 {
+    .win-card h2 {
       font-family: 'Cinzel', serif;
       font-size: 3rem;
       margin-bottom: 12px;
@@ -396,8 +483,7 @@
 
     /* ── Toast autre gagnant ── */
     #toast-gagnant {
-      position: fixed;
-      top: 16px; left: 50%;
+      position: fixed; top: 16px; left: 50%;
       transform: translateX(-50%) translateY(-140%);
       background: linear-gradient(135deg, #0d3820, #1a5c35);
       border: 1px solid #2ecc71;
@@ -426,7 +512,7 @@
 </head>
 <body>
 
-<!-- Formulaire de connexion en ligne -->
+<!-- Overlay connexion en ligne -->
 <div id="overlay-rejoindre">
   <div class="form-rejoindre">
     <h2>Rejoindre la partie</h2>
@@ -435,7 +521,7 @@
     <input type="text" id="input-nom" placeholder="ex : Marie" maxlength="20" />
     <label>Votre clan</label>
     <div class="form-clan" id="form-clan-grid"></div>
-    <button class="btn-rejoindre" id="btn-rejoindre-submit" onclick="rejoindrePartie()" disabled>Rejoindre →</button>
+    <button class="btn-principal vert" id="btn-rejoindre-submit" onclick="rejoindrePartie()" disabled style="margin-top:20px;">Rejoindre &#8594;</button>
     <div class="msg-erreur" id="msg-erreur"></div>
   </div>
 </div>
@@ -447,13 +533,13 @@
     <div class="toast-nom"  id="toast-nom"></div>
     <div class="toast-clan" id="toast-clan"></div>
   </div>
-  <button class="toast-close" onclick="fermerToast()">×</button>
+  <button class="toast-close" onclick="fermerToast()">&#215;</button>
 </div>
 
 <!-- Overlay victoire -->
 <div id="win-overlay">
   <div class="win-card">
-    <h1>🌽 WENDIO ! 🌽</h1>
+    <h2>&#127805; WENDIO ! &#127805;</h2>
     <div class="win-joueur" id="win-joueur"></div>
     <div class="win-clan"   id="win-clan"></div>
     <button onclick="fermerWin()">Continuer</button>
@@ -461,78 +547,142 @@
   </div>
 </div>
 
+<!-- ── SETUP ── -->
 <h1>WENDIO</h1>
-<div class="online-badge" id="online-badge">🌐 Partie en ligne</div>
 
-<!-- Rejoindre une partie avec un code -->
-<div class="section-code" id="section-code">
-  <div class="section-titre">Rejoindre une partie en ligne</div>
-  <div class="code-entree">
-    <input type="text" id="input-code" placeholder="CODE" maxlength="4"
-      oninput="this.value=this.value.toUpperCase(); validerCode()"
-      onkeydown="if(event.key==='Enter') entrerCode()" />
-    <button class="btn-entrer-code" id="btn-entrer-code" onclick="entrerCode()" disabled>Rejoindre →</button>
+<div class="mode-bar">
+  <button class="btn-mode actif" id="btn-local"  onclick="setMode('local')">Local</button>
+  <button class="btn-mode"       id="btn-online" onclick="setMode('online')">En ligne</button>
+</div>
+
+<div id="vue-setup">
+
+  <!-- Setup local -->
+  <div class="setup-panel" id="setup-local">
+    <div class="section-titre">Choisissez votre clan</div>
+    <div class="clan-grid" id="clan-grid"></div>
+    <div class="objectif" id="objectif">S&#233;lectionnez un clan pour voir votre objectif</div>
+    <button class="btn-principal brun" id="btn-jouer" onclick="commencerLocal()" disabled>Jouer &#8594;</button>
   </div>
+
+  <!-- Setup en ligne -->
+  <div class="setup-panel" id="setup-online" style="display:none;">
+    <div class="section-titre">Rejoindre une partie en ligne</div>
+    <div class="code-entree">
+      <input type="text" id="input-code" placeholder="CODE" maxlength="4"
+        oninput="this.value=this.value.toUpperCase(); validerCode()"
+        onkeydown="if(event.key==='Enter') entrerCode()" />
+      <button class="btn-principal vert" id="btn-entrer-code" onclick="entrerCode()" disabled style="flex:1;">Rejoindre &#8594;</button>
+    </div>
+    <div class="msg-erreur" id="msg-erreur-code"></div>
+  </div>
+
 </div>
 
-<!-- Contrôles (mode local uniquement) -->
-<div class="controles" id="controles-local" style="max-width:560px;">
-  <div class="section-titre">Choisissez votre clan</div>
-  <div class="clan-grid" id="clan-grid"></div>
-  <div class="objectif" id="objectif">Sélectionnez un clan pour voir votre objectif</div>
-  <button class="btn-nouvelle" onclick="nouvellePartie()">🔄 Nouvelle carte aléatoire</button>
-</div>
+<!-- ── VUE JEU ── -->
+<div id="vue-jeu">
 
-<!-- Numéro annoncé (mode en ligne) -->
-<div id="annonce">
-  <div class="annonce-label">Numéro annoncé</div>
-  <div class="annonce-num"    id="annonce-num">—</div>
-  <div class="annonce-wendat" id="annonce-wendat"></div>
-</div>
+  <div id="jeu-sidebar">
+    <div id="jeu-info">
+      <span class="info-badge clan"   id="badge-clan"   style="display:none;"></span>
+      <span class="info-badge online" id="badge-online" style="display:none;">&#127760; En ligne</span>
+      <button class="btn-retour" onclick="nouvellePartie()">&#8617; Nouvelle carte</button>
+    </div>
 
-<!-- Grille -->
-<div class="bingo-wrap">
-  <div class="bingo-grid" id="grille"></div>
-</div>
+    <div id="annonce">
+      <div class="annonce-label">Num&#233;ro annonc&#233;</div>
+      <div class="annonce-num"    id="annonce-num">&#8212;</div>
+      <div class="annonce-wendat" id="annonce-wendat"></div>
+    </div>
 
-<!-- Bouton victoire -->
-<button id="btn-wendio" onclick="declarerVictoire()">🌽 WENDIO !</button>
+    <button id="btn-wendio" onclick="declarerVictoire()">&#127805; WENDIO !</button>
+  </div>
+
+  <div class="bingo-wrap">
+    <div class="bingo-grid" id="grille"></div>
+  </div>
+
+</div>
 
 <script src="data.js"></script>
 <script>
-  let carteActuelle  = null;
-  let clanActuel     = null;
-  let selectionnees  = new Set();
-  let modeOnline     = false;
-  let socket         = null;
-  let codePartie     = null;
-  let nomJoueur      = null;
-  let clanJoinForm   = null; // clan choisi dans le formulaire de connexion
-  let tiresOnline    = [];   // numéros tirés reçus du serveur
+  'use strict';
+  let carteActuelle = null;
+  let clanActuel    = null;
+  let selectionnees = new Set();
+  let modeOnline    = false;
+  let socket        = null;
+  let codePartie    = null;
+  let nomJoueur     = null;
+  let clanJoinForm  = null;
+  let tiresOnline   = [];
 
-  // ── Détection du mode (paramètre ?code= ou saisie manuelle) ─────────
+  // ── Création DOM sécurisée d'un bouton clan ──────────────────────────
+  function creerBoutonClan(nom, clan, className, onclickFn) {
+    const btn    = document.createElement('button');
+    btn.className = className;
+    btn.id        = className === 'btn-clan' ? 'clan-' + nom : '';
+
+    const icon   = document.createTextNode(clan.icon + ' ');
+    const strong = document.createElement('strong');
+    strong.textContent = nom;
+    const br     = document.createElement('br');
+    const small  = document.createElement('small');
+    small.style.fontWeight = 'normal';
+    small.style.fontSize   = '.8em';
+    small.textContent = clan.wendat;
+
+    btn.append(icon, strong, br, small);
+    btn.onclick = onclickFn;
+    return btn;
+  }
+
+  // ── Init ─────────────────────────────────────────────────────────────
   function demarrer() {
-    const params = new URLSearchParams(window.location.search);
-    const code   = params.get('code');
-
-    // Boutons clan (mode local)
-    const clanGridLocal = document.getElementById('clan-grid');
+    const clanGridEl = document.getElementById('clan-grid');
     Object.entries(CLANS).forEach(([nom, clan]) => {
-      const btn = document.createElement('button');
-      btn.className = 'btn-clan';
-      btn.id = `clan-${nom}`;
-      btn.innerHTML = `${clan.icon} <strong>${nom}</strong><br><small style="font-weight:normal;font-size:.8em">${clan.wendat}</small>`;
-      btn.onclick = () => setClan(nom);
-      clanGridLocal.appendChild(btn);
+      clanGridEl.appendChild(
+        creerBoutonClan(nom, clan, 'btn-clan', () => setClan(nom))
+      );
     });
 
+    const params = new URLSearchParams(window.location.search);
+    const code   = params.get('code');
     if (code) {
+      setMode('online');
       activerModeOnline(code.toUpperCase());
-    } else {
-      nouvellePartie();
     }
   }
 
+  // ── Toggle local / en ligne ──────────────────────────────────────────
+  function setMode(mode) {
+    modeOnline = (mode === 'online');
+    document.getElementById('btn-local').classList.toggle('actif',  !modeOnline);
+    document.getElementById('btn-online').classList.toggle('actif',  modeOnline);
+    document.getElementById('setup-local').style.display  = modeOnline ? 'none'  : 'block';
+    document.getElementById('setup-online').style.display = modeOnline ? 'block' : 'none';
+  }
+
+  // ── Setup local ──────────────────────────────────────────────────────
+  function setClan(nom) {
+    clanActuel = nom;
+    document.querySelectorAll('.btn-clan').forEach(b => b.classList.remove('actif'));
+    document.getElementById('clan-' + nom).classList.add('actif');
+    const clan = CLANS[nom];
+    document.getElementById('objectif').textContent =
+      'Objectif : ' + clan.label + ' \u2014 ' + clan.points + ' pt' + (clan.points > 1 ? 's' : '') + ' WENDIO';
+    document.getElementById('btn-jouer').disabled = false;
+  }
+
+  function commencerLocal() {
+    carteActuelle = genererCarte();
+    selectionnees = new Set();
+    afficherBadgeClan(clanActuel);
+    basculerVersJeu();
+    rendreGrille();
+  }
+
+  // ── Setup en ligne ───────────────────────────────────────────────────
   function validerCode() {
     const code = document.getElementById('input-code').value.trim();
     document.getElementById('btn-entrer-code').disabled = code.length !== 4;
@@ -547,25 +697,22 @@
   function activerModeOnline(code) {
     modeOnline = true;
     codePartie = code;
-    document.getElementById('online-badge').classList.add('visible');
-    document.getElementById('controles-local').style.display = 'none';
-    document.getElementById('section-code').style.display = 'none';
 
-    // Peupler le formulaire de connexion
     document.getElementById('badge-code').textContent = codePartie;
+
     const formClan = document.getElementById('form-clan-grid');
-    formClan.innerHTML = '';
+    formClan.replaceChildren();
     Object.entries(CLANS).forEach(([nom, clan]) => {
-      const btn = document.createElement('button');
-      btn.className = 'btn-clan-join';
-      btn.innerHTML = `${clan.icon} <strong>${nom}</strong><br><small style="font-weight:normal">${clan.wendat}</small>`;
-      btn.onclick = () => {
-        clanJoinForm = nom;
-        document.querySelectorAll('.btn-clan-join').forEach(b => b.classList.remove('actif'));
-        btn.classList.add('actif');
-        validerFormulaire();
-      };
-      formClan.appendChild(btn);
+      formClan.appendChild(
+        creerBoutonClan(nom, clan, 'btn-clan-join', () => {
+          clanJoinForm = nom;
+          document.querySelectorAll('.btn-clan-join').forEach(b => b.classList.remove('actif'));
+          document.querySelector('.btn-clan-join[data-nom="' + nom + '"]').classList.add('actif');
+          validerFormulaire();
+        })
+      );
+      // stocker nom dans dataset pour ciblage
+      formClan.lastChild.dataset.nom = nom;
     });
 
     document.getElementById('input-nom').addEventListener('input', validerFormulaire);
@@ -578,61 +725,60 @@
     document.getElementById('btn-rejoindre-submit').disabled = !(nom && clanJoinForm);
   }
 
-  // ── Socket.io ────────────────────────────────────────────────────
+  // ── Socket.io ────────────────────────────────────────────────────────
   function chargerSocket() {
-    const s = document.createElement('script');
-    s.src = '/socket.io/socket.io.js';
-    s.onload  = connecterSocket;
-    s.onerror = () => {
-      document.getElementById('msg-erreur').textContent = 'Impossible de joindre le serveur.';
-      document.getElementById('msg-erreur').classList.add('visible');
+    const s    = document.createElement('script');
+    s.src      = '/socket.io/socket.io.js';
+    s.onload   = connecterSocket;
+    s.onerror  = () => {
+      const el = document.getElementById('msg-erreur');
+      el.textContent = 'Impossible de joindre le serveur.';
+      el.classList.add('visible');
     };
     document.head.appendChild(s);
   }
 
   function connecterSocket() {
-    socket = io();
+    socket = io();  // eslint-disable-line no-undef
 
     socket.on('rejoint', ({ tirages }) => {
-      // Fermer le formulaire
       document.getElementById('overlay-rejoindre').classList.remove('visible');
-      clanActuel   = clanJoinForm;
-      nomJoueur    = document.getElementById('input-nom').value.trim();
-      tiresOnline  = tirages;
+      clanActuel    = clanJoinForm;
+      nomJoueur     = document.getElementById('input-nom').value.trim();
+      tiresOnline   = tirages;
       carteActuelle = genererCarte();
-      rendreGrille();
-      // Marquer les numéros déjà tirés
-      tirages.forEach(num => marquerNumero(num));
+
+      afficherBadgeClan(clanActuel);
+      document.getElementById('badge-online').style.display = 'inline-flex';
       document.getElementById('annonce').classList.add('visible');
+      basculerVersJeu();
+      rendreGrille();
+      tirages.forEach(num => marquerNumero(num));
     });
 
     socket.on('numero-tire', ({ num }) => {
       tiresOnline.push(num);
-      // Afficher l'annonce
-      document.getElementById('annonce-num').textContent = num;
+      document.getElementById('annonce-num').textContent    = num;
       const data = NOMBRES[num];
       document.getElementById('annonce-wendat').textContent = data ? data.wendat : '';
-      // Auto-marquer sur la carte
       marquerNumero(num);
       jouerSon(num);
       verifierVictoire();
     });
 
     socket.on('gagnant', ({ nom, clan, rang }) => {
-      if (nom === nomJoueur) {
-        afficherGagnant(nom, clan, rang);
-      } else {
-        afficherToastGagnant(nom, clan, rang);
-      }
+      if (nom === nomJoueur) afficherGagnant(nom, clan, rang);
+      else afficherToastGagnant(nom, clan, rang);
     });
 
     socket.on('partie-terminee', () => {
-      alert('La partie a été terminée par le meneur.');
+      alert('La partie a \u00e9t\u00e9 termin\u00e9e par le meneur.');
     });
 
     socket.on('erreur', msg => {
-      document.getElementById('msg-erreur').textContent = msg;
-      document.getElementById('msg-erreur').classList.add('visible');
+      const el = document.getElementById('msg-erreur');
+      el.textContent = msg;
+      el.classList.add('visible');
     });
   }
 
@@ -642,10 +788,61 @@
     socket.emit('rejoindre', { code: codePartie, nom, clan: clanJoinForm });
   }
 
-  // ── Marquage automatique d'un numéro annoncé ─────────────────────
+  // ── Bascule setup ↔ jeu ──────────────────────────────────────────────
+  function basculerVersJeu() {
+    document.querySelector('h1').style.display        = 'none';
+    document.querySelector('.mode-bar').style.display = 'none';
+    document.getElementById('vue-setup').style.display = 'none';
+    document.getElementById('vue-jeu').classList.add('visible');
+  }
+
+  function basculerVersSetup() {
+    document.querySelector('h1').style.display        = '';
+    document.querySelector('.mode-bar').style.display = '';
+    document.getElementById('vue-setup').style.display = '';
+    document.getElementById('vue-jeu').classList.remove('visible');
+  }
+
+  function afficherBadgeClan(nom) {
+    const clan  = CLANS[nom] || {};
+    const badge = document.getElementById('badge-clan');
+    badge.textContent    = clan.icon + ' ' + nom;
+    badge.style.display  = 'inline-flex';
+  }
+
+  // ── Nouvelle carte / retour setup ────────────────────────────────────
+  function nouvellePartie() {
+    clanActuel    = null;
+    carteActuelle = null;
+    selectionnees = new Set();
+    tiresOnline   = [];
+    modeOnline    = false;
+    socket        = null;
+    codePartie    = null;
+    nomJoueur     = null;
+    clanJoinForm  = null;
+
+    document.querySelectorAll('.btn-clan').forEach(b => b.classList.remove('actif'));
+    document.getElementById('objectif').textContent    = 'S\u00e9lectionnez un clan pour voir votre objectif';
+    document.getElementById('btn-jouer').disabled      = true;
+    document.getElementById('input-code').value        = '';
+    document.getElementById('btn-entrer-code').disabled = true;
+    document.getElementById('msg-erreur-code').classList.remove('visible');
+
+    document.getElementById('annonce').classList.remove('visible');
+    document.getElementById('btn-wendio').classList.remove('visible');
+    document.getElementById('win-overlay').classList.remove('visible');
+    document.getElementById('badge-clan').style.display   = 'none';
+    document.getElementById('badge-online').style.display = 'none';
+    document.getElementById('grille').replaceChildren();
+
+    setMode('local');
+    basculerVersSetup();
+  }
+
+  // ── Marquage ─────────────────────────────────────────────────────────
   function marquerNumero(num) {
-    // Trouver toutes les cases qui contiennent ce numéro sur la carte
-    LIGNES.forEach((ligne, ligneIdx) => {
+    LIGNES.forEach(ligne => {
       for (let col = 0; col < 6; col++) {
         if (!estCoeur(ligne, col) && valeurCase(carteActuelle, ligne, col) === num) {
           selectionnees.add(ligne + col);
@@ -655,36 +852,16 @@
     rendreGrille();
   }
 
-  // ── Mode local ────────────────────────────────────────────────────
-  function setClan(nom) {
-    clanActuel = nom;
-    document.querySelectorAll('.btn-clan').forEach(b => b.classList.remove('actif'));
-    document.getElementById(`clan-${nom}`).classList.add('actif');
-    const clan = CLANS[nom];
-    document.getElementById('objectif').textContent =
-      `Objectif : ${clan.label} — ${clan.points} pt${clan.points > 1 ? 's' : ''} WENDIO`;
-    rendreGrille();
-  }
-
-  function nouvellePartie() {
-    carteActuelle = genererCarte();
-    selectionnees = new Set();
-    tiresOnline   = [];
-    document.getElementById('win-overlay').classList.remove('visible');
-    document.getElementById('btn-wendio').classList.remove('visible');
-    rendreGrille();
-  }
-
-  // ── Rendu de la grille ────────────────────────────────────────────
+  // ── Rendu grille ─────────────────────────────────────────────────────
   function rendreGrille() {
     const grille = document.getElementById('grille');
-    grille.innerHTML = '';
+    grille.replaceChildren();
 
     LIGNES.forEach((ligne, ligneIdx) => {
       const label = document.createElement('div');
-      label.className = 'row-label';
+      label.className        = 'row-label';
       label.style.background = CONFIG[ligne].couleur;
-      label.textContent = ligne;
+      label.textContent      = ligne;
       grille.appendChild(label);
 
       for (let col = 0; col < 6; col++) {
@@ -692,21 +869,20 @@
         const id   = ligne + col;
 
         if (estCoeur(ligne, col)) {
-          cell.className = 'cell coeur';
-          cell.textContent = COEUR[id] || '🐾';
+          cell.className   = 'cell coeur';
+          cell.textContent = COEUR[id] || '\uD83D\uDC3E';
         } else {
-          const val     = valeurCase(carteActuelle, ligne, col);
-          const marque  = selectionnees.has(id);
-          const isTire  = modeOnline && tiresOnline.includes(val); // auto-marqué
+          const val    = valeurCase(carteActuelle, ligne, col);
+          const marque = selectionnees.has(id);
+          const isTire = modeOnline && tiresOnline.includes(val);
 
           cell.className = ['cell',
-            marque  ? 'marque'  : '',
+            marque            ? 'marque'      : '',
             isTire && !marque ? 'auto-marque' : '',
             estCible(ligneIdx, col) ? 'cible' : ''
           ].filter(Boolean).join(' ');
 
           cell.textContent = val;
-
           cell.onclick = () => {
             if (selectionnees.has(id)) selectionnees.delete(id);
             else selectionnees.add(id);
@@ -730,7 +906,7 @@
     return false;
   }
 
-  // ── Vérification de victoire ──────────────────────────────────────
+  // ── Victoire ─────────────────────────────────────────────────────────
   function verifierVictoire() {
     if (!clanActuel) return;
     const has = (l, c) => selectionnees.has(l + c);
@@ -760,13 +936,8 @@
     }
 
     if (gagne) {
-      if (modeOnline) {
-        // Mode en ligne : afficher le bouton WENDIO !
-        document.getElementById('btn-wendio').classList.add('visible');
-      } else {
-        // Mode local : overlay immédiat
-        afficherGagnant(null, clanActuel);
-      }
+      if (modeOnline) document.getElementById('btn-wendio').classList.add('visible');
+      else afficherGagnant(null, clanActuel, null);
     }
   }
 
@@ -777,36 +948,33 @@
     document.getElementById('btn-wendio').classList.remove('visible');
   }
 
-  const MEDAILLES = ['🥇','🥈','🥉'];
+  const MEDAILLES = ['\uD83E\uDD47', '\uD83E\uDD48', '\uD83E\uDD49'];
 
   function afficherGagnant(nom, clan, rang) {
     const c       = CLANS[clan] || {};
-    const medaille = rang ? (MEDAILLES[rang - 1] || `#${rang}`) : '🥇';
+    const medaille = rang ? (MEDAILLES[rang - 1] || '#' + rang) : MEDAILLES[0];
     document.getElementById('win-joueur').textContent = nom
-      ? `${medaille} ${c.icon || ''} ${nom}`
-      : `${c.icon || ''} Vous avez gagné !`;
-    document.getElementById('win-clan').textContent = `${clan} — ${c.label || ''}`;
+      ? medaille + ' ' + (c.icon || '') + ' ' + nom
+      : (c.icon || '') + ' Vous avez gagn\u00e9 !';
+    document.getElementById('win-clan').textContent = clan + ' \u2014 ' + (c.label || '');
     document.getElementById('win-overlay').classList.add('visible');
   }
 
   let _toastTimer = null;
   function afficherToastGagnant(nom, clan, rang) {
     const c       = CLANS[clan] || {};
-    const medaille = MEDAILLES[rang - 1] || `#${rang}`;
-    const ordinal  = rang === 1 ? '1re place' : `${rang}e place`;
-    document.getElementById('toast-rang').textContent  = `${medaille} ${ordinal}`;
-    document.getElementById('toast-nom').textContent   = `${c.icon || ''} ${nom} a gagné !`;
-    document.getElementById('toast-clan').textContent  = `${clan} — Continuez à jouer !`;
+    const medaille = MEDAILLES[rang - 1] || '#' + rang;
+    const ordinal  = rang === 1 ? '1re place' : rang + 'e place';
+    document.getElementById('toast-rang').textContent  = medaille + ' ' + ordinal;
+    document.getElementById('toast-nom').textContent   = (c.icon || '') + ' ' + nom + ' a gagn\u00e9 !';
+    document.getElementById('toast-clan').textContent  = clan + ' \u2014 Continuez \u00e0 jouer !';
     document.getElementById('toast-gagnant').classList.add('visible');
     clearTimeout(_toastTimer);
     _toastTimer = setTimeout(fermerToast, 6000);
   }
 
-  function fermerToast() {
-    document.getElementById('toast-gagnant').classList.remove('visible');
-  }
-
-  function fermerWin() { document.getElementById('win-overlay').classList.remove('visible'); }
+  function fermerToast() { document.getElementById('toast-gagnant').classList.remove('visible'); }
+  function fermerWin()   { document.getElementById('win-overlay').classList.remove('visible'); }
 
   demarrer();
 </script>
