@@ -84,6 +84,15 @@ io.on('connection', socket => {
     console.log(`[${code}] Numéro tiré : ${num}`);
   });
 
+  // Meneur : terminer la partie explicitement
+  socket.on('terminer', ({ code }) => {
+    const partie = parties.get(code);
+    if (!partie || partie.maitre !== socket.id) return;
+    io.to(code).emit('partie-terminee');
+    parties.delete(code);
+    console.log(`[${code}] Partie terminée par le meneur`);
+  });
+
   // Joueur : déclarer victoire
   socket.on('victoire', ({ code, nom, clan }) => {
     const partie = parties.get(code);
