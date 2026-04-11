@@ -33,9 +33,10 @@ io.on('connection', socket => {
   socket.on('creer', () => {
     codePartie = genererCode();
     parties.set(codePartie, {
-      maitre:  socket.id,
-      tirages: [],
-      joueurs: new Map()
+      maitre:   socket.id,
+      tirages:  [],
+      joueurs:  new Map(),
+      gagnants: []
     });
     socket.join(codePartie);
     socket.emit('partie-creee', { code: codePartie });
@@ -97,8 +98,10 @@ io.on('connection', socket => {
   socket.on('victoire', ({ code, nom, clan }) => {
     const partie = parties.get(code);
     if (!partie) return;
-    io.to(code).emit('gagnant', { nom, clan });
-    console.log(`[${code}] WENDIO ! ${nom} (${clan})`);
+    partie.gagnants.push({ nom, clan });
+    const rang = partie.gagnants.length;
+    io.to(code).emit('gagnant', { nom, clan, rang });
+    console.log(`[${code}] WENDIO #${rang} ! ${nom} (${clan})`);
   });
 
   // Déconnexion

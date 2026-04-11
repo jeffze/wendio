@@ -280,33 +280,39 @@
     .suivi-cell.actuel { outline: 2px solid rgba(255,255,255,.8); outline-offset: 1px; box-shadow: 0 0 8px rgba(255,255,255,.18); }
     .compteur { text-align: center; margin-top: 14px; font-size: .8rem; color: var(--muted); font-weight: 500; letter-spacing: .05em; }
 
-    /* ── Bandeau gagnant dans le tableau ── */
+    /* ── Bandeau classement dans le tableau ── */
     #bandeau-gagnant {
       display: none;
       background: linear-gradient(135deg, #0d3820 0%, #1a5c35 100%);
       border: 1px solid #2ecc71;
       border-radius: 12px;
-      padding: 16px 20px;
+      padding: 14px 18px;
       margin-bottom: 18px;
-      text-align: center;
       box-shadow: 0 0 28px rgba(46,204,113,.2), 0 4px 16px rgba(0,0,0,.4);
-      animation: slideIn .45s cubic-bezier(.175,.885,.32,1.275);
     }
     #bandeau-gagnant.visible { display: block; }
     .bandeau-titre {
       font-family: 'Cinzel', serif;
-      font-size: 1rem; font-weight: 900;
-      letter-spacing: .18em; text-transform: uppercase;
-      color: #2ecc71; margin-bottom: 6px;
+      font-size: .78rem; font-weight: 900;
+      letter-spacing: .22em; text-transform: uppercase;
+      color: #2ecc71; margin-bottom: 10px;
     }
-    .bandeau-joueur {
-      font-size: 1.35rem; font-weight: 700;
-      color: white; margin-bottom: 3px;
+    .bandeau-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 7px 0;
+      border-bottom: 1px solid rgba(46,204,113,.12);
+      animation: slideIn .4s cubic-bezier(.175,.885,.32,1.275);
     }
-    .bandeau-clan { font-size: .82rem; color: #80edb5; letter-spacing: .06em; }
+    .bandeau-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .bandeau-item:first-child { padding-top: 0; }
+    .bandeau-rang {
+      font-size: 1.3rem; flex-shrink: 0; width: 28px; text-align: center;
+    }
+    .bandeau-nom { font-size: .95rem; font-weight: 700; color: white; }
+    .bandeau-clan-info { font-size: .75rem; color: #80edb5; margin-top: 1px; }
     @keyframes slideIn {
-      from { transform: translateY(-10px); opacity: 0; }
-      to   { transform: translateY(0);     opacity: 1; }
+      from { transform: translateY(-8px); opacity: 0; }
+      to   { transform: translateY(0);    opacity: 1; }
     }
 
     /* ── Gagnant overlay ── */
@@ -424,9 +430,8 @@
 <div id="tableau">
   <h2>Tableau des tirages</h2>
   <div id="bandeau-gagnant">
-    <div class="bandeau-titre">🌽 WENDIO !</div>
-    <div class="bandeau-joueur" id="bandeau-joueur-nom"></div>
-    <div class="bandeau-clan"   id="bandeau-joueur-clan"></div>
+    <div class="bandeau-titre">🌽 Classement</div>
+    <div id="gagnants-liste"></div>
   </div>
   <div class="suivi-grille" id="suivi-grille"></div>
   <div class="compteur" id="compteur">0 / 72 numéros tirés</div>
@@ -496,7 +501,7 @@
       mettreAJourSuivi(num);
     });
 
-    socket.on('gagnant', ({ nom, clan }) => afficherGagnant(nom, clan));
+    socket.on('gagnant', ({ nom, clan, rang }) => afficherGagnant(nom, clan, rang));
     socket.on('tous-tires', () => { document.getElementById('btn-tirer').disabled = true; });
   }
 
@@ -596,15 +601,21 @@
   function rejouerSon() { if (numeroActuel) jouerSon(numeroActuel); }
 
   // ── Gagnant ───────────────────────────────────────────────────────
-  function afficherGagnant(nom, clan) {
+  const MEDAILLES = ['🥇','🥈','🥉'];
+  function afficherGagnant(nom, clan, rang) {
     const c = CLANS[clan] || {};
     // Grand overlay
-    document.getElementById('win-joueur').textContent = `${c.icon || ''} ${nom}`;
+    const medaille = MEDAILLES[rang - 1] || `#${rang}`;
+    document.getElementById('win-joueur').textContent = `${medaille} ${c.icon || ''} ${nom}`;
     document.getElementById('win-clan').textContent   = `${clan} — ${c.label || ''}`;
     document.getElementById('win-overlay').style.display = 'flex';
-    // Bandeau persistant dans le tableau
-    document.getElementById('bandeau-joueur-nom').textContent  = `${c.icon || ''} ${nom}`;
-    document.getElementById('bandeau-joueur-clan').textContent = `${clan} — ${c.label || ''}`;
+    // Ajouter au classement
+    const item = document.createElement('div');
+    item.className = 'bandeau-item';
+    item.innerHTML = `<span class="bandeau-rang">${medaille}</span>
+      <div><div class="bandeau-nom">${nom}</div>
+      <div class="bandeau-clan-info">${c.icon || ''} ${clan} — ${c.label || ''}</div></div>`;
+    document.getElementById('gagnants-liste').appendChild(item);
     document.getElementById('bandeau-gagnant').classList.add('visible');
   }
 
@@ -616,6 +627,7 @@
     document.getElementById('btn-tirer').disabled = false;
     document.getElementById('carte-numero').style.display = 'none';
     document.getElementById('compteur').textContent = '0 / 72 numéros tirés';
+    document.getElementById('gagnants-liste').innerHTML = '';
     document.getElementById('bandeau-gagnant').classList.remove('visible');
     document.querySelectorAll('.suivi-cell').forEach(c => { c.classList.remove('tire','actuel'); c.style.background = ''; });
   }
