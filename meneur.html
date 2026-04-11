@@ -280,6 +280,35 @@
     .suivi-cell.actuel { outline: 2px solid rgba(255,255,255,.8); outline-offset: 1px; box-shadow: 0 0 8px rgba(255,255,255,.18); }
     .compteur { text-align: center; margin-top: 14px; font-size: .8rem; color: var(--muted); font-weight: 500; letter-spacing: .05em; }
 
+    /* ── Bandeau gagnant dans le tableau ── */
+    #bandeau-gagnant {
+      display: none;
+      background: linear-gradient(135deg, #0d3820 0%, #1a5c35 100%);
+      border: 1px solid #2ecc71;
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 18px;
+      text-align: center;
+      box-shadow: 0 0 28px rgba(46,204,113,.2), 0 4px 16px rgba(0,0,0,.4);
+      animation: slideIn .45s cubic-bezier(.175,.885,.32,1.275);
+    }
+    #bandeau-gagnant.visible { display: block; }
+    .bandeau-titre {
+      font-family: 'Cinzel', serif;
+      font-size: 1rem; font-weight: 900;
+      letter-spacing: .18em; text-transform: uppercase;
+      color: #2ecc71; margin-bottom: 6px;
+    }
+    .bandeau-joueur {
+      font-size: 1.35rem; font-weight: 700;
+      color: white; margin-bottom: 3px;
+    }
+    .bandeau-clan { font-size: .82rem; color: #80edb5; letter-spacing: .06em; }
+    @keyframes slideIn {
+      from { transform: translateY(-10px); opacity: 0; }
+      to   { transform: translateY(0);     opacity: 1; }
+    }
+
     /* ── Gagnant overlay ── */
     #win-overlay {
       display: none; position: fixed; inset: 0;
@@ -394,6 +423,11 @@
 <!-- Tableau de suivi -->
 <div id="tableau">
   <h2>Tableau des tirages</h2>
+  <div id="bandeau-gagnant">
+    <div class="bandeau-titre">🌽 WENDIO !</div>
+    <div class="bandeau-joueur" id="bandeau-joueur-nom"></div>
+    <div class="bandeau-clan"   id="bandeau-joueur-clan"></div>
+  </div>
   <div class="suivi-grille" id="suivi-grille"></div>
   <div class="compteur" id="compteur">0 / 72 numéros tirés</div>
 </div>
@@ -564,9 +598,14 @@
   // ── Gagnant ───────────────────────────────────────────────────────
   function afficherGagnant(nom, clan) {
     const c = CLANS[clan] || {};
+    // Grand overlay
     document.getElementById('win-joueur').textContent = `${c.icon || ''} ${nom}`;
     document.getElementById('win-clan').textContent   = `${clan} — ${c.label || ''}`;
     document.getElementById('win-overlay').style.display = 'flex';
+    // Bandeau persistant dans le tableau
+    document.getElementById('bandeau-joueur-nom').textContent  = `${c.icon || ''} ${nom}`;
+    document.getElementById('bandeau-joueur-clan').textContent = `${clan} — ${c.label || ''}`;
+    document.getElementById('bandeau-gagnant').classList.add('visible');
   }
 
   function fermerWin() { document.getElementById('win-overlay').style.display = 'none'; }
@@ -577,6 +616,7 @@
     document.getElementById('btn-tirer').disabled = false;
     document.getElementById('carte-numero').style.display = 'none';
     document.getElementById('compteur').textContent = '0 / 72 numéros tirés';
+    document.getElementById('bandeau-gagnant').classList.remove('visible');
     document.querySelectorAll('.suivi-cell').forEach(c => { c.classList.remove('tire','actuel'); c.style.background = ''; });
   }
 
