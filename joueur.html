@@ -393,6 +393,35 @@
     }
     .win-card button:hover { background: rgba(255,255,255,.2); }
     @keyframes pop { from { transform: scale(.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+    /* ── Toast autre gagnant ── */
+    #toast-gagnant {
+      position: fixed;
+      top: 16px; left: 50%;
+      transform: translateX(-50%) translateY(-140%);
+      background: linear-gradient(135deg, #0d3820, #1a5c35);
+      border: 1px solid #2ecc71;
+      border-radius: 14px;
+      padding: 13px 14px 13px 18px;
+      z-index: 150;
+      width: min(90vw, 340px);
+      box-shadow: 0 8px 28px rgba(0,0,0,.45);
+      display: flex; align-items: center; gap: 12px;
+      transition: transform .4s cubic-bezier(.175,.885,.32,1.275);
+    }
+    #toast-gagnant.visible { transform: translateX(-50%) translateY(0); }
+    .toast-body { flex: 1; }
+    .toast-rang { font-size: .7rem; color: #80edb5; letter-spacing: .08em; margin-bottom: 2px; }
+    .toast-nom  { font-size: 1rem; font-weight: 700; color: white; }
+    .toast-clan { font-size: .75rem; color: #80edb5; margin-top: 2px; }
+    .toast-close {
+      background: rgba(255,255,255,.12); border: none; color: white;
+      width: 26px; height: 26px; border-radius: 50%;
+      cursor: pointer; font-size: 1.1rem; line-height: 1; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      transition: background .2s;
+    }
+    .toast-close:hover { background: rgba(255,255,255,.25); }
   </style>
 </head>
 <body>
@@ -409,6 +438,16 @@
     <button class="btn-rejoindre" id="btn-rejoindre-submit" onclick="rejoindrePartie()" disabled>Rejoindre →</button>
     <div class="msg-erreur" id="msg-erreur"></div>
   </div>
+</div>
+
+<!-- Toast autre gagnant -->
+<div id="toast-gagnant">
+  <div class="toast-body">
+    <div class="toast-rang" id="toast-rang"></div>
+    <div class="toast-nom"  id="toast-nom"></div>
+    <div class="toast-clan" id="toast-clan"></div>
+  </div>
+  <button class="toast-close" onclick="fermerToast()">×</button>
 </div>
 
 <!-- Overlay victoire -->
@@ -579,8 +618,12 @@
       verifierVictoire();
     });
 
-    socket.on('gagnant', ({ nom, clan }) => {
-      afficherGagnant(nom, clan);
+    socket.on('gagnant', ({ nom, clan, rang }) => {
+      if (nom === nomJoueur) {
+        afficherGagnant(nom, clan, rang);
+      } else {
+        afficherToastGagnant(nom, clan, rang);
+      }
     });
 
     socket.on('partie-terminee', () => {
@@ -734,13 +777,33 @@
     document.getElementById('btn-wendio').classList.remove('visible');
   }
 
-  function afficherGagnant(nom, clan) {
-    const c = CLANS[clan] || {};
+  const MEDAILLES = ['🥇','🥈','🥉'];
+
+  function afficherGagnant(nom, clan, rang) {
+    const c       = CLANS[clan] || {};
+    const medaille = rang ? (MEDAILLES[rang - 1] || `#${rang}`) : '🥇';
     document.getElementById('win-joueur').textContent = nom
-      ? `${c.icon || ''} ${nom}`
+      ? `${medaille} ${c.icon || ''} ${nom}`
       : `${c.icon || ''} Vous avez gagné !`;
     document.getElementById('win-clan').textContent = `${clan} — ${c.label || ''}`;
     document.getElementById('win-overlay').classList.add('visible');
+  }
+
+  let _toastTimer = null;
+  function afficherToastGagnant(nom, clan, rang) {
+    const c       = CLANS[clan] || {};
+    const medaille = MEDAILLES[rang - 1] || `#${rang}`;
+    const ordinal  = rang === 1 ? '1re place' : `${rang}e place`;
+    document.getElementById('toast-rang').textContent  = `${medaille} ${ordinal}`;
+    document.getElementById('toast-nom').textContent   = `${c.icon || ''} ${nom} a gagné !`;
+    document.getElementById('toast-clan').textContent  = `${clan} — Continuez à jouer !`;
+    document.getElementById('toast-gagnant').classList.add('visible');
+    clearTimeout(_toastTimer);
+    _toastTimer = setTimeout(fermerToast, 6000);
+  }
+
+  function fermerToast() {
+    document.getElementById('toast-gagnant').classList.remove('visible');
   }
 
   function fermerWin() { document.getElementById('win-overlay').classList.remove('visible'); }
