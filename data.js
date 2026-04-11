@@ -72,7 +72,7 @@ function estCoeur(ligne, colIdx) {
 
 // Chemin audio
 function cheminAudio(num) {
-  return `sound/Wendat numbers ${num}.wav`;
+  return `Sound/Wendat numbers ${num}.wav`;
 }
 
 function jouerSon(num) {

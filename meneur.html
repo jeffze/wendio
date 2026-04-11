@@ -44,6 +44,9 @@
     .btn-tirer:disabled { opacity: .35; cursor: default; }
     .btn-reset { background: var(--surface); color: var(--muted); border: 1px solid var(--muted); border-radius: 8px; padding: 14px 20px; cursor: pointer; }
     .btn-reset:hover { opacity: .7; }
+    .btn-arreter { background: #922b21; color: white; border: none; border-radius: 8px; padding: 10px 18px; font-size: .9rem; font-weight: bold; cursor: pointer; margin-top: 14px; display: none; }
+    .btn-arreter.visible { display: block; }
+    .btn-arreter:hover { background: #c0392b; }
 
     /* ── Carte numéro tiré ── */
     #carte-numero { background: var(--surface); border-radius: 12px; border: 2px solid var(--accent); padding: 18px 20px; margin-bottom: 16px; display: none; }
@@ -116,6 +119,7 @@
       <div class="lien-rejoin" id="lien-rejoin"></div>
       <div class="joueurs-titre">Joueurs connectés : <strong id="joueurs-count">0</strong></div>
       <div id="joueurs-items"></div>
+      <button class="btn-arreter" id="btn-arreter" onclick="arreterPartie()">⏹ Terminer la partie</button>
     </div>
     <div class="qr-bloc">
       <div id="qr-rejoindre"></div>
@@ -191,6 +195,7 @@
       document.getElementById('lien-rejoin').textContent  = lien;
       document.getElementById('online-creation').style.display = 'none';
       document.getElementById('online-actif').classList.add('visible');
+      document.getElementById('btn-arreter').classList.add('visible');
       document.getElementById('qr-rejoindre').innerHTML = '';
       if (typeof QRCode !== 'undefined') {
         new QRCode(document.getElementById('qr-rejoindre'), { text: lien, width: 120, height: 120 });
@@ -223,6 +228,19 @@
   }
 
   function creerPartie() { if (socket) socket.emit('creer'); }
+
+  function arreterPartie() {
+    if (!socket || !codePartie) return;
+    if (!confirm('Terminer la partie ? Tous les joueurs seront déconnectés.')) return;
+    socket.emit('terminer', { code: codePartie });
+    codePartie = null;
+    document.getElementById('online-actif').classList.remove('visible');
+    document.getElementById('btn-arreter').classList.remove('visible');
+    document.getElementById('online-creation').style.display = '';
+    document.getElementById('joueurs-items').innerHTML = '';
+    document.getElementById('joueurs-count').textContent = '0';
+    resetJeu();
+  }
 
   // ── Tirer ─────────────────────────────────────────────────────────
   function actionTirer() {
