@@ -120,6 +120,27 @@
       text-align: center;
       line-height: 1.8;
     }
+
+    /* ── Conseil plein écran ── */
+    .conseil-fs {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid #3e2510;
+      border-radius: 12px;
+      padding: 12px 18px;
+      margin-bottom: 28px;
+      max-width: 540px;
+      width: 100%;
+      font-size: .85rem;
+      color: #a08060;
+      line-height: 1.5;
+    }
+    .conseil-fs svg { flex-shrink: 0; color: #7a5a3a; }
+    .conseil-fs strong { color: #c8a070; }
+    /* Cacher si on est déjà en plein écran ou si l'API est absente */
+    .conseil-fs.cache { display: none; }
   </style>
 </head>
 <body>
@@ -135,6 +156,13 @@
     <span title="Loup — Yānariskwa'">🐺</span>
     <span title="Ours — Yānionyen'">🐻</span>
     <span title="Tortue — Yāndia'wich">🐢</span>
+  </div>
+
+  <div class="conseil-fs" id="conseil-fs">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+    </svg>
+    <span>Pour une exp&#233;rience optimale sur tablette, utilisez le <strong>mode plein &#233;cran</strong> &#8212; un bouton est disponible sur chaque &#233;cran de jeu.</span>
   </div>
 
   <div class="nav-grille">
@@ -173,5 +201,11 @@
     Wendat &nbsp;→&nbsp; Français &nbsp;→&nbsp; Anglais
   </footer>
 
+<script>
+  // Cacher le conseil si l'API fullscreen est absente (Safari iPad)
+  if (!document.documentElement.requestFullscreen) {
+    document.getElementById('conseil-fs').classList.add('cache');
+  }
+</script>
 </body>
 </html>

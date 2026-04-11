@@ -328,45 +328,31 @@
         justify-content: center;
         padding: 12px;
         gap: 14px;
-        height: calc(var(--vh, 1svh) * 100);
-        overflow: hidden;
       }
       h1 { font-size: 1.5rem; margin-bottom: 8px; }
       .mode-bar { margin-bottom: 12px; }
 
       #vue-jeu {
         flex-direction: row;
-        align-items: stretch;
+        align-items: flex-start;
         justify-content: center;
         gap: 14px;
         width: 100%;
         max-width: 900px;
-        height: 100%;
-        overflow: hidden;
       }
       #jeu-sidebar {
         width: 200px;
         flex-shrink: 0;
         max-width: none;
         padding-top: 4px;
-        overflow-y: auto;
       }
       #jeu-info { flex-direction: column; align-items: flex-start; }
       .btn-retour { margin-left: 0; }
       #annonce { max-width: none; border-radius: 12px; padding: 10px 14px; }
       .annonce-num { font-size: 2.4rem; }
       #btn-wendio { max-width: none; font-size: 1.1rem; padding: 14px; }
-      .bingo-wrap {
-        flex: 1;
-        max-width: none;
-        height: 100%;
-        overflow: hidden;
-      }
-      .bingo-grid {
-        height: 100%;
-        grid-auto-rows: 1fr;
-      }
-      .cell { aspect-ratio: auto; }
+      .bingo-wrap { flex: 1; max-width: none; }
+      .bingo-grid { grid-auto-rows: 1fr; }
     }
 
     /* ── Overlay connexion ── */
@@ -517,6 +503,25 @@
     #btn-fullscreen.actif .icon-expand   { display: none; }
     #btn-fullscreen.actif .icon-compress { display: block; }
 
+    #btn-accueil {
+      position: fixed;
+      top: 10px; right: 54px;
+      z-index: 300;
+      background: rgba(255,255,255,.75);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 6px;
+      width: 34px; height: 34px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color .2s, border-color .2s, background .2s;
+      backdrop-filter: blur(4px);
+    }
+    #btn-accueil:hover { color: var(--accent); border-color: var(--accent); background: rgba(255,255,255,.95); }
+    #btn-accueil svg { width: 18px; height: 18px; display: block; }
+
     /* ── Toast autre gagnant ── */
     #toast-gagnant {
       position: fixed; top: 16px; left: 50%;
@@ -547,6 +552,12 @@
   </style>
 </head>
 <body>
+
+<a id="btn-accueil" href="lobby.html" title="Accueil">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+  </svg>
+</a>
 
 <button id="btn-fullscreen" title="Plein &#233;cran" onclick="toggleFullscreen()">
   <svg class="icon-expand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1038,12 +1049,6 @@
     document.getElementById('btn-fullscreen').style.display = 'none';
   }
 
-  // Hauteur réelle disponible (exclut la barre URL du navigateur)
-  function majVH() {
-    document.documentElement.style.setProperty('--vh', (window.innerHeight * 0.01) + 'px');
-  }
-  window.addEventListener('resize', majVH);
-  majVH();
 </script>
 </body>
 </html>
