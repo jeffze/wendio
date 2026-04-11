@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WENDIO — Le Jeu des Clans</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #1a1008;
+      color: #f4e7d3;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    /* ── Titre ── */
+    .titre-bloc { text-align: center; margin-bottom: 48px; }
+
+    .titre {
+      font-size: clamp(3rem, 10vw, 5.5rem);
+      font-weight: 900;
+      letter-spacing: .12em;
+      line-height: 1;
+      background: linear-gradient(135deg, #d35400 0%, #f39c12 50%, #d35400 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 10px;
+    }
+
+    .sous-titre {
+      font-size: 1.1rem;
+      color: #a08060;
+      letter-spacing: .06em;
+    }
+
+    .devise {
+      margin-top: 14px;
+      font-size: .9rem;
+      font-style: italic;
+      color: #7a5a3a;
+    }
+
+    /* ── Clans décoratifs ── */
+    .clans-deco {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      font-size: 2.2rem;
+      margin-bottom: 48px;
+      opacity: .7;
+    }
+
+    /* ── Cartes de navigation ── */
+    .nav-grille {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+      width: 100%;
+      max-width: 780px;
+    }
+
+    .nav-carte {
+      background: #2c1a0e;
+      border: 2px solid #3e2510;
+      border-radius: 16px;
+      padding: 28px 24px;
+      text-decoration: none;
+      color: inherit;
+      text-align: center;
+      transition: border-color .2s, transform .2s, background .2s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .nav-carte:hover {
+      border-color: var(--couleur);
+      background: #38200e;
+      transform: translateY(-3px);
+    }
+
+    .nav-carte .icone {
+      font-size: 2.8rem;
+      line-height: 1;
+    }
+
+    .nav-carte .label {
+      font-size: 1.25rem;
+      font-weight: 800;
+      letter-spacing: .05em;
+      color: var(--couleur);
+    }
+
+    .nav-carte .description {
+      font-size: .88rem;
+      color: #a08060;
+      line-height: 1.5;
+    }
+
+    .nav-carte .fleche {
+      margin-top: 6px;
+      font-size: 1.1rem;
+      color: var(--couleur);
+      opacity: .7;
+    }
+
+    /* ── Pied de page ── */
+    footer {
+      margin-top: 48px;
+      font-size: .78rem;
+      color: #4a3020;
+      text-align: center;
+      line-height: 1.8;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="titre-bloc">
+    <div class="titre">WENDIO</div>
+    <div class="sous-titre">Le Jeu des Clans</div>
+    <div class="devise">« Une main sur le passé, une oreille sur l'avenir. »</div>
+  </div>
+
+  <div class="clans-deco">
+    <span title="Chevreuil — Ohskénonton'">🦌</span>
+    <span title="Loup — Yānariskwa'">🐺</span>
+    <span title="Ours — Yānionyen'">🐻</span>
+    <span title="Tortue — Yāndia'wich">🐢</span>
+  </div>
+
+  <div class="nav-grille">
+
+    <a class="nav-carte" href="meneur.html" style="--couleur: #d35400;">
+      <div class="icone">🎲</div>
+      <div class="label">Meneur de Jeu</div>
+      <div class="description">
+        Tirez les numéros, suivez les tirages et lancez les sons Wendat pour tous les joueurs.
+      </div>
+      <div class="fleche">→</div>
+    </a>
+
+    <a class="nav-carte" href="imprimer.html" style="--couleur: #27ae60;">
+      <div class="icone">🖨️</div>
+      <div class="label">Cartes à imprimer</div>
+      <div class="description">
+        Générez 4 cartes aléatoires sur une page A4. Régénérez autant de fois que nécessaire avant d'imprimer.
+      </div>
+      <div class="fleche">→</div>
+    </a>
+
+    <a class="nav-carte" href="joueur.html" style="--couleur: #2980b9;">
+      <div class="icone">📱</div>
+      <div class="label">Carte numérique</div>
+      <div class="description">
+        Jouez directement sur tablette ou téléphone avec une carte générée aléatoirement.
+      </div>
+      <div class="fleche">→</div>
+    </a>
+
+  </div>
+
+  <footer>
+    Une expérience de revitalisation linguistique hybride<br>
+    Wendat &nbsp;→&nbsp; Français &nbsp;→&nbsp; Anglais
+  </footer>
+
+</body>
+</html>
