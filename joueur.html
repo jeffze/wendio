@@ -328,31 +328,45 @@
         justify-content: center;
         padding: 12px;
         gap: 14px;
-        min-height: 100dvh;
+        height: 100svh;
+        overflow: hidden;
       }
       h1 { font-size: 1.5rem; margin-bottom: 8px; }
       .mode-bar { margin-bottom: 12px; }
 
       #vue-jeu {
         flex-direction: row;
-        align-items: flex-start;
+        align-items: stretch;
         justify-content: center;
         gap: 14px;
         width: 100%;
         max-width: 900px;
+        height: 100%;
+        overflow: hidden;
       }
       #jeu-sidebar {
         width: 200px;
         flex-shrink: 0;
         max-width: none;
         padding-top: 4px;
+        overflow-y: auto;
       }
       #jeu-info { flex-direction: column; align-items: flex-start; }
       .btn-retour { margin-left: 0; }
       #annonce { max-width: none; border-radius: 12px; padding: 10px 14px; }
       .annonce-num { font-size: 2.4rem; }
       #btn-wendio { max-width: none; font-size: 1.1rem; padding: 14px; }
-      .bingo-wrap { flex: 1; max-width: none; max-height: calc(100dvh - 24px); }
+      .bingo-wrap {
+        flex: 1;
+        max-width: none;
+        height: 100%;
+        overflow: hidden;
+      }
+      .bingo-grid {
+        height: 100%;
+        grid-auto-rows: 1fr;
+      }
+      .cell { aspect-ratio: auto; }
     }
 
     /* ── Overlay connexion ── */
