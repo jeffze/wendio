@@ -52,6 +52,15 @@
     .btn-nouvelle { width: 100%; background: var(--primary); color: white; border: none; border-radius: 6px; padding: 11px; font-weight: bold; font-size: 1rem; cursor: pointer; }
     .btn-nouvelle:hover { opacity: .85; }
 
+    /* ── Rejoindre avec code ── */
+    .section-code { background: white; border-radius: 10px; box-shadow: 0 3px 8px rgba(0,0,0,.12); padding: 14px 16px; margin-bottom: 14px; width: 100%; max-width: 560px; }
+    .code-entree { display: flex; gap: 8px; margin-top: 8px; }
+    .code-entree input { flex: 1; border: 2px solid #ddd; border-radius: 6px; padding: 10px 12px; font-size: 1.4rem; font-weight: 900; letter-spacing: .2em; text-transform: uppercase; text-align: center; outline: none; max-width: 120px; }
+    .code-entree input:focus { border-color: var(--accent); }
+    .btn-entrer-code { flex: 1; background: var(--vert); color: white; border: none; border-radius: 6px; padding: 10px 16px; font-weight: bold; font-size: 1rem; cursor: pointer; }
+    .btn-entrer-code:hover { opacity: .88; }
+    .btn-entrer-code:disabled { opacity: .4; cursor: default; }
+
     /* ── Numéro annoncé (mode en ligne) ── */
     #annonce { display: none; background: var(--primary); color: white; border-radius: 10px; padding: 12px 16px; margin-bottom: 12px; width: 100%; max-width: 560px; text-align: center; }
     #annonce.visible { display: block; }
@@ -118,6 +127,17 @@
 <h1>WENDIO</h1>
 <div class="online-badge" id="online-badge">🌐 Partie en ligne</div>
 
+<!-- Rejoindre une partie avec un code -->
+<div class="section-code" id="section-code">
+  <div class="section-titre">Rejoindre une partie en ligne</div>
+  <div class="code-entree">
+    <input type="text" id="input-code" placeholder="CODE" maxlength="4"
+      oninput="this.value=this.value.toUpperCase(); validerCode()"
+      onkeydown="if(event.key==='Enter') entrerCode()" />
+    <button class="btn-entrer-code" id="btn-entrer-code" onclick="entrerCode()" disabled>Rejoindre →</button>
+  </div>
+</div>
+
 <!-- Contrôles (mode local uniquement) -->
 <div class="controles" id="controles-local" style="max-width:560px;">
   <div class="section-titre">Choisissez votre clan</div>
@@ -153,7 +173,7 @@
   let clanJoinForm   = null; // clan choisi dans le formulaire de connexion
   let tiresOnline    = [];   // numéros tirés reçus du serveur
 
-  // ── Détection du mode (paramètre ?code=) ──────────────────────────
+  // ── Détection du mode (paramètre ?code= ou saisie manuelle) ─────────
   function demarrer() {
     const params = new URLSearchParams(window.location.search);
     const code   = params.get('code');
@@ -170,35 +190,50 @@
     });
 
     if (code) {
-      // ── Mode en ligne ──
-      modeOnline = true;
-      codePartie = code.toUpperCase();
-      document.getElementById('online-badge').classList.add('visible');
-      document.getElementById('controles-local').style.display = 'none';
-
-      // Peupler le formulaire de connexion
-      document.getElementById('badge-code').textContent = codePartie;
-      const formClan = document.getElementById('form-clan-grid');
-      Object.entries(CLANS).forEach(([nom, clan]) => {
-        const btn = document.createElement('button');
-        btn.className = 'btn-clan-join';
-        btn.innerHTML = `${clan.icon} <strong>${nom}</strong><br><small style="font-weight:normal">${clan.wendat}</small>`;
-        btn.onclick = () => {
-          clanJoinForm = nom;
-          document.querySelectorAll('.btn-clan-join').forEach(b => b.classList.remove('actif'));
-          btn.classList.add('actif');
-          validerFormulaire();
-        };
-        formClan.appendChild(btn);
-      });
-
-      document.getElementById('input-nom').addEventListener('input', validerFormulaire);
-      document.getElementById('overlay-rejoindre').classList.add('visible');
-      chargerSocket();
+      activerModeOnline(code.toUpperCase());
     } else {
-      // ── Mode local ──
       nouvellePartie();
     }
+  }
+
+  function validerCode() {
+    const code = document.getElementById('input-code').value.trim();
+    document.getElementById('btn-entrer-code').disabled = code.length !== 4;
+  }
+
+  function entrerCode() {
+    const code = document.getElementById('input-code').value.trim().toUpperCase();
+    if (code.length !== 4) return;
+    activerModeOnline(code);
+  }
+
+  function activerModeOnline(code) {
+    modeOnline = true;
+    codePartie = code;
+    document.getElementById('online-badge').classList.add('visible');
+    document.getElementById('controles-local').style.display = 'none';
+    document.getElementById('section-code').style.display = 'none';
+
+    // Peupler le formulaire de connexion
+    document.getElementById('badge-code').textContent = codePartie;
+    const formClan = document.getElementById('form-clan-grid');
+    formClan.innerHTML = '';
+    Object.entries(CLANS).forEach(([nom, clan]) => {
+      const btn = document.createElement('button');
+      btn.className = 'btn-clan-join';
+      btn.innerHTML = `${clan.icon} <strong>${nom}</strong><br><small style="font-weight:normal">${clan.wendat}</small>`;
+      btn.onclick = () => {
+        clanJoinForm = nom;
+        document.querySelectorAll('.btn-clan-join').forEach(b => b.classList.remove('actif'));
+        btn.classList.add('actif');
+        validerFormulaire();
+      };
+      formClan.appendChild(btn);
+    });
+
+    document.getElementById('input-nom').addEventListener('input', validerFormulaire);
+    document.getElementById('overlay-rejoindre').classList.add('visible');
+    chargerSocket();
   }
 
   function validerFormulaire() {
