@@ -118,10 +118,10 @@
     /* ── Clan grid ── */
     .clans {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 1.4rem;
-      width: 100%; max-width: 840px;
-      margin-bottom: 3.5rem;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      width: 100%; max-width: 900px;
+      margin-bottom: 0;
     }
 
     .card {
@@ -187,9 +187,9 @@
 
     /* animal SVG wrapper */
     .totem {
-      width: 100px; height: 100px;
+      width: 68px; height: 68px;
       display: flex; align-items: center; justify-content: center;
-      margin-bottom: 1.4rem;
+      margin-bottom: 1rem;
     }
 
     .totem svg {
@@ -209,20 +209,21 @@
 
     .clan-name {
       font-family: 'Cinzel', serif;
-      font-size: 1.3rem; font-weight: 700;
-      letter-spacing: .2em; text-transform: uppercase;
-      color: var(--c); margin-bottom: .25rem;
+      font-size: 1rem; font-weight: 700;
+      letter-spacing: .15em; text-transform: uppercase;
+      color: var(--c); margin-bottom: .2rem;
     }
 
     .clan-role {
-      font-size: .8rem; letter-spacing: .28em; text-transform: uppercase;
-      color: var(--bone-dim); opacity: .55; font-style: italic;
+      font-size: .7rem; letter-spacing: .22em; text-transform: uppercase;
+      color: var(--bone-dim); opacity: .5; font-style: italic;
     }
 
     /* ── CTA Button ── */
     .cta-wrap {
-      animation: riseIn 1s ease both 1.6s;
-      display: flex; flex-direction: column; align-items: center; gap: 1rem;
+      animation: riseIn 1s ease both 1.2s;
+      display: flex; flex-direction: column; align-items: center; gap: .8rem;
+      margin-bottom: 2rem;
     }
 
     .btn {
@@ -267,14 +268,14 @@
     }
 
     /* ── Responsive ── */
-    @media (max-width: 580px) {
-      .clans { gap: 1rem; }
-      .totem { width: 82px; height: 82px; }
-      .card  { padding: 1.5rem 1rem 1.4rem; }
-      .clan-name { font-size: 1.05rem; }
+    @media (max-width: 700px) {
+      .clans { grid-template-columns: repeat(2, 1fr); gap: .8rem; }
+      .totem { width: 72px; height: 72px; }
+      .card  { padding: 1.4rem .9rem 1.2rem; }
     }
-    @media (max-width: 360px) {
-      .clans { grid-template-columns: 1fr; }
+    @media (max-width: 400px) {
+      .totem { width: 58px; height: 58px; }
+      .clan-name { font-size: .85rem; }
     }
   </style>
 </head>
@@ -310,6 +311,12 @@
       </svg>
     </div>
   </header>
+
+  <!-- ── CTA ── -->
+  <div class="cta-wrap">
+    <a href="index.html" class="btn">Commencer</a>
+    <span class="btn-hint">Choisissez votre clan</span>
+  </div>
 
   <!-- ── CLAN CARDS ── -->
   <div class="clans">
@@ -554,12 +561,6 @@
     </div>
 
   </div><!-- /.clans -->
-
-  <!-- ── CTA ── -->
-  <div class="cta-wrap">
-    <a href="index.html" class="btn">Commencer</a>
-    <span class="btn-hint">Choisissez votre clan</span>
-  </div>
 
 </div><!-- /.page -->
 
