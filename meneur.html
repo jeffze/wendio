@@ -372,7 +372,7 @@
         justify-content: center;
         padding: 12px;
         gap: 14px;
-        height: 100svh;
+        height: calc(var(--vh, 1svh) * 100);
         overflow: hidden;
       }
 
@@ -739,6 +739,13 @@
   }
 
   initialiser();
+
+  // Hauteur réelle disponible (exclut la barre URL du navigateur)
+  function majVH() {
+    document.documentElement.style.setProperty('--vh', (window.innerHeight * 0.01) + 'px');
+  }
+  window.addEventListener('resize', majVH);
+  majVH();
 </script>
 </body>
 </html>
