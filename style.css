@@ -1,0 +1,38 @@
+:root {
+    --color-w: #d35400; --color-e: #27ae60; --color-n: #2980b9;
+    --color-d: #8e44ad; --color-a: #f39c12; --color-o: #c0392b;
+    --clan-bg: #fdf2e9;
+}
+
+body { font-family: 'Segoe UI', sans-serif; background: #f4e7d3; display: flex; justify-content: center; }
+.game-container { width: 90vw; max-width: 600px; text-align: center; }
+
+.bingo-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 10px;
+    background: #5d4037;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.cell {
+    background: white;
+    aspect-ratio: 1/1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: 0.3s;
+    font-size: 0.8rem;
+}
+
+.cell.active { background: #ffe082; position: relative; }
+.cell.active::after { content: '🌽'; position: absolute; top: 5px; right: 5px; font-size: 1.2rem; }
+
+.header { font-weight: bold; color: white; padding-bottom: 10px; font-size: 1.5rem; }
+
+/* Couleurs des clans au centre */
+.heart { background: var(--clan-bg); border: 2px solid #5d4037; font-weight: bold; }
