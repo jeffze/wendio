@@ -467,7 +467,10 @@
       /* Code online plus compact */
       .code-valeur { font-size: 2.2rem; }
       .online-actif.visible { grid-template-columns: 1fr; }
-      .qr-bloc { display: none; } /* QR masqué en paysage sidebar, déjà visible au centre */
+      /* QR visible en paysage — réduit pour tenir dans la sidebar */
+      .qr-bloc { display: block; text-align: center; margin-top: 6px; }
+      #qr-rejoindre { display: inline-block; }
+      #qr-rejoindre canvas, #qr-rejoindre img { width: 80px !important; height: 80px !important; }
     }
   </style>
 </head>
