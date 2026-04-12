@@ -246,9 +246,28 @@
       box-shadow: 0 4px 20px rgba(44,26,14,.28);
     }
     #annonce.visible { display: block; }
-    .annonce-label  { font-size: .65rem; color: #b8956a; margin-bottom: 3px; text-transform: uppercase; letter-spacing: .12em; font-weight: 600; }
-    .annonce-num    { font-family: 'Cinzel', serif; font-size: 3rem; font-weight: 900; color: var(--accent-lt); line-height: 1; }
-    .annonce-wendat { font-size: .88rem; font-style: italic; color: #c4905a; margin-top: 4px; }
+    .annonce-label   { font-size: .65rem; color: #b8956a; margin-bottom: 6px; text-transform: uppercase; letter-spacing: .12em; font-weight: 600; }
+    .annonce-badge   { display: inline-block; color: white; font-weight: 700; font-size: .65rem; padding: 2px 12px; border-radius: 20px; margin-bottom: 6px; letter-spacing: .14em; font-family: 'Cinzel', serif; background: var(--annonce-couleur, #b86808); }
+    .annonce-num     { font-family: 'Cinzel', serif; font-size: 2.8rem; font-weight: 900; line-height: 1; color: var(--annonce-couleur, var(--accent-lt)); margin-bottom: 6px; }
+    .annonce-wendat  { font-size: .88rem; font-style: italic; color: #c4905a; margin-bottom: 3px; }
+    .annonce-phon    { font-size: .75rem; color: #8a6040; margin-bottom: 8px; letter-spacing: .04em; }
+    .annonce-langues { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 8px; }
+    .annonce-fr      { color: #70b8e0; font-weight: 600; font-size: .78rem; }
+    .annonce-en      { color: #68d898; font-weight: 600; font-size: .78rem; }
+    .annonce-manquant { font-size: .75rem; font-style: italic; color: #5a3820; margin-bottom: 6px; }
+    .btn-rejouer-joueur {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,.2);
+      color: rgba(255,255,255,.7);
+      border-radius: 8px;
+      padding: 6px 14px;
+      font-size: .8rem;
+      cursor: pointer;
+      font-family: inherit;
+      font-weight: 500;
+      transition: all .2s;
+    }
+    .btn-rejouer-joueur:hover { border-color: var(--accent-lt); color: var(--accent-lt); }
 
     /* Grille bingo */
     .bingo-wrap { width: 100%; max-width: 560px; }
@@ -279,8 +298,9 @@
       justify-content: center;
       align-items: center;
       border-radius: 8px;
-      font-size: 1rem;
-      font-weight: 700;
+      font-size: 1.35rem;
+      font-weight: 900;
+      font-family: 'Cinzel', serif;
       cursor: pointer;
       position: relative;
       transition: all .12s;
@@ -646,9 +666,17 @@
     </div>
 
     <div id="annonce">
-      <div class="annonce-label">Num&#233;ro annonc&#233;</div>
-      <div class="annonce-num"    id="annonce-num">&#8212;</div>
-      <div class="annonce-wendat" id="annonce-wendat"></div>
+      <div class="annonce-label">Case s&#233;lectionn&#233;e</div>
+      <div class="annonce-badge" id="annonce-badge">W</div>
+      <div class="annonce-num"   id="annonce-num">&#8212;</div>
+      <div class="annonce-wendat"  id="annonce-wendat"></div>
+      <div class="annonce-phon"    id="annonce-phon"></div>
+      <div class="annonce-langues">
+        <span class="annonce-fr" id="annonce-fr"></span>
+        <span class="annonce-en" id="annonce-en"></span>
+      </div>
+      <div class="annonce-manquant" id="annonce-manquant"></div>
+      <button class="btn-rejouer-joueur" id="btn-rejouer-joueur" onclick="rejouerSon()">&#9654; Rejouer</button>
     </div>
 
     <button id="btn-wendio" onclick="declarerVictoire()">&#127805; WENDIO !</button>
@@ -663,15 +691,16 @@
 <script src="data.js"></script>
 <script>
   'use strict';
-  let carteActuelle = null;
-  let clanActuel    = null;
-  let selectionnees = new Set();
-  let modeOnline    = false;
-  let socket        = null;
-  let codePartie    = null;
-  let nomJoueur     = null;
-  let clanJoinForm  = null;
-  let tiresOnline   = [];
+  let carteActuelle       = null;
+  let clanActuel          = null;
+  let selectionnees       = new Set();
+  let modeOnline          = false;
+  let socket              = null;
+  let codePartie          = null;
+  let nomJoueur           = null;
+  let clanJoinForm        = null;
+  let tiresOnline         = [];
+  let dernierNumeroClique = null;
 
   // ── Création DOM sécurisée d'un bouton clan ──────────────────────────
   function creerBoutonClan(nom, clan, className, onclickFn) {
@@ -814,9 +843,7 @@
 
     socket.on('numero-tire', ({ num }) => {
       tiresOnline.push(num);
-      document.getElementById('annonce-num').textContent    = num;
-      const data = NOMBRES[num];
-      document.getElementById('annonce-wendat').textContent = data ? data.wendat : '';
+      afficherInfoNumero(num);
       marquerNumero(num);
       jouerSon(num);
       verifierVictoire();
@@ -868,15 +895,16 @@
 
   // ── Nouvelle carte / retour setup ────────────────────────────────────
   function nouvellePartie() {
-    clanActuel    = null;
-    carteActuelle = null;
-    selectionnees = new Set();
-    tiresOnline   = [];
-    modeOnline    = false;
-    socket        = null;
-    codePartie    = null;
-    nomJoueur     = null;
-    clanJoinForm  = null;
+    clanActuel          = null;
+    carteActuelle       = null;
+    selectionnees       = new Set();
+    tiresOnline         = [];
+    modeOnline          = false;
+    socket              = null;
+    codePartie          = null;
+    nomJoueur           = null;
+    clanJoinForm        = null;
+    dernierNumeroClique = null;
 
     document.querySelectorAll('.btn-clan').forEach(b => b.classList.remove('actif'));
     document.getElementById('objectif').textContent    = 'S\u00e9lectionnez un clan pour voir votre objectif';
@@ -894,6 +922,39 @@
 
     setMode('local');
     basculerVersSetup();
+  }
+
+  // ── Carte info numéro ────────────────────────────────────────────────
+  function afficherInfoNumero(num) {
+    dernierNumeroClique = num;
+    const ligne   = ligneDeNumero(num);
+    const couleur = CONFIG[ligne].couleur;
+    const data    = NOMBRES[num];
+    const annonce = document.getElementById('annonce');
+
+    annonce.style.setProperty('--annonce-couleur', couleur);
+    document.getElementById('annonce-badge').textContent  = ligne;
+    document.getElementById('annonce-badge').style.background = couleur;
+    document.getElementById('annonce-num').textContent    = num;
+
+    if (data) {
+      document.getElementById('annonce-wendat').textContent   = data.wendat;
+      document.getElementById('annonce-phon').textContent     = data.phon;
+      document.getElementById('annonce-fr').textContent       = '\uD83C\uDDEB\uD83C\uDDF7 ' + data.fr;
+      document.getElementById('annonce-en').textContent       = '\uD83C\uDDEC\uD83C\uDDE7 ' + data.en;
+      document.getElementById('annonce-manquant').textContent = '';
+    } else {
+      ['annonce-wendat','annonce-phon','annonce-fr','annonce-en'].forEach(id => {
+        document.getElementById(id).textContent = '';
+      });
+      document.getElementById('annonce-manquant').textContent = '\u2014 vocabulaire Wendat \u00e0 compl\u00e9ter \u2014';
+    }
+
+    annonce.classList.add('visible');
+  }
+
+  function rejouerSon() {
+    if (dernierNumeroClique) jouerSon(dernierNumeroClique);
   }
 
   // ── Marquage ─────────────────────────────────────────────────────────
@@ -942,7 +1003,8 @@
           cell.onclick = () => {
             if (selectionnees.has(id)) selectionnees.delete(id);
             else selectionnees.add(id);
-            if (!modeOnline) jouerSon(val);
+            afficherInfoNumero(val);
+            jouerSon(val);
             rendreGrille();
             if (!modeOnline) verifierVictoire();
           };
