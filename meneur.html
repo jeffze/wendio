@@ -503,12 +503,12 @@
 
   <h1>WENDIO &#8212; Meneur</h1>
 
-  <div class="mode-bar">
+  <div class="mode-bar" id="barre-connexion">
     <button class="btn-mode actif" id="btn-local"  onclick="setMode('local')">&#128244; Local</button>
     <button class="btn-mode"       id="btn-online" onclick="setMode('online')">&#127760; En ligne</button>
   </div>
 
-  <div class="mode-bar" style="margin-top:8px;">
+  <div class="mode-bar" id="barre-tirage" style="margin-top:8px;">
     <button class="btn-mode actif" id="btn-auto"     onclick="setModePhysique(false)">&#127922; Al&#233;atoire</button>
     <button class="btn-mode"       id="btn-physique" onclick="setModePhysique(true)">&#127183; Physique</button>
   </div>
@@ -828,6 +828,16 @@
   }
 
   initialiser();
+
+  // ── Mode démo (paramètre URL ?demo=) ──────────────────────────────────
+  (function() {
+    const demo = new URLSearchParams(window.location.search).get('demo');
+    if (!demo) return;
+    document.getElementById('barre-connexion').style.display = 'none';
+    document.getElementById('barre-tirage').style.display    = 'none';
+    if (demo === 'physique') setModePhysique(true);
+    if (demo === 'online')   setMode('online');
+  })();
 
   // Plein écran
   function toggleFullscreen() {
