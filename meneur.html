@@ -279,8 +279,9 @@
       text-align: center;
       padding: 6px 1px;
       border-radius: 5px;
-      font-size: .78rem;
-      font-weight: 700;
+      font-size: 1rem;
+      font-weight: 900;
+      font-family: 'Cinzel', serif;
       cursor: default;
       transition: all .15s;
       border: 1px solid transparent;
@@ -288,6 +289,18 @@
     .suivi-cell.tire  { color: white; cursor: pointer; border-color: rgba(255,255,255,.07); box-shadow: 0 1px 4px rgba(0,0,0,.3); }
     .suivi-cell.tire:hover { opacity: .78; transform: scale(.94); }
     .suivi-cell.actuel { outline: 2px solid rgba(255,255,255,.8); outline-offset: 1px; box-shadow: 0 0 8px rgba(255,255,255,.18); }
+
+    /* ── Mode physique ── */
+    body.mode-physique .suivi-cell:not(.tire) {
+      cursor: pointer;
+    }
+    body.mode-physique .suivi-cell:not(.tire):hover {
+      background: #2a1e08;
+      border-color: var(--gold);
+      color: var(--gold-lt);
+      transform: scale(1.05);
+    }
+    body.mode-physique .btn-tirer { display: none; }
     .compteur { text-align: center; margin-top: 14px; font-size: .8rem; color: var(--muted); font-weight: 500; letter-spacing: .05em; }
 
     /* ── Bandeau classement ── */
@@ -495,6 +508,11 @@
     <button class="btn-mode"       id="btn-online" onclick="setMode('online')">&#127760; En ligne</button>
   </div>
 
+  <div class="mode-bar" style="margin-top:8px;">
+    <button class="btn-mode actif" id="btn-auto"     onclick="setModePhysique(false)">&#127922; Al&#233;atoire</button>
+    <button class="btn-mode"       id="btn-physique" onclick="setModePhysique(true)">&#127183; Physique</button>
+  </div>
+
   <!-- Panel online -->
   <div id="panneau-online">
     <div id="online-creation" style="text-align:center;">
@@ -564,6 +582,7 @@
   let tirages      = [];
   let numeroActuel = null;
   let modeOnline   = false;
+  let modePhysique = false;
   let socket       = null;
   let codePartie   = null;
 
@@ -574,6 +593,13 @@
     document.getElementById('btn-online').classList.toggle('actif', modeOnline);
     document.getElementById('panneau-online').classList.toggle('visible', modeOnline);
     if (modeOnline && !socket) chargerSocket();
+  }
+
+  function setModePhysique(physique) {
+    modePhysique = physique;
+    document.getElementById('btn-auto').classList.toggle('actif', !physique);
+    document.getElementById('btn-physique').classList.toggle('actif', physique);
+    document.body.classList.toggle('mode-physique', physique);
   }
 
   function chargerSocket() {
@@ -717,7 +743,18 @@
         cell.className   = 'suivi-cell';
         cell.id          = 'cell-' + num;
         cell.textContent = num;
-        cell.onclick = () => { if (tirages.includes(num)) { jouerSon(num); surlignerActuel(num); } };
+        cell.onclick = () => {
+          if (tirages.includes(num)) {
+            jouerSon(num);
+            surlignerActuel(num);
+          } else if (modePhysique) {
+            tirages.push(num);
+            numeroActuel = num;
+            afficherCarte(num);
+            jouerSon(num);
+            mettreAJourSuivi(num);
+          }
+        };
         grille.appendChild(cell);
       }
     });
