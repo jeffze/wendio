@@ -318,8 +318,8 @@
     .cell.coeur:active { transform: none; }
     /* Images animaux dans les cases cœur */
     .coeur-animal { width: 100%; height: 100%; object-fit: contain; display: block; }
-    /* L'ours a un fond noir : screen le dissout dans le fond ambré de la case */
-    .coeur-animal.ours { mix-blend-mode: screen; }
+    /* L'ours a un fond noir : case sombre pour que le fond noir disparaisse naturellement */
+    .cell.coeur.ours { background: #1a1008; }
 
     /* Bouton WENDIO ! */
     #btn-wendio {
@@ -995,11 +995,12 @@
         const id   = ligne + col;
 
         if (estCoeur(ligne, col)) {
-          cell.className = 'cell coeur';
+          const clan = COEUR_CLAN[id] || 'Tortue';
+          cell.className = 'cell coeur' + (clan === 'Ours' ? ' ours' : '');
           const img = document.createElement('img');
-          img.src = 'sources/' + (COEUR_CLAN[id] || 'Tortue') + '.png';
-          img.alt = COEUR_CLAN[id] || '';
-          img.className = 'coeur-animal' + (COEUR_CLAN[id] === 'Ours' ? ' ours' : '');
+          img.src = 'sources/' + clan + '.png';
+          img.alt = clan;
+          img.className = 'coeur-animal';
           cell.appendChild(img);
         } else {
           const val    = valeurCase(carteActuelle, ligne, col);
