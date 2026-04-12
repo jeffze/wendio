@@ -10,42 +10,94 @@
     body { font-family: 'Segoe UI', sans-serif; background: #f4e7d3; padding: 16px; }
 
     .controls {
-      max-width: 210mm;
+      max-width: 297mm;
       margin: 0 auto 14px;
       background: white;
       border-radius: 10px;
       padding: 14px 16px;
       box-shadow: 0 2px 6px rgba(0,0,0,.1);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      align-items: flex-end;
     }
-    .controls-titre { font-size: .75rem; text-transform: uppercase; letter-spacing: .08em; color: #999; margin-bottom: 10px; }
+    .controls-section { display: flex; flex-direction: column; gap: 6px; }
+    .controls-titre { font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; color: #999; font-weight: 700; }
 
-    .clan-selector { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    /* Sélecteur nombre de cartes */
+    .nb-selector { display: flex; gap: 6px; }
+    .btn-nb {
+      padding: 8px 16px; border: 2px solid #ddd; border-radius: 6px;
+      background: #fafafa; cursor: pointer; font-size: .88rem; font-weight: 700;
+      transition: .2s; white-space: nowrap;
+    }
+    .btn-nb:hover { border-color: #5d4037; }
+    .btn-nb.actif { background: #5d4037; color: white; border-color: #5d4037; }
+
+    /* Sélecteur clan */
+    .clan-selector { display: flex; flex-wrap: wrap; gap: 6px; }
     .btn-clan {
-      padding: 8px 14px; border: 2px solid #ddd; border-radius: 6px;
-      background: #fafafa; cursor: pointer; font-size: .9rem; font-weight: bold;
-      transition: .2s; display: flex; align-items: center; gap: 6px;
+      padding: 7px 12px; border: 2px solid #ddd; border-radius: 6px;
+      background: #fafafa; cursor: pointer; font-size: .88rem; font-weight: 700;
+      transition: .2s; display: flex; align-items: center; gap: 5px;
     }
     .btn-clan:hover { border-color: var(--c); }
     .btn-clan.actif { background: var(--c); color: white; border-color: var(--c); }
     .btn-clan.actif .wendat { opacity: .85; }
-    .wendat { font-size: .72rem; font-weight: normal; font-style: italic; }
+    .wendat { font-size: .7rem; font-weight: normal; font-style: italic; }
 
-    .btn-bar { display: flex; gap: 10px; }
-    .btn-bar button { padding: 10px 22px; border: none; border-radius: 6px; font-weight: bold; font-size: .95rem; cursor: pointer; }
+    /* Boutons action */
+    .btn-bar { display: flex; gap: 8px; align-items: flex-end; margin-left: auto; }
+    .btn-bar button { padding: 9px 20px; border: none; border-radius: 6px; font-weight: 700; font-size: .92rem; cursor: pointer; }
     .btn-regen { background: #5d4037; color: white; }
     .btn-print { background: #d35400; color: white; }
     .btn-regen:hover, .btn-print:hover { opacity: .85; }
 
-    /* ── Page A4 — hauteur fixe ── */
+    /* ── Pages ── */
     .page {
       background: white;
-      width: 210mm; height: 297mm;
       margin: 0 auto;
-      padding: 6mm;
       display: grid;
+      gap: 4mm;
+    }
+    .page.n1 {
+      width: 210mm; height: 297mm;
+      padding: 10mm;
+      grid-template-columns: 1fr;
+      grid-template-rows: 1fr;
+      --cell-font: 16pt;
+      --label-w: 2.2rem;
+      --lbl-font: 13pt;
+      --head-font: 13pt;
+      --sub-font: 8pt;
+      --band-font: 11pt;
+      --band-sub: 8.5pt;
+    }
+    .page.n2 {
+      width: 297mm; height: 210mm;
+      padding: 8mm;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr;
+      --cell-font: 11pt;
+      --label-w: 1.6rem;
+      --lbl-font: 10pt;
+      --head-font: 10pt;
+      --sub-font: 6.5pt;
+      --band-font: 8.5pt;
+      --band-sub: 7pt;
+    }
+    .page.n4 {
+      width: 210mm; height: 297mm;
+      padding: 6mm;
       grid-template-columns: 1fr 1fr;
       grid-template-rows: 1fr 1fr;
-      gap: 4mm;
+      --cell-font: 8pt;
+      --label-w: 1.3rem;
+      --lbl-font: 8pt;
+      --head-font: 10pt;
+      --sub-font: 6.5pt;
+      --band-font: 8pt;
+      --band-sub: 6.5pt;
     }
 
     /* ── Carte ── */
@@ -56,33 +108,29 @@
       display: flex; flex-direction: column; gap: 1.8mm;
       min-height: 0; overflow: hidden;
     }
-    /* Bordure colorée si clan sélectionné */
     .carte.avec-clan { border-width: 2px; border-color: var(--clan-c); }
 
-    /* ── En-tête ── */
+    /* En-tête */
     .carte-entete { flex-shrink: 0; text-align: center; }
-    .carte-jeu    { font-size: 10pt; font-weight: 900; letter-spacing: .06em; }
-    .carte-consigne { font-size: 6.5pt; color: #888; margin-top: 1px; }
+    .carte-jeu     { font-size: var(--head-font, 10pt); font-weight: 900; letter-spacing: .06em; }
+    .carte-consigne { font-size: var(--sub-font, 6.5pt); color: #888; margin-top: 1px; }
 
-    /* Bandeau clan (visible seulement si clan choisi) */
+    /* Bandeau clan */
     .clan-bandeau {
       display: none;
       align-items: center; justify-content: center; gap: 5px;
-      padding: 2mm 3mm;
-      border-radius: 1.5mm;
-      color: white;
-      flex-shrink: 0;
+      padding: 2mm 3mm; border-radius: 1.5mm; color: white; flex-shrink: 0;
     }
     .clan-bandeau.visible { display: flex; }
-    .clan-bandeau .clan-icone  { font-size: 13pt; }
-    .clan-bandeau .clan-nom    { font-size: 9pt; font-weight: 800; letter-spacing: .03em; }
-    .clan-bandeau .clan-wendat { font-size: 7pt; font-style: italic; opacity: .9; }
-    .clan-bandeau .clan-obj    { font-size: 7pt; background: rgba(255,255,255,.22); padding: 1px 5px; border-radius: 3px; }
+    .clan-bandeau .clan-icone  { font-size: var(--band-font, 8pt); }
+    .clan-bandeau .clan-nom    { font-size: var(--band-font, 8pt); font-weight: 800; letter-spacing: .03em; }
+    .clan-bandeau .clan-wendat { font-size: var(--band-sub, 6.5pt); font-style: italic; opacity: .9; }
+    .clan-bandeau .clan-obj    { font-size: var(--band-sub, 6.5pt); background: rgba(255,255,255,.22); padding: 1px 5px; border-radius: 3px; }
 
     /* ── Grille bingo ── */
     .bingo-grid {
       display: grid;
-      grid-template-columns: 1.3rem repeat(6, 1fr);
+      grid-template-columns: var(--label-w, 1.3rem) repeat(6, 1fr);
       grid-template-rows: repeat(6, 1fr);
       gap: 1.5px;
       background: #5d4037;
@@ -91,22 +139,40 @@
       flex: 1; min-height: 0;
     }
     .row-label {
-      color: white; font-weight: bold; font-size: 8pt;
+      color: white; font-weight: 900; font-size: var(--lbl-font, 8pt);
       display: flex; align-items: center; justify-content: center;
     }
     .cell {
       background: white;
       display: flex; justify-content: center; align-items: center;
-      font-size: 8pt; font-weight: bold;
+      font-size: var(--cell-font, 8pt); font-weight: 900;
     }
-    .coeur  { background: #f2ede8; font-size: 10pt; }
 
-    /* Cases cibles selon le clan */
+    /* Cases cibles clan */
     .cell.cible {
       background: var(--clan-bg, #fff8e1);
-      font-weight: 900;
       outline: 1.5px solid var(--clan-c, #d35400);
       outline-offset: -1.5px;
+    }
+
+    /* ── Cœur fusionné — mosaïque 2×2 d'animaux ── */
+    .coeur-merged {
+      background: #f0ebe2;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      overflow: hidden;
+      gap: 1px;
+      padding: 2px;
+    }
+    .coeur-img-wrap {
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden; background: #f0ebe2;
+    }
+    .coeur-img-wrap.ours { background: #111; }
+    .coeur-img-wrap img {
+      width: 100%; height: 100%;
+      object-fit: contain;
     }
 
     /* ── Légende ── */
@@ -115,7 +181,6 @@
       font-size: 6pt; border: 1.2px solid #ddd;
       border-radius: 1.5mm; padding: 1mm 1.5mm;
     }
-    /* Clan actif dans la légende : cerclé */
     .clan-item.actif {
       border-color: var(--clan-c);
       background: var(--clan-bg);
@@ -128,59 +193,113 @@
       body { background: white; padding: 0; }
       .controls { display: none; }
       .page { margin: 0; }
-      @page { size: A4 portrait; margin: 0; }
     }
+  </style>
+  <style id="print-style">
+    @media print { @page { size: A4 portrait; margin: 0; } }
   </style>
 </head>
 <body>
 
 <div class="controls">
-  <div class="controls-titre">Choisissez le clan à imprimer</div>
-  <div class="clan-selector" id="clan-selector">
-    <!-- boutons générés en JS -->
+
+  <div class="controls-section">
+    <div class="controls-titre">Nombre de cartes</div>
+    <div class="nb-selector">
+      <button class="btn-nb" id="btn-nb-1" onclick="setNb(1)">1 carte</button>
+      <button class="btn-nb" id="btn-nb-2" onclick="setNb(2)">2 cartes — paysage</button>
+      <button class="btn-nb actif" id="btn-nb-4" onclick="setNb(4)">4 cartes</button>
+    </div>
   </div>
+
+  <div class="controls-section">
+    <div class="controls-titre">Clan</div>
+    <div class="clan-selector" id="clan-selector"></div>
+  </div>
+
   <div class="btn-bar">
-    <button class="btn-regen" onclick="regenerer()">🔄 Nouvelles cartes aléatoires</button>
-    <button class="btn-print" onclick="window.print()">🖨️ Imprimer</button>
+    <button class="btn-regen" onclick="regenerer()">&#x1F504; Nouvelles cartes</button>
+    <button class="btn-print" onclick="window.print()">&#x1F5A8;&#xFE0F; Imprimer</button>
   </div>
+
 </div>
 
-<div class="page" id="page"></div>
+<div class="page n4" id="page"></div>
 
 <script src="data.js"></script>
 <script>
-  let clanChoisi = null; // null = générique, 'melange' = un de chaque, ou nom de clan
+  'use strict';
+  let clanChoisi = null;
+  let nbCartes   = 4;
 
-  // ── Sélecteurs de clan ──────────────────────────────────────────────
+  // ── Correspondance position cœur → clan ──────────────────────────────
+  const COEUR_CLAN = { 'N2': 'Tortue', 'N3': 'Ours', 'D2': 'Loup', 'D3': 'Chevreuil' };
+  // Ordre d'affichage dans la mosaïque 2×2 (haut-gauche → bas-droite)
+  const COEUR_ORDRE = ['Tortue', 'Ours', 'Loup', 'Chevreuil'];
+
+  // ── Couleurs par clan ─────────────────────────────────────────────────
+  function clanCouleur(nom) {
+    const c = { Chevreuil: '#27ae60', Loup: '#2980b9', Ours: '#8e44ad', Tortue: '#d35400' };
+    return c[nom] || '#5d4037';
+  }
+  function clanCouleurBg(nom) {
+    const c = { Chevreuil: '#eafaf1', Loup: '#eaf3fb', Ours: '#f5eef8', Tortue: '#fef5ec' };
+    return c[nom] || '#fff8e1';
+  }
+
+  // ── Sélecteur nombre de cartes ────────────────────────────────────────
+  function setNb(n) {
+    nbCartes = n;
+    [1, 2, 4].forEach(x => {
+      document.getElementById('btn-nb-' + x).classList.toggle('actif', x === n);
+    });
+    document.getElementById('print-style').textContent = n === 2
+      ? '@media print { @page { size: A4 landscape; margin: 0; } }'
+      : '@media print { @page { size: A4 portrait; margin: 0; } }';
+    document.getElementById('page').className = 'page n' + n;
+    regenerer();
+  }
+
+  // ── Sélecteur clan ────────────────────────────────────────────────────
   function initSelector() {
     const sel = document.getElementById('clan-selector');
 
-    // Bouton générique
     const btnGen = document.createElement('button');
     btnGen.className = 'btn-clan actif';
     btnGen.id = 'btn-generique';
     btnGen.style.setProperty('--c', '#5d4037');
-    btnGen.innerHTML = '📋 <span>Générique</span>';
+    const genIcon = document.createTextNode('\uD83D\uDCCB ');
+    const genSpan = document.createElement('span');
+    genSpan.textContent = 'G\u00e9n\u00e9rique';
+    btnGen.append(genIcon, genSpan);
     btnGen.onclick = () => setClan(null);
     sel.appendChild(btnGen);
 
-    // Un de chaque
     const btnMix = document.createElement('button');
     btnMix.className = 'btn-clan';
     btnMix.id = 'btn-melange';
     btnMix.style.setProperty('--c', '#555');
-    btnMix.innerHTML = '🔀 <span>Un de chaque clan</span>';
+    const mixIcon = document.createTextNode('\uD83D\uDD00 ');
+    const mixSpan = document.createElement('span');
+    mixSpan.textContent = 'Un de chaque';
+    btnMix.append(mixIcon, mixSpan);
     btnMix.onclick = () => setClan('melange');
     sel.appendChild(btnMix);
 
-    // Un bouton par clan
     Object.entries(CLANS).forEach(([nom, clan]) => {
       const btn = document.createElement('button');
       btn.className = 'btn-clan';
-      btn.id = `btn-${nom}`;
-      btn.style.setProperty('--c', CONFIG['W'].couleur); // couleur par défaut
+      btn.id = 'btn-' + nom;
       btn.style.setProperty('--c', clanCouleur(nom));
-      btn.innerHTML = `${clan.icon} <span>${nom} <span class="wendat">${clan.wendat}</span></span>`;
+      const icon  = document.createTextNode(clan.icon + ' ');
+      const span  = document.createElement('span');
+      const strong = document.createElement('strong');
+      strong.textContent = nom;
+      const wend  = document.createElement('span');
+      wend.className   = 'wendat';
+      wend.textContent = ' ' + clan.wendat;
+      span.append(strong, wend);
+      btn.append(icon, span);
       btn.onclick = () => setClan(nom);
       sel.appendChild(btn);
     });
@@ -188,68 +307,76 @@
 
   function setClan(clan) {
     clanChoisi = clan;
-    // Mise à jour des boutons
     document.querySelectorAll('.btn-clan').forEach(b => b.classList.remove('actif'));
-    const id = clan === null ? 'btn-generique' : clan === 'melange' ? 'btn-melange' : `btn-${clan}`;
+    const id = clan === null ? 'btn-generique' : clan === 'melange' ? 'btn-melange' : 'btn-' + clan;
     document.getElementById(id).classList.add('actif');
     regenerer();
   }
 
-  function clanCouleur(nom) {
-    const couleurs = { Chevreuil: '#27ae60', Loup: '#2980b9', Ours: '#8e44ad', Tortue: '#d35400' };
-    return couleurs[nom] || '#5d4037';
-  }
-
-  function clanCouleurBg(nom) {
-    const bgs = { Chevreuil: '#eafaf1', Loup: '#eaf3fb', Ours: '#f5eef8', Tortue: '#fef5ec' };
-    return bgs[nom] || '#fff8e1';
-  }
-
-  // ── Génération des cartes ───────────────────────────────────────────
+  // ── Génération ────────────────────────────────────────────────────────
   function regenerer() {
     const page = document.getElementById('page');
-    page.innerHTML = '';
+    page.replaceChildren();
+
     if (clanChoisi === 'melange') {
-      Object.keys(CLANS).forEach(nom => page.appendChild(creerCarte(nom)));
+      // Un de chaque clan — jusqu'à nbCartes
+      const clans = Object.keys(CLANS).slice(0, nbCartes);
+      clans.forEach(nom => page.appendChild(creerCarte(nom)));
     } else {
-      for (let i = 0; i < 4; i++) page.appendChild(creerCarte(clanChoisi));
+      for (let i = 0; i < nbCartes; i++) {
+        page.appendChild(creerCarte(clanChoisi));
+      }
     }
   }
 
   function creerCarte(clan) {
-    const donnees = genererCarte();
-    const couleur = clan ? clanCouleur(clan) : '#5d4037';
-    const couleurBg = clan ? clanCouleurBg(clan) : '#fff8e1';
-    const infoClan = clan ? CLANS[clan] : null;
+    const donnees   = genererCarte();
+    const couleur   = clan && clan !== 'melange' ? clanCouleur(clan) : '#5d4037';
+    const couleurBg = clan && clan !== 'melange' ? clanCouleurBg(clan) : '#fff8e1';
+    const infoClan  = clan && clan !== 'melange' ? CLANS[clan] : null;
 
     const div = document.createElement('div');
-    div.className = clan ? 'carte avec-clan' : 'carte';
+    div.className = infoClan ? 'carte avec-clan' : 'carte';
     div.style.setProperty('--clan-c', couleur);
     div.style.setProperty('--clan-bg', couleurBg);
 
     // ── En-tête ──
     const entete = document.createElement('div');
     entete.className = 'carte-entete';
-    entete.innerHTML = `<div class="carte-jeu">WENDIO — Le Jeu des Clans</div>
-      <div class="carte-consigne">Marquez les cases avec un grain de maïs 🌽</div>`;
+    const titre = document.createElement('div');
+    titre.className = 'carte-jeu';
+    titre.textContent = 'WENDIO \u2014 Le Jeu des Clans';
+    const consigne = document.createElement('div');
+    consigne.className = 'carte-consigne';
+    consigne.textContent = 'Marquez les cases avec un grain de ma\u00efs \uD83C\uDF3D';
+    entete.append(titre, consigne);
     div.appendChild(entete);
 
     // ── Bandeau clan ──
     const bandeau = document.createElement('div');
-    bandeau.className = clan ? 'clan-bandeau visible' : 'clan-bandeau';
+    bandeau.className = infoClan ? 'clan-bandeau visible' : 'clan-bandeau';
     bandeau.style.background = couleur;
     if (infoClan) {
-      bandeau.innerHTML = `
-        <span class="clan-icone">${infoClan.icon}</span>
-        <span class="clan-nom">${clan}</span>
-        <span class="clan-wendat">${infoClan.wendat}</span>
-        <span class="clan-obj">${infoClan.label}</span>`;
+      const icone = document.createElement('span');
+      icone.className = 'clan-icone';
+      icone.textContent = infoClan.icon;
+      const nomEl = document.createElement('span');
+      nomEl.className = 'clan-nom';
+      nomEl.textContent = clan;
+      const wendEl = document.createElement('span');
+      wendEl.className = 'clan-wendat';
+      wendEl.textContent = infoClan.wendat;
+      const objEl = document.createElement('span');
+      objEl.className = 'clan-obj';
+      objEl.textContent = infoClan.label;
+      bandeau.append(icone, nomEl, wendEl, objEl);
     }
     div.appendChild(bandeau);
 
     // ── Grille ──
     const grid = document.createElement('div');
     grid.className = 'bingo-grid';
+    let coeurAjoute = false;
 
     LIGNES.forEach((ligne, ligneIdx) => {
       const label = document.createElement('div');
@@ -259,19 +386,21 @@
       grid.appendChild(label);
 
       for (let col = 0; col < 6; col++) {
-        const cell = document.createElement('div');
-        const id = ligne + col;
         if (estCoeur(ligne, col)) {
-          cell.className = 'cell coeur';
-          cell.textContent = COEUR[id] || '';
-        } else {
-          const val = valeurCase(donnees, ligne, col);
-          cell.className = estCible(clan, ligneIdx, col) ? 'cell cible' : 'cell';
-          cell.textContent = val || '';
+          if (!coeurAjoute) {
+            grid.appendChild(creerCoeurMosaique());
+            coeurAjoute = true;
+          }
+          continue; // toujours ignorer les 3 autres cases cœur
         }
+        const val  = valeurCase(donnees, ligne, col);
+        const cell = document.createElement('div');
+        cell.className   = estCible(clan, ligneIdx, col) ? 'cell cible' : 'cell';
+        cell.textContent = val || '';
         grid.appendChild(cell);
       }
     });
+
     div.appendChild(grid);
 
     // ── Légende ──
@@ -282,7 +411,11 @@
       item.className = nom === clan ? 'clan-item actif' : 'clan-item';
       item.style.setProperty('--clan-c', clanCouleur(nom));
       item.style.setProperty('--clan-bg', clanCouleurBg(nom));
-      item.innerHTML = `${c.icon} <strong>${nom}</strong> — ${c.label}`;
+      const icon   = document.createTextNode(c.icon + ' ');
+      const strong = document.createElement('strong');
+      strong.textContent = nom;
+      const dash = document.createTextNode(' \u2014 ' + c.label);
+      item.append(icon, strong, dash);
       legende.appendChild(item);
     });
     div.appendChild(legende);
@@ -290,7 +423,28 @@
     return div;
   }
 
-  // Cases cibles à surligner selon le clan et la victoire
+  // Mosaïque 2×2 d'images animaux fusionnant les 4 cases cœur
+  function creerCoeurMosaique() {
+    const merged = document.createElement('div');
+    merged.className = 'cell coeur-merged';
+    // Position explicite dans la CSS grid : colonnes 4-5, lignes 3-4
+    merged.style.gridColumn = '4 / 6';
+    merged.style.gridRow    = '3 / 5';
+
+    COEUR_ORDRE.forEach(clan => {
+      const wrap = document.createElement('div');
+      wrap.className = 'coeur-img-wrap' + (clan === 'Ours' ? ' ours' : '');
+      const img = document.createElement('img');
+      img.src = 'sources/' + clan + '.png';
+      img.alt = clan;
+      wrap.appendChild(img);
+      merged.appendChild(wrap);
+    });
+
+    return merged;
+  }
+
+  // Cases cibles à surligner selon le clan
   function estCible(clan, ligneIdx, colIdx) {
     if (!clan || clan === 'melange') return false;
     const ligne = LIGNES[ligneIdx];
@@ -298,7 +452,6 @@
     if (v === 'coins')  return (ligneIdx === 0 || ligneIdx === 5) && (colIdx === 0 || colIdx === 5);
     if (v === 'carre')  return ligneIdx >= 1 && ligneIdx <= 4 && colIdx >= 1 && colIdx <= 4 && !estCoeur(ligne, colIdx);
     if (v === 'pleine') return !estCoeur(ligne, colIdx);
-    if (v === 'ligne')  return false; // aucune ligne prédéfinie à surligner
     return false;
   }
 
