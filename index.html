@@ -185,27 +185,31 @@
     }
     .card:hover .card-glow { opacity: .07; }
 
-    /* animal SVG wrapper */
+    /* animal image wrapper */
     .totem {
-      width: 68px; height: 68px;
+      width: 120px; height: 120px;
       display: flex; align-items: center; justify-content: center;
       margin-bottom: 1rem;
     }
 
-    .totem svg {
+    .totem img {
       width: 100%; height: 100%;
-      filter: drop-shadow(0 0 14px var(--c));
+      object-fit: contain;
+      filter: drop-shadow(0 0 18px var(--c));
       transition: filter .4s, transform .4s;
       animation: float 5.5s ease-in-out infinite;
     }
-    .card:nth-child(2) .totem svg { animation-delay: -1.4s; }
-    .card:nth-child(3) .totem svg { animation-delay: -2.8s; }
-    .card:nth-child(4) .totem svg { animation-delay: -4.2s; }
+    .card:nth-child(2) .totem img { animation-delay: -1.4s; }
+    .card:nth-child(3) .totem img { animation-delay: -2.8s; }
+    .card:nth-child(4) .totem img { animation-delay: -4.2s; }
 
-    .card:hover .totem svg {
-      filter: drop-shadow(0 0 26px var(--c)) drop-shadow(0 0 6px var(--c));
+    .card:hover .totem img {
+      filter: drop-shadow(0 0 32px var(--c)) drop-shadow(0 0 8px var(--c));
       transform: scale(1.07);
     }
+
+    /* L'ours a un fond noir — screen le dissout sur fond sombre */
+    .card[data-c="ours"] .totem img { mix-blend-mode: screen; }
 
     .clan-name {
       font-family: 'Cinzel', serif;
@@ -326,52 +330,7 @@
       <div class="br"></div><div class="bl"></div>
       <div class="card-glow"></div>
       <div class="totem">
-        <svg viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
-          <!-- ring -->
-          <circle cx="80" cy="80" r="70" stroke="#c87838" stroke-width=".6" fill="none" opacity=".18"/>
-          <!-- ear left -->
-          <path d="M36 45 L22 14 L54 28 Z" fill="#c87838" opacity=".9"/>
-          <path d="M37 44 L27 20 L50 31 Z" fill="#7a3a10" opacity=".7"/>
-          <!-- ear right -->
-          <path d="M124 45 L138 14 L106 28 Z" fill="#c87838" opacity=".9"/>
-          <path d="M123 44 L133 20 L110 31 Z" fill="#7a3a10" opacity=".7"/>
-          <!-- head -->
-          <path d="M36 62 Q36 28 80 24 Q124 28 124 62 L124 92 Q124 116 80 120 Q36 116 36 92 Z" fill="#c87838" opacity=".82"/>
-          <!-- brow ridge -->
-          <path d="M50 58 Q65 50 80 52 Q95 50 110 58" stroke="#7a3a10" stroke-width="2" fill="none" opacity=".6"/>
-          <!-- forehead mark (triangle) -->
-          <path d="M72 34 L80 40 L88 34" stroke="#7a3a10" stroke-width="1.4" fill="none" opacity=".5"/>
-          <!-- eyes -->
-          <circle cx="60" cy="70" r="11" fill="#1c0800"/>
-          <circle cx="100" cy="70" r="11" fill="#1c0800"/>
-          <circle cx="57" cy="67" r="3.5" fill="#e8d8b8" opacity=".85"/>
-          <circle cx="97" cy="67" r="3.5" fill="#e8d8b8" opacity=".85"/>
-          <circle cx="56" cy="66" r="1.4" fill="white"/>
-          <circle cx="96" cy="66" r="1.4" fill="white"/>
-          <!-- muzzle -->
-          <ellipse cx="80" cy="89" rx="19" ry="14" fill="#a06020" opacity=".85"/>
-          <!-- nose -->
-          <path d="M70 84 Q80 79 90 84 Q86 92 80 93 Q74 92 70 84 Z" fill="#1c0800"/>
-          <!-- nostrils -->
-          <ellipse cx="75" cy="86" rx="2.5" ry="1.5" fill="#3a1000" opacity=".6"/>
-          <ellipse cx="85" cy="86" rx="2.5" ry="1.5" fill="#3a1000" opacity=".6"/>
-          <!-- mouth -->
-          <path d="M75 93 Q80 98 85 93" stroke="#1c0800" stroke-width="1.4" fill="none"/>
-          <!-- chest diamond -->
-          <path d="M80 124 L68 136 L80 148 L92 136 Z" fill="#c87838" opacity=".6" stroke="#7a3a10" stroke-width=".6"/>
-          <path d="M80 128 L72 136 L80 144 L88 136 Z" fill="#7a3a10" opacity=".45"/>
-          <!-- paws -->
-          <ellipse cx="46" cy="108" rx="15" ry="10" fill="#c87838" opacity=".7"/>
-          <ellipse cx="114" cy="108" rx="15" ry="10" fill="#c87838" opacity=".7"/>
-          <!-- claws left -->
-          <line x1="35" y1="103" x2="33" y2="115" stroke="#7a3a10" stroke-width="1.2" opacity=".6"/>
-          <line x1="42" y1="100" x2="41" y2="113" stroke="#7a3a10" stroke-width="1.2" opacity=".6"/>
-          <line x1="49" y1="100" x2="49" y2="113" stroke="#7a3a10" stroke-width="1.2" opacity=".6"/>
-          <!-- claws right -->
-          <line x1="125" y1="103" x2="127" y2="115" stroke="#7a3a10" stroke-width="1.2" opacity=".6"/>
-          <line x1="118" y1="100" x2="119" y2="113" stroke="#7a3a10" stroke-width="1.2" opacity=".6"/>
-          <line x1="111" y1="100" x2="111" y2="113" stroke="#7a3a10" stroke-width="1.2" opacity=".6"/>
-        </svg>
+        <img src="sources/Ours.png" alt="Ours">
       </div>
       <div class="clan-name">Ours</div>
       <div class="clan-role">Clan de la Force</div>
@@ -382,60 +341,7 @@
       <div class="br"></div><div class="bl"></div>
       <div class="card-glow"></div>
       <div class="totem">
-        <svg viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="80" cy="80" r="70" stroke="#5a9448" stroke-width=".6" fill="none" opacity=".18"/>
-          <!-- antler left -->
-          <path d="M60 58 L48 34 L40 14" stroke="#5a9448" stroke-width="2.8" stroke-linecap="round" fill="none" opacity=".9"/>
-          <path d="M48 34 L34 36" stroke="#5a9448" stroke-width="2.2" stroke-linecap="round" fill="none" opacity=".85"/>
-          <path d="M48 34 L42 22" stroke="#5a9448" stroke-width="1.8" stroke-linecap="round" fill="none" opacity=".8"/>
-          <path d="M40 22 L30 18" stroke="#5a9448" stroke-width="1.4" stroke-linecap="round" fill="none" opacity=".7"/>
-          <!-- antler right -->
-          <path d="M100 58 L112 34 L120 14" stroke="#5a9448" stroke-width="2.8" stroke-linecap="round" fill="none" opacity=".9"/>
-          <path d="M112 34 L126 36" stroke="#5a9448" stroke-width="2.2" stroke-linecap="round" fill="none" opacity=".85"/>
-          <path d="M112 34 L118 22" stroke="#5a9448" stroke-width="1.8" stroke-linecap="round" fill="none" opacity=".8"/>
-          <path d="M120 22 L130 18" stroke="#5a9448" stroke-width="1.4" stroke-linecap="round" fill="none" opacity=".7"/>
-          <!-- antler glow -->
-          <path d="M60 58 L48 34 L40 14 M48 34 L34 36 M48 34 L42 22 M40 22 L30 18" stroke="#a0e888" stroke-width=".6" stroke-linecap="round" fill="none" opacity=".25"/>
-          <path d="M100 58 L112 34 L120 14 M112 34 L126 36 M112 34 L118 22 M120 22 L130 18" stroke="#a0e888" stroke-width=".6" stroke-linecap="round" fill="none" opacity=".25"/>
-          <!-- neck -->
-          <path d="M65 94 L62 58 L70 54 L80 56 L90 54 L98 58 L95 94 Z" fill="#5a9448" opacity=".7"/>
-          <!-- head -->
-          <ellipse cx="80" cy="73" rx="23" ry="21" fill="#5a9448" opacity=".85"/>
-          <!-- face shadow -->
-          <path d="M58 76 Q64 60 80 58 Q96 60 102 76" fill="#2d6430" opacity=".2"/>
-          <!-- ears -->
-          <path d="M57 64 L42 50 L57 56 Z" fill="#5a9448" opacity=".8"/>
-          <path d="M103 64 L118 50 L103 56 Z" fill="#5a9448" opacity=".8"/>
-          <path d="M57 64 L48 54 L57 59 Z" fill="#2d6430" opacity=".55"/>
-          <path d="M103 64 L112 54 L103 59 Z" fill="#2d6430" opacity=".55"/>
-          <!-- eyes -->
-          <circle cx="66" cy="71" r="9" fill="#121800"/>
-          <circle cx="94" cy="71" r="9" fill="#121800"/>
-          <circle cx="63.5" cy="68.5" r="3" fill="#d8eec8" opacity=".8"/>
-          <circle cx="91.5" cy="68.5" r="3" fill="#d8eec8" opacity=".8"/>
-          <circle cx="62.5" cy="67.5" r="1.2" fill="white"/>
-          <circle cx="90.5" cy="67.5" r="1.2" fill="white"/>
-          <!-- snout -->
-          <ellipse cx="80" cy="82" rx="10" ry="7.5" fill="#3c7030" opacity=".9"/>
-          <!-- nose -->
-          <ellipse cx="80" cy="79" rx="5" ry="3.5" fill="#121800"/>
-          <line x1="80" y1="82" x2="80" y2="86" stroke="#121800" stroke-width="1.2"/>
-          <path d="M76 86 Q80 89 84 86" stroke="#121800" stroke-width="1" fill="none"/>
-          <!-- body -->
-          <path d="M55 94 Q38 106 40 130 Q48 148 80 150 Q112 148 120 130 Q122 106 105 94 Z" fill="#5a9448" opacity=".6"/>
-          <!-- spots -->
-          <circle cx="64" cy="112" r="3.5" fill="#2d6430" opacity=".5"/>
-          <circle cx="78" cy="120" r="3.5" fill="#2d6430" opacity=".5"/>
-          <circle cx="92" cy="112" r="3.5" fill="#2d6430" opacity=".5"/>
-          <circle cx="70" cy="104" r="2.2" fill="#2d6430" opacity=".4"/>
-          <circle cx="90" cy="105" r="2.2" fill="#2d6430" opacity=".4"/>
-          <!-- legs -->
-          <rect x="60" y="140" width="10" height="18" rx="5" fill="#5a9448" opacity=".65"/>
-          <rect x="90" y="140" width="10" height="18" rx="5" fill="#5a9448" opacity=".65"/>
-          <!-- hooves -->
-          <rect x="59" y="153" width="12" height="5" rx="2" fill="#2d6430" opacity=".7"/>
-          <rect x="89" y="153" width="12" height="5" rx="2" fill="#2d6430" opacity=".7"/>
-        </svg>
+        <img src="sources/Chevreuil.png" alt="Chevreuil">
       </div>
       <div class="clan-name">Chevreuil</div>
       <div class="clan-role">Clan de la Grâce</div>
@@ -446,59 +352,7 @@
       <div class="br"></div><div class="bl"></div>
       <div class="card-glow"></div>
       <div class="totem">
-        <svg viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="80" cy="80" r="70" stroke="#2a9080" stroke-width=".6" fill="none" opacity=".18"/>
-          <!-- shell base -->
-          <ellipse cx="80" cy="83" rx="54" ry="49" fill="#2a9080" opacity=".65"/>
-          <!-- shell outer ring -->
-          <ellipse cx="80" cy="83" rx="54" ry="49" fill="none" stroke="#1a6058" stroke-width="3.5" opacity=".5"/>
-          <!-- shell inner ellipse -->
-          <ellipse cx="80" cy="83" rx="40" ry="35" fill="#1e7068" opacity=".5"/>
-          <!-- central hexagon -->
-          <path d="M80 56 L102 69 L102 95 L80 108 L58 95 L58 69 Z"
-                fill="#146050" opacity=".55" stroke="#2a9080" stroke-width="1.2"/>
-          <!-- hex internal lines -->
-          <line x1="80" y1="56" x2="80" y2="108" stroke="#2a9080" stroke-width=".7" opacity=".4"/>
-          <line x1="58" y1="69" x2="102" y2="95" stroke="#2a9080" stroke-width=".7" opacity=".4"/>
-          <line x1="102" y1="69" x2="58" y2="95" stroke="#2a9080" stroke-width=".7" opacity=".4"/>
-          <!-- radial spokes from hex vertices -->
-          <line x1="80" y1="56" x2="80" y2="34" stroke="#2a9080" stroke-width=".8" opacity=".35"/>
-          <line x1="102" y1="69" x2="120" y2="58" stroke="#2a9080" stroke-width=".8" opacity=".35"/>
-          <line x1="102" y1="95" x2="120" y2="106" stroke="#2a9080" stroke-width=".8" opacity=".35"/>
-          <line x1="80" y1="108" x2="80" y2="130" stroke="#2a9080" stroke-width=".8" opacity=".35"/>
-          <line x1="58" y1="95" x2="40" y2="106" stroke="#2a9080" stroke-width=".8" opacity=".35"/>
-          <line x1="58" y1="69" x2="40" y2="58" stroke="#2a9080" stroke-width=".8" opacity=".35"/>
-          <!-- triangular facets (subtle fill) -->
-          <path d="M80 56 L102 69 L80 34 Z" fill="#2a9080" opacity=".15"/>
-          <path d="M102 69 L120 58 L102 95 Z" fill="#2a9080" opacity=".12"/>
-          <path d="M102 95 L120 106 L80 108 Z" fill="#2a9080" opacity=".15"/>
-          <path d="M80 108 L40 106 L58 95 Z" fill="#2a9080" opacity=".12"/>
-          <path d="M58 95 L40 58 L58 69 Z" fill="#2a9080" opacity=".15"/>
-          <path d="M58 69 L80 34 L80 56 Z" fill="#2a9080" opacity=".12"/>
-          <!-- center gem -->
-          <circle cx="80" cy="82" r="7" fill="#50d0b8" opacity=".35"/>
-          <circle cx="80" cy="82" r="3" fill="#2a9080" opacity=".9"/>
-          <circle cx="78" cy="80" r="1" fill="white" opacity=".7"/>
-          <!-- head -->
-          <ellipse cx="80" cy="27" rx="13" ry="11" fill="#2a9080" opacity=".9"/>
-          <!-- eye left -->
-          <circle cx="74" cy="24" r="4" fill="#0a1a18"/>
-          <circle cx="72.5" cy="22.5" r="1.4" fill="#a0e8d8" opacity=".75"/>
-          <circle cx="72" cy="22" r=".6" fill="white"/>
-          <!-- eye right -->
-          <circle cx="86" cy="24" r="4" fill="#0a1a18"/>
-          <circle cx="84.5" cy="22.5" r="1.4" fill="#a0e8d8" opacity=".75"/>
-          <circle cx="84" cy="22" r=".6" fill="white"/>
-          <!-- mouth smile -->
-          <path d="M74.5 30 Q80 34 85.5 30" stroke="#1a6058" stroke-width="1.2" fill="none"/>
-          <!-- legs (4) -->
-          <ellipse cx="28" cy="62" rx="13" ry="8.5" fill="#2a9080" opacity=".72" transform="rotate(-25 28 62)"/>
-          <ellipse cx="132" cy="62" rx="13" ry="8.5" fill="#2a9080" opacity=".72" transform="rotate(25 132 62)"/>
-          <ellipse cx="28" cy="104" rx="13" ry="8.5" fill="#2a9080" opacity=".72" transform="rotate(25 28 104)"/>
-          <ellipse cx="132" cy="104" rx="13" ry="8.5" fill="#2a9080" opacity=".72" transform="rotate(-25 132 104)"/>
-          <!-- tail -->
-          <path d="M72 132 Q80 142 88 132" stroke="#2a9080" stroke-width="4.5" stroke-linecap="round" fill="none" opacity=".65"/>
-        </svg>
+        <img src="sources/Tortue.png" alt="Tortue">
       </div>
       <div class="clan-name">Tortue</div>
       <div class="clan-role">Clan de la Sagesse</div>
@@ -509,52 +363,7 @@
       <div class="br"></div><div class="bl"></div>
       <div class="card-glow"></div>
       <div class="totem">
-        <svg viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="80" cy="80" r="70" stroke="#6890b8" stroke-width=".6" fill="none" opacity=".18"/>
-          <!-- ear left — sharp triangle -->
-          <path d="M45 52 L30 14 L64 38 Z" fill="#6890b8" opacity=".9"/>
-          <path d="M46 50 L36 20 L62 38 Z" fill="#2a4a6a" opacity=".65"/>
-          <!-- ear right -->
-          <path d="M115 52 L130 14 L96 38 Z" fill="#6890b8" opacity=".9"/>
-          <path d="M114 50 L124 20 L98 38 Z" fill="#2a4a6a" opacity=".65"/>
-          <!-- head -->
-          <path d="M40 64 Q40 30 80 26 Q120 30 120 64 L120 94 Q120 118 80 122 Q40 118 40 94 Z" fill="#6890b8" opacity=".78"/>
-          <!-- dark mask patches around eyes -->
-          <path d="M40 72 Q47 55 68 60 L62 84 Q47 86 40 72 Z" fill="#2a4a6a" opacity=".35"/>
-          <path d="M120 72 Q113 55 92 60 L98 84 Q113 86 120 72 Z" fill="#2a4a6a" opacity=".35"/>
-          <!-- eyes — angular/fierce -->
-          <!-- left eye socket -->
-          <path d="M50 70 L72 63 L72 81 L50 76 Z" fill="#0a0c18"/>
-          <!-- right eye socket -->
-          <path d="M110 70 L88 63 L88 81 L110 76 Z" fill="#0a0c18"/>
-          <!-- iris glow left -->
-          <ellipse cx="61" cy="72" rx="8" ry="7" fill="#90c0e8" opacity=".55"/>
-          <!-- iris glow right -->
-          <ellipse cx="99" cy="72" rx="8" ry="7" fill="#90c0e8" opacity=".55"/>
-          <!-- slit pupil left -->
-          <ellipse cx="61" cy="72" rx="2" ry="7" fill="#0a0c18"/>
-          <!-- slit pupil right -->
-          <ellipse cx="99" cy="72" rx="2" ry="7" fill="#0a0c18"/>
-          <!-- highlight -->
-          <circle cx="58" cy="68" r="1.8" fill="white" opacity=".75"/>
-          <circle cx="96" cy="68" r="1.8" fill="white" opacity=".75"/>
-          <!-- muzzle -->
-          <path d="M58 88 Q80 82 102 88 L98 104 Q80 110 62 104 Z" fill="#4a6a88" opacity=".75"/>
-          <!-- nose -->
-          <path d="M68 93 Q80 88 92 93 Q88 100 80 102 Q72 100 68 93 Z" fill="#0a0c18"/>
-          <!-- nose bridge crease -->
-          <line x1="80" y1="82" x2="80" y2="92" stroke="#2a4a6a" stroke-width="1" opacity=".4"/>
-          <!-- mouth — stern V -->
-          <path d="M73 102 L80 107 L87 102" stroke="#0a0c18" stroke-width="1.5" fill="none"/>
-          <!-- neck / chest -->
-          <path d="M56 118 L42 148 L80 154 L118 148 L104 118 Z" fill="#6890b8" opacity=".45"/>
-          <!-- chest rune mark -->
-          <path d="M80 126 L73 138 L80 136 L73 150" stroke="#a0c8e8" stroke-width="1.8" stroke-linecap="round" fill="none" opacity=".55"/>
-          <path d="M80 126 L87 138 L80 136 L87 150" stroke="#a0c8e8" stroke-width="1.8" stroke-linecap="round" fill="none" opacity=".55"/>
-          <!-- neck fur tufts -->
-          <path d="M58 116 L50 106 L62 112" stroke="#2a4a6a" stroke-width="1.4" stroke-linecap="round" fill="none" opacity=".5"/>
-          <path d="M102 116 L110 106 L98 112" stroke="#2a4a6a" stroke-width="1.4" stroke-linecap="round" fill="none" opacity=".5"/>
-        </svg>
+        <img src="sources/Loup.png" alt="Loup">
       </div>
       <div class="clan-name">Loup</div>
       <div class="clan-role">Clan de la Ruse</div>
