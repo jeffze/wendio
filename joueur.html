@@ -626,7 +626,7 @@
 <!-- ── SETUP ── -->
 <h1>WENDIO</h1>
 
-<div class="mode-bar">
+<div class="mode-bar" id="barre-mode">
   <button class="btn-mode actif" id="btn-local"  onclick="setMode('local')">Local</button>
   <button class="btn-mode"       id="btn-online" onclick="setMode('online')">En ligne</button>
 </div>
@@ -701,6 +701,7 @@
   let clanJoinForm        = null;
   let tiresOnline         = [];
   let dernierNumeroClique = null;
+  let modeDemo            = false;
 
   // ── Création DOM sécurisée d'un bouton clan ──────────────────────────
   function creerBoutonClan(nom, clan, className, onclickFn) {
@@ -736,6 +737,10 @@
     if (code) {
       setMode('online');
       activerModeOnline(code.toUpperCase());
+    }
+    if (params.get('demo') === 'local') {
+      modeDemo = true;
+      document.getElementById('barre-mode').style.display = 'none';
     }
   }
 
@@ -881,7 +886,7 @@
 
   function basculerVersSetup() {
     document.querySelector('h1').style.display        = '';
-    document.querySelector('.mode-bar').style.display = '';
+    if (!modeDemo) document.getElementById('barre-mode').style.display = '';
     document.getElementById('vue-setup').style.display = '';
     document.getElementById('vue-jeu').classList.remove('visible');
   }
