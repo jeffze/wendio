@@ -313,9 +313,13 @@
     .cell.cible { border-color: var(--accent-lt); background: #fffbf2; box-shadow: 0 0 0 1px var(--accent-lt), 0 2px 8px rgba(224,144,48,.2); }
     .cell.marque::after { content: '🌽'; position: absolute; font-size: 1.65rem; z-index: 2; }
     .cell.auto-marque { background: #fff8e8; border-color: rgba(224,144,48,.28); }
-    .cell.coeur { background: #f5f0e8; font-size: 1.5rem; cursor: default; border-color: transparent; }
+    .cell.coeur { background: #b88840; font-size: 0; cursor: default; border-color: transparent; padding: 2px; overflow: hidden; }
     .cell.coeur:hover { transform: none; border-color: transparent; }
     .cell.coeur:active { transform: none; }
+    /* Images animaux dans les cases cœur */
+    .coeur-animal { width: 100%; height: 100%; object-fit: contain; display: block; }
+    /* L'ours a un fond noir : screen le dissout dans le fond ambré de la case */
+    .coeur-animal.ours { mix-blend-mode: screen; }
 
     /* Bouton WENDIO ! */
     #btn-wendio {
@@ -991,8 +995,12 @@
         const id   = ligne + col;
 
         if (estCoeur(ligne, col)) {
-          cell.className   = 'cell coeur';
-          cell.textContent = COEUR[id] || '\uD83D\uDC3E';
+          cell.className = 'cell coeur';
+          const img = document.createElement('img');
+          img.src = 'sources/' + (COEUR_CLAN[id] || 'Tortue') + '.png';
+          img.alt = COEUR_CLAN[id] || '';
+          img.className = 'coeur-animal' + (COEUR_CLAN[id] === 'Ours' ? ' ours' : '');
+          cell.appendChild(img);
         } else {
           const val    = valeurCase(carteActuelle, ligne, col);
           const marque = selectionnees.has(id);
