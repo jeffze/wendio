@@ -107,11 +107,14 @@ The 4 center heart cells display clan icons (🐢🐻🐺🦌) — they are not 
 
 ### `meneur.html`
 - `setMode(mode)` — toggles between `local` and `online` modes
+- `setModePhysique(physique)` — toggles between `aléatoire` and `physique` draw modes; adds/removes `body.mode-physique` class
 - `creerPartie()` — emits `creer` to server (online mode)
-- `actionTirer()` — draws a number (locally or via socket)
+- `actionTirer()` — draws a random number (locally or via socket); hidden in physical mode
 - `afficherCarte(num)` — adds `.visible` class to `#carte-numero` (never sets `style.display` directly — the class drives both portrait `display:block` and landscape `display:flex`)
 - `afficherGagnant(nom, clan, rang)` — shows win overlay + adds entry to classement bandeau
 - `resetJeu()` — resets game state; removes `.visible` from `#carte-numero`
+
+**Mode physique** (`body.mode-physique`) : le bouton "Tirer" est caché via CSS. Chaque case non-tirée de `#suivi-grille` est cliquable (cursor pointer + hover doré). Cliquer une case non-tirée appelle `tirages.push(num)` + `afficherCarte` + `jouerSon` + `mettreAJourSuivi`. Cliquer une case déjà tirée rejoue le son (comportement identique aux deux modes).
 
 ### `joueur.html`
 - `setMode(mode)` — toggles local/online setup panels
@@ -126,20 +129,33 @@ The 4 center heart cells display clan icons (🐢🐻🐺🦌) — they are not 
 - `rendreGrille()` — renders the card grid into the DOM
 - `verifierVictoire()` — checks win condition for active clan after each mark
 - `declarerVictoire()` — emits `victoire` to server
+- `afficherInfoNumero(num)` — affiche la carte complète du numéro dans `#annonce` (badge colonne coloré, numéro, nom Wendat, phonétique, fr/en) ; appelée au clic sur toute case non-cœur et à chaque `numero-tire` online
+- `rejouerSon()` — rejoue le son du `dernierNumeroClique`
 
 ## Layout paysage (tablette)
 
 Les deux fichiers sont optimisés pour tablette en mode paysage (`@media (orientation: landscape) and (min-height: 400px)`).
 
 **`meneur.html`** — deux colonnes via `body { display: flex; align-items: stretch }` :
-- `#colonne-gauche` (260px) : titre, toggle, bouton tirer, carte numéro tiré
+- `#colonne-gauche` (260px) : titre, toggles (local/online + aléatoire/physique), bouton tirer, carte numéro tiré
 - `#tableau` (flex: 1) : grille de suivi W-E-N-D-I-O avec `grid-auto-rows: 1fr` pour que les lignes remplissent toute la hauteur
 - La hauteur totale est dictée par la colonne gauche (contenu naturel). Avant le premier tirage : aucun espace réservé pour la carte (`#carte-numero` reste `display:none` jusqu'à `.visible`)
 - Après tirage : `#carte-numero.visible { flex: 1 }` remplit l'espace restant à gauche ; le tableau de droite s'étire à la même hauteur via `align-items: stretch`
 
 **`joueur.html`** — deux phases :
 - **Setup** : toggle local/en ligne + sélection clan ou saisie code, plein écran centré
-- **Jeu** : `#vue-jeu` en flex-row (paysage) — sidebar gauche 200px (badges, annonce, bouton WENDIO) + grille droite flex:1
+- **Jeu** : `#vue-jeu` en flex-row (paysage) — sidebar gauche 200px (badges, `#annonce` avec info numéro complet, bouton WENDIO) + grille droite flex:1
+
+## Grilles de jeu
+
+Les chiffres dans les deux grilles utilisent la police **Cinzel** (même que le titre) en `font-weight: 900` pour maximiser la lisibilité dans un contexte d'apprentissage linguistique.
+
+- `meneur.html` `.suivi-cell` : `font-size: 1rem`, Cinzel — 12 colonnes par ligne (plage 1–12 par lettre)
+- `joueur.html` `.cell` : `font-size: 1.35rem`, Cinzel — 6 colonnes, `aspect-ratio: 1/1`
+
+## Versions futures
+
+L'architecture est prévue pour supporter plusieurs thèmes (animaux, couleurs, etc.) au-delà des chiffres. Le vocabulaire est centralisé dans `data.js` — chaque thème futur aura son propre fichier de données interchangeable.
 
 ## Audio
 
