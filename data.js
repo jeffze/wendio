@@ -23,7 +23,8 @@ const CLANS = {
 //       col: 0   1  [2]  [3]  4   5
 //  N       [ n ][ n ][🐢][🐻][ n ][ n ]
 //  D       [ n ][ n ][🐺][🦌][ n ][ n ]
-const COEUR = { 'N2': '🐢', 'N3': '🐻', 'D2': '🐺', 'D3': '🦌' };
+const COEUR      = { 'N2': '🐢', 'N3': '🐻', 'D2': '🐺', 'D3': '🦌' };
+const COEUR_CLAN = { 'N2': 'Tortue', 'N3': 'Ours', 'D2': 'Loup', 'D3': 'Chevreuil' };
 
 // Vocabulaire Wendat — à compléter pour tous les numéros
 const NOMBRES = {
