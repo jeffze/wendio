@@ -423,27 +423,43 @@
     return div;
   }
 
-  // Suppression fond noir Ours via canvas — partagé entre toutes les cartes
+  // Suppression fond noir Ours par flood fill — partagé entre toutes les cartes
   let oursDataUrl = null;
   function prepareOursImage(imgEl) {
     if (oursDataUrl) { imgEl.src = oursDataUrl; return; }
     const src = new Image();
     src.onload = function () {
       try {
+        const W = src.width, H = src.height;
         const canvas = document.createElement('canvas');
-        canvas.width  = src.width;
-        canvas.height = src.height;
+        canvas.width = W; canvas.height = H;
         const ctx = canvas.getContext('2d');
         ctx.drawImage(src, 0, 0);
-        const id = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const d  = id.data;
-        for (let i = 0; i < d.length; i += 4) {
-          const m = Math.max(d[i], d[i+1], d[i+2]);
-          if (m < 60) d[i+3] = Math.round(d[i+3] * m / 60);
+        const imgData = ctx.getImageData(0, 0, W, H);
+        const d = imgData.data;
+        const SEUIL = 40;
+        const fond = new Uint8Array(W * H);
+        const queue = [];
+        const essayer = (x, y) => {
+          const k = y * W + x;
+          if (fond[k]) return;
+          const i = k * 4;
+          if (Math.max(d[i], d[i+1], d[i+2]) < SEUIL) { fond[k] = 1; queue.push(k); }
+        };
+        for (let x = 0; x < W; x++) { essayer(x, 0); essayer(x, H - 1); }
+        for (let y = 1; y < H - 1; y++) { essayer(0, y); essayer(W - 1, y); }
+        let qi = 0;
+        while (qi < queue.length) {
+          const k = queue[qi++];
+          const x = k % W, y = (k / W) | 0;
+          if (x > 0)     essayer(x - 1, y);
+          if (x < W - 1) essayer(x + 1, y);
+          if (y > 0)     essayer(x, y - 1);
+          if (y < H - 1) essayer(x, y + 1);
         }
-        ctx.putImageData(id, 0, 0);
+        for (let k = 0; k < W * H; k++) if (fond[k]) d[k * 4 + 3] = 0;
+        ctx.putImageData(imgData, 0, 0);
         oursDataUrl = canvas.toDataURL('image/png');
-        // Mettre à jour tous les img Ours déjà dans le DOM
         document.querySelectorAll('img[data-ours]').forEach(el => el.src = oursDataUrl);
       } catch (e) { /* fallback silencieux */ }
     };
