@@ -318,8 +318,6 @@
     .cell.coeur:active { transform: none; }
     /* Images animaux dans les cases cœur */
     .coeur-animal { width: 100%; height: 100%; object-fit: contain; display: block; }
-    /* L'ours : filtre SVG qui rend les pixels noirs/très sombres transparents */
-    .cell.coeur.ours .coeur-animal { filter: url(#enlever-noir); }
 
     /* Bouton WENDIO ! */
     #btn-wendio {
@@ -577,22 +575,6 @@
 </head>
 <body>
 
-<!-- Filtre SVG : supprime uniquement le fond noir pur de l'image Ours.
-     Étape 1 : luminanceToAlpha → A = luminance perceptuelle (0.21R+0.72G+0.07B)
-     Étape 2 : courbe raide (slope=50, intercept=-0.05) → transparent si lum<0.001,
-               pleinement visible si lum>0.02 ; la fourrure sombre reste intacte.
-     Étape 3 : feComposite "in" restaure les couleurs originales avec ce nouveau alpha. -->
-<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
-  <defs>
-    <filter id="enlever-noir" color-interpolation-filters="sRGB" x="0" y="0" width="100%" height="100%">
-      <feColorMatrix type="luminanceToAlpha" result="lum"/>
-      <feComponentTransfer in="lum" result="mask">
-        <feFuncA type="linear" slope="50" intercept="-0.05"/>
-      </feComponentTransfer>
-      <feComposite in="SourceGraphic" in2="mask" operator="in"/>
-    </filter>
-  </defs>
-</svg>
 
 <a id="btn-accueil" href="lobby.html" title="Accueil">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -723,6 +705,7 @@
   let tiresOnline         = [];
   let dernierNumeroClique = null;
   let modeDemo            = false;
+  let oursDataUrl         = null; // cache canvas : fond noir supprimé
 
   // ── Création DOM sécurisée d'un bouton clan ──────────────────────────
   function creerBoutonClan(nom, clan, className, onclickFn) {
@@ -995,6 +978,32 @@
     rendreGrille();
   }
 
+  // ── Suppression fond noir de l'ours via canvas (traitement pixel par pixel) ──
+  // Transition douce : max(R,G,B) < 30 → transparent, > 60 → opaque, entre les deux → graduel.
+  function prepareOursImage(imgEl) {
+    if (oursDataUrl) { imgEl.src = oursDataUrl; return; }
+    const src = new Image();
+    src.onload = function () {
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width  = src.width;
+        canvas.height = src.height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(src, 0, 0);
+        const id = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const d  = id.data;
+        for (let i = 0; i < d.length; i += 4) {
+          const m = Math.max(d[i], d[i+1], d[i+2]); // canal le plus brillant
+          if (m < 60) d[i+3] = Math.round(d[i+3] * m / 60); // fondu doux
+        }
+        ctx.putImageData(id, 0, 0);
+        oursDataUrl = canvas.toDataURL('image/png');
+        imgEl.src   = oursDataUrl;
+      } catch (e) { /* CORS/file:// : on garde le src d'origine */ }
+    };
+    src.src = 'sources/Ours.png';
+  }
+
   // ── Rendu grille ─────────────────────────────────────────────────────
   function rendreGrille() {
     const grille = document.getElementById('grille');
@@ -1013,11 +1022,16 @@
 
         if (estCoeur(ligne, col)) {
           const clan = COEUR_CLAN[id] || 'Tortue';
-          cell.className = 'cell coeur' + (clan === 'Ours' ? ' ours' : '');
+          cell.className = 'cell coeur';
           const img = document.createElement('img');
-          img.src = 'sources/' + clan + '.png';
           img.alt = clan;
           img.className = 'coeur-animal';
+          if (clan === 'Ours') {
+            img.src = 'sources/Ours.png'; // placeholder pendant le traitement
+            prepareOursImage(img);
+          } else {
+            img.src = 'sources/' + clan + '.png';
+          }
           cell.appendChild(img);
         } else {
           const val    = valeurCase(carteActuelle, ligne, col);

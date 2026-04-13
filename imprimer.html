@@ -170,7 +170,6 @@
       overflow: hidden; background: #f0ebe2; min-height: 0;
     }
     .coeur-img-wrap.ours { background: #f0ebe2; }
-    .coeur-img-wrap.ours img { filter: url(#enlever-noir); }
     .coeur-img-wrap img {
       max-width: 100%; max-height: 100%;
       object-fit: contain;
@@ -202,17 +201,6 @@
 </head>
 <body>
 
-<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
-  <defs>
-    <filter id="enlever-noir" color-interpolation-filters="sRGB" x="0" y="0" width="100%" height="100%">
-      <feColorMatrix type="luminanceToAlpha" result="lum"/>
-      <feComponentTransfer in="lum" result="mask">
-        <feFuncA type="linear" slope="50" intercept="-0.05"/>
-      </feComponentTransfer>
-      <feComposite in="SourceGraphic" in2="mask" operator="in"/>
-    </filter>
-  </defs>
-</svg>
 
 <div class="controls">
 
@@ -435,6 +423,33 @@
     return div;
   }
 
+  // Suppression fond noir Ours via canvas — partagé entre toutes les cartes
+  let oursDataUrl = null;
+  function prepareOursImage(imgEl) {
+    if (oursDataUrl) { imgEl.src = oursDataUrl; return; }
+    const src = new Image();
+    src.onload = function () {
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width  = src.width;
+        canvas.height = src.height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(src, 0, 0);
+        const id = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const d  = id.data;
+        for (let i = 0; i < d.length; i += 4) {
+          const m = Math.max(d[i], d[i+1], d[i+2]);
+          if (m < 60) d[i+3] = Math.round(d[i+3] * m / 60);
+        }
+        ctx.putImageData(id, 0, 0);
+        oursDataUrl = canvas.toDataURL('image/png');
+        // Mettre à jour tous les img Ours déjà dans le DOM
+        document.querySelectorAll('img[data-ours]').forEach(el => el.src = oursDataUrl);
+      } catch (e) { /* fallback silencieux */ }
+    };
+    src.src = 'sources/Ours.png';
+  }
+
   // Mosaïque 2×2 d'images animaux fusionnant les 4 cases cœur
   function creerCoeurMosaique() {
     const merged = document.createElement('div');
@@ -447,8 +462,14 @@
       const wrap = document.createElement('div');
       wrap.className = 'coeur-img-wrap' + (clan === 'Ours' ? ' ours' : '');
       const img = document.createElement('img');
-      img.src = 'sources/' + clan + '.png';
       img.alt = clan;
+      if (clan === 'Ours') {
+        img.dataset.ours = '1';
+        img.src = 'sources/Ours.png';
+        prepareOursImage(img);
+      } else {
+        img.src = 'sources/' + clan + '.png';
+      }
       wrap.appendChild(img);
       merged.appendChild(wrap);
     });
