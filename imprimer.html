@@ -169,7 +169,8 @@
       display: flex; align-items: center; justify-content: center;
       overflow: hidden; background: #f0ebe2; min-height: 0;
     }
-    .coeur-img-wrap.ours { background: #1a1008; }
+    .coeur-img-wrap.ours { background: #f0ebe2; }
+    .coeur-img-wrap.ours img { filter: url(#enlever-noir); }
     .coeur-img-wrap img {
       max-width: 100%; max-height: 100%;
       object-fit: contain;
@@ -200,6 +201,18 @@
   </style>
 </head>
 <body>
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+  <defs>
+    <filter id="enlever-noir" x="0" y="0" width="100%" height="100%">
+      <feColorMatrix type="matrix"
+        values="1 0 0 0 0
+                0 1 0 0 0
+                0 0 1 0 0
+                15 15 15 -1 0"/>
+    </filter>
+  </defs>
+</svg>
 
 <div class="controls">
 

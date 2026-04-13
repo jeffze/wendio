@@ -318,8 +318,8 @@
     .cell.coeur:active { transform: none; }
     /* Images animaux dans les cases cœur */
     .coeur-animal { width: 100%; height: 100%; object-fit: contain; display: block; }
-    /* L'ours a un fond noir : case sombre pour que le fond noir disparaisse naturellement */
-    .cell.coeur.ours { background: #1a1008; }
+    /* L'ours : filtre SVG qui rend les pixels noirs/très sombres transparents */
+    .cell.coeur.ours .coeur-animal { filter: url(#enlever-noir); }
 
     /* Bouton WENDIO ! */
     #btn-wendio {
@@ -576,6 +576,19 @@
   </style>
 </head>
 <body>
+
+<!-- Filtre SVG : rend transparent les pixels noirs/très sombres (fond de l'image Ours) -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+  <defs>
+    <filter id="enlever-noir" x="0" y="0" width="100%" height="100%">
+      <feColorMatrix type="matrix"
+        values="1 0 0 0 0
+                0 1 0 0 0
+                0 0 1 0 0
+                15 15 15 -1 0"/>
+    </filter>
+  </defs>
+</svg>
 
 <a id="btn-accueil" href="lobby.html" title="Accueil">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
