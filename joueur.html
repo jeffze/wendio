@@ -978,28 +978,51 @@
     rendreGrille();
   }
 
-  // ── Suppression fond noir de l'ours via canvas (traitement pixel par pixel) ──
-  // Transition douce : max(R,G,B) < 30 → transparent, > 60 → opaque, entre les deux → graduel.
+  // ── Suppression fond noir de l'ours par flood fill depuis les bords ──
+  // BFS depuis les 4 bords : seuls les pixels noirs *connectés au fond* deviennent
+  // transparents. Les zones sombres à l'intérieur du pelage sont préservées.
   function prepareOursImage(imgEl) {
     if (oursDataUrl) { imgEl.src = oursDataUrl; return; }
     const src = new Image();
     src.onload = function () {
       try {
+        const W = src.width, H = src.height;
         const canvas = document.createElement('canvas');
-        canvas.width  = src.width;
-        canvas.height = src.height;
+        canvas.width = W; canvas.height = H;
         const ctx = canvas.getContext('2d');
         ctx.drawImage(src, 0, 0);
-        const id = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const d  = id.data;
-        for (let i = 0; i < d.length; i += 4) {
-          const m = Math.max(d[i], d[i+1], d[i+2]); // canal le plus brillant
-          if (m < 60) d[i+3] = Math.round(d[i+3] * m / 60); // fondu doux
+        const imgData = ctx.getImageData(0, 0, W, H);
+        const d = imgData.data;
+        const SEUIL = 40; // max(R,G,B) < SEUIL → considéré "fond noir"
+
+        // BFS : marque les pixels fond connectés aux bords
+        const fond = new Uint8Array(W * H);
+        const queue = [];
+        const essayer = (x, y) => {
+          const k = y * W + x;
+          if (fond[k]) return;
+          const i = k * 4;
+          if (Math.max(d[i], d[i+1], d[i+2]) < SEUIL) { fond[k] = 1; queue.push(k); }
+        };
+        for (let x = 0; x < W; x++) { essayer(x, 0); essayer(x, H - 1); }
+        for (let y = 1; y < H - 1; y++) { essayer(0, y); essayer(W - 1, y); }
+        let qi = 0;
+        while (qi < queue.length) {
+          const k = queue[qi++];
+          const x = k % W, y = (k / W) | 0;
+          if (x > 0)     essayer(x - 1, y);
+          if (x < W - 1) essayer(x + 1, y);
+          if (y > 0)     essayer(x, y - 1);
+          if (y < H - 1) essayer(x, y + 1);
         }
-        ctx.putImageData(id, 0, 0);
+
+        // Rend transparent uniquement les pixels du fond
+        for (let k = 0; k < W * H; k++) if (fond[k]) d[k * 4 + 3] = 0;
+
+        ctx.putImageData(imgData, 0, 0);
         oursDataUrl = canvas.toDataURL('image/png');
-        imgEl.src   = oursDataUrl;
-      } catch (e) { /* CORS/file:// : on garde le src d'origine */ }
+        imgEl.src = oursDataUrl;
+      } catch (e) { /* fallback silencieux (file://) */ }
     };
     src.src = 'sources/Ours.png';
   }
