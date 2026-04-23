@@ -679,6 +679,7 @@
         <span class="annonce-en" id="annonce-en"></span>
       </div>
       <div class="annonce-manquant" id="annonce-manquant"></div>
+      <img id="annonce-image" alt="Carte WENDIO" style="display:none; max-width:200px; width:100%; margin:8px auto 0; border-radius:10px; box-shadow:0 3px 12px rgba(0,0,0,.4); cursor:pointer;" onclick="rejouerSon()">
       <button class="btn-rejouer-joueur" id="btn-rejouer-joueur" onclick="rejouerSon()">&#9654; Rejouer</button>
     </div>
 
@@ -945,6 +946,12 @@
     document.getElementById('annonce-badge').textContent  = ligne;
     document.getElementById('annonce-badge').style.background = couleur;
     document.getElementById('annonce-num').textContent    = num;
+
+    // Carte image physique (cliquable pour rejouer le son)
+    const img = document.getElementById('annonce-image');
+    img.src = `cartes/${num}.jpg`;
+    img.style.display = 'block';
+    img.title = `Carte WENDIO ${num} — clic pour rejouer le son`;
 
     if (data) {
       document.getElementById('annonce-wendat').textContent   = data.wendat;

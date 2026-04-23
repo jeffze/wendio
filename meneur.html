@@ -560,6 +560,7 @@
         <button class="btn-rejouer" onclick="rejouerSon()" style="margin-top:12px;">&#9654; Rejouer</button>
       </div>
       <div class="carte-droite">
+        <img id="carte-image" alt="Carte du numéro" style="display:none; max-width:240px; width:100%; border-radius:12px; box-shadow:0 4px 16px rgba(0,0,0,.4); cursor:pointer;" onclick="rejouerSon()">
         <div id="qrcode"></div>
       </div>
     </div>
@@ -709,6 +710,12 @@
     document.getElementById('grand-num').textContent        = num;
     document.getElementById('grand-num').style.color        = couleur;
 
+    // Carte image physique
+    const img = document.getElementById('carte-image');
+    img.src = `cartes/${num}.jpg`;
+    img.style.display = 'block';
+    img.title = `Carte WENDIO numéro ${num} — clic pour rejouer le son`;
+
     if (data) {
       document.getElementById('wendat-nom').textContent   = data.wendat;
       document.getElementById('wendat-phon').textContent  = data.phon;
@@ -821,6 +828,7 @@
     fermerWin();
     document.getElementById('btn-tirer').disabled          = false;
     document.getElementById('carte-numero').classList.remove('visible');
+    document.getElementById('carte-image').style.display   = 'none';
     document.getElementById('compteur').textContent        = '0 / 72 num\u00e9ros tir\u00e9s';
     document.getElementById('gagnants-liste').replaceChildren();
     document.getElementById('bandeau-gagnant').classList.remove('visible');
