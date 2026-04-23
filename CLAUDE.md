@@ -159,4 +159,4 @@ L'architecture est prévue pour supporter plusieurs thèmes (animaux, couleurs, 
 
 ## Audio
 
-WAV files in `sound/` are named `Sound/Wendat numbers {num}.wav`. Only 6 files currently exist (9, 14, 20, 40, 60, 72 — key milestone numbers). Missing files fail silently. The full vision is **3-in-1 audio**: Wendat → French → English per number.
+WAV files in `sound/` are named `Wendat numbers {num}.wav`. **All 72 numbers have audio (1–72), plus 3 bonus files (73, 74, 75).** `jouerSon(num)` plays the file and fails silently if missing. The full vision is **3-in-1 audio**: Wendat → French → English per number (current files are Wendat only).
