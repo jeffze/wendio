@@ -446,7 +446,8 @@
       /* Numéro plus compact en sidebar */
       .grand-num { font-size: 4rem; }
       .wendat-nom { font-size: 1rem; }
-      .carte-droite { display: none; } /* cache QR en sidebar paysage, trop serré */
+      .carte-droite #qrcode { display: none; } /* cache QR en sidebar paysage, trop serré (la carte image reste visible) */
+      .carte-droite { align-self: center; }
 
       #carte-numero.visible {
         flex: 1;
