@@ -247,28 +247,6 @@
     }
     #annonce.visible { display: block; }
     .annonce-label   { font-size: .65rem; color: #b8956a; margin-bottom: 6px; text-transform: uppercase; letter-spacing: .12em; font-weight: 600; }
-    .annonce-badge   { display: inline-block; color: white; font-weight: 700; font-size: .65rem; padding: 2px 12px; border-radius: 20px; margin-bottom: 6px; letter-spacing: .14em; font-family: 'Cinzel', serif; background: var(--annonce-couleur, #b86808); }
-    .annonce-num     { font-family: 'Cinzel', serif; font-size: 2.8rem; font-weight: 900; line-height: 1; color: var(--annonce-couleur, var(--accent-lt)); margin-bottom: 6px; }
-    .annonce-wendat  { font-size: .88rem; font-style: italic; color: #c4905a; margin-bottom: 3px; }
-    .annonce-phon    { font-size: .75rem; color: #8a6040; margin-bottom: 8px; letter-spacing: .04em; }
-    .annonce-langues { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 8px; }
-    .annonce-fr      { color: #70b8e0; font-weight: 600; font-size: .78rem; }
-    .annonce-en      { color: #68d898; font-weight: 600; font-size: .78rem; }
-    .annonce-manquant { font-size: .75rem; font-style: italic; color: #5a3820; margin-bottom: 6px; }
-    .btn-rejouer-joueur {
-      background: transparent;
-      border: 1px solid rgba(255,255,255,.2);
-      color: rgba(255,255,255,.7);
-      border-radius: 8px;
-      padding: 6px 14px;
-      font-size: .8rem;
-      cursor: pointer;
-      font-family: inherit;
-      font-weight: 500;
-      transition: all .2s;
-    }
-    .btn-rejouer-joueur:hover { border-color: var(--accent-lt); color: var(--accent-lt); }
-
     /* Grille bingo */
     .bingo-wrap { width: 100%; max-width: 560px; }
     .bingo-grid {
@@ -311,7 +289,14 @@
     .cell:hover { transform: scale(.94); border-color: rgba(184,104,8,.35); }
     .cell:active { transform: scale(.86); }
     .cell.cible { border-color: var(--accent-lt); background: #fffbf2; box-shadow: 0 0 0 1px var(--accent-lt), 0 2px 8px rgba(224,144,48,.2); }
-    .cell.marque::after { content: '🌽'; position: absolute; font-size: 1.65rem; z-index: 2; }
+    .cell.marque::after {
+      content: '';
+      position: absolute;
+      width: 1.65rem; height: 1.65rem;
+      background: url('grain-mais.svg') center/contain no-repeat;
+      z-index: 2;
+      filter: drop-shadow(0 1px 2px rgba(0,0,0,.35));
+    }
     .cell.auto-marque { background: #fff8e8; border-color: rgba(224,144,48,.28); }
     .cell.coeur { background: #b88840; font-size: 0; cursor: default; border-color: transparent; padding: 2px; overflow: hidden; }
     .cell.coeur:hover { transform: none; border-color: transparent; }
@@ -371,7 +356,6 @@
       #jeu-info { flex-direction: column; align-items: flex-start; }
       .btn-retour { margin-left: 0; }
       #annonce { max-width: none; border-radius: 12px; padding: 10px 14px; }
-      .annonce-num { font-size: 2.4rem; }
       #btn-wendio { max-width: none; font-size: 1.1rem; padding: 14px; }
       .bingo-wrap { flex: 1; max-width: none; }
       .bingo-grid { grid-auto-rows: 1fr; }
@@ -670,17 +654,7 @@
 
     <div id="annonce">
       <div class="annonce-label">Case s&#233;lectionn&#233;e</div>
-      <div class="annonce-badge" id="annonce-badge">W</div>
-      <div class="annonce-num"   id="annonce-num">&#8212;</div>
-      <div class="annonce-wendat"  id="annonce-wendat"></div>
-      <div class="annonce-phon"    id="annonce-phon"></div>
-      <div class="annonce-langues">
-        <span class="annonce-fr" id="annonce-fr"></span>
-        <span class="annonce-en" id="annonce-en"></span>
-      </div>
-      <div class="annonce-manquant" id="annonce-manquant"></div>
-      <img id="annonce-image" alt="Carte WENDIO" style="display:none; width:180px; max-width:100%; height:auto; margin:8px auto 0; border-radius:10px; box-shadow:0 3px 12px rgba(0,0,0,.4); cursor:pointer;" onclick="rejouerSon()">
-      <button class="btn-rejouer-joueur" id="btn-rejouer-joueur" onclick="rejouerSon()">&#9654; Rejouer</button>
+      <img id="annonce-image" alt="Carte WENDIO" style="display:none; width:100%; max-width:280px; height:auto; margin:0 auto; border-radius:10px; box-shadow:0 3px 12px rgba(0,0,0,.4); cursor:pointer;" onclick="rejouerSon()">
     </div>
 
     <button id="btn-wendio" onclick="declarerVictoire()">&#127805; WENDIO !</button>
@@ -937,34 +911,13 @@
   // ── Carte info numéro ────────────────────────────────────────────────
   function afficherInfoNumero(num) {
     dernierNumeroClique = num;
-    const ligne   = ligneDeNumero(num);
-    const couleur = CONFIG[ligne].couleur;
-    const data    = NOMBRES[num];
     const annonce = document.getElementById('annonce');
 
-    annonce.style.setProperty('--annonce-couleur', couleur);
-    document.getElementById('annonce-badge').textContent  = ligne;
-    document.getElementById('annonce-badge').style.background = couleur;
-    document.getElementById('annonce-num').textContent    = num;
-
-    // Carte image physique (cliquable pour rejouer le son)
+    // Carte image (toute l'info — numéro, ligne, nom Wendat, phonétique, traductions — est dans l'image)
     const img = document.getElementById('annonce-image');
     img.src = `cartes/${num}.jpg`;
     img.style.display = 'block';
     img.title = `Carte WENDIO ${num} — clic pour rejouer le son`;
-
-    if (data) {
-      document.getElementById('annonce-wendat').textContent   = data.wendat;
-      document.getElementById('annonce-phon').textContent     = data.phon;
-      document.getElementById('annonce-fr').textContent       = '\uD83C\uDDEB\uD83C\uDDF7 ' + data.fr;
-      document.getElementById('annonce-en').textContent       = '\uD83C\uDDEC\uD83C\uDDE7 ' + data.en;
-      document.getElementById('annonce-manquant').textContent = '';
-    } else {
-      ['annonce-wendat','annonce-phon','annonce-fr','annonce-en'].forEach(id => {
-        document.getElementById(id).textContent = '';
-      });
-      document.getElementById('annonce-manquant').textContent = '\u2014 vocabulaire Wendat \u00e0 compl\u00e9ter \u2014';
-    }
 
     annonce.classList.add('visible');
   }

@@ -30,7 +30,13 @@ body { font-family: 'Segoe UI', sans-serif; background: #f4e7d3; display: flex; 
 }
 
 .cell.active { background: #ffe082; position: relative; }
-.cell.active::after { content: '🌽'; position: absolute; top: 5px; right: 5px; font-size: 1.2rem; }
+.cell.active::after {
+    content: '';
+    position: absolute;
+    top: 5px; right: 5px;
+    width: 1.2rem; height: 1.2rem;
+    background: url('grain-mais.svg') center/contain no-repeat;
+}
 
 .header { font-weight: bold; color: white; padding-bottom: 10px; font-size: 1.5rem; }
 
