@@ -213,41 +213,10 @@
       background: var(--ligne-couleur, var(--gold));
       border-radius: 16px 16px 0 0;
     }
-    .carte-interieur { display: flex; gap: 24px; align-items: flex-start; }
-    .carte-texte  { flex: 1; }
-    .badge-ligne {
-      display: inline-block;
-      color: white;
-      font-weight: 700;
-      font-size: .72rem;
-      padding: 4px 14px;
-      border-radius: 20px;
-      margin-bottom: 10px;
-      letter-spacing: .14em;
-      font-family: 'Cinzel', serif;
-    }
-    .grand-num   { font-family: 'Cinzel', serif; font-size: 5.5rem; font-weight: 900; line-height: 1; margin-bottom: 8px; }
-    .wendat-nom  { font-size: 1.25rem; font-style: italic; color: var(--gold-lt); margin-bottom: 4px; font-weight: 500; }
-    .wendat-phon { font-size: .84rem; color: var(--muted); margin-bottom: 12px; letter-spacing: .04em; }
-    .langues     { display: flex; gap: 20px; }
-    .lang-fr     { color: #70b8e0; font-weight: 600; font-size: .88rem; }
-    .lang-en     { color: #68d898; font-weight: 600; font-size: .88rem; }
-    .msg-manquant { color: var(--dim); font-style: italic; font-size: .8rem; margin-top: 8px; }
-    .carte-droite { display: flex; flex-direction: column; align-items: center; gap: 12px; flex-shrink: 0; }
+    .carte-interieur { display: flex; justify-content: center; gap: 24px; align-items: flex-start; min-height: 0; }
+    .carte-droite { display: flex; flex-direction: column; align-items: center; gap: 12px; flex-shrink: 1; min-height: 0; max-height: 100%; }
+    .carte-droite img#carte-image { max-height: 100%; object-fit: contain; }
     #qrcode { background: white; padding: 8px; border-radius: 10px; box-shadow: 0 4px 16px rgba(0,0,0,.4); }
-    .btn-rejouer {
-      background: transparent;
-      border: 1px solid var(--border);
-      color: var(--muted);
-      border-radius: 8px;
-      padding: 8px 16px;
-      cursor: pointer;
-      font-size: .83rem;
-      transition: all .2s;
-      font-weight: 500;
-      font-family: inherit;
-    }
-    .btn-rejouer:hover { border-color: var(--gold); color: var(--gold-lt); }
 
     /* ── Tableau de suivi ── */
     #tableau {
@@ -443,17 +412,20 @@
 
       .mode-bar { max-width: none; margin: 0; }
 
-      /* Numéro plus compact en sidebar */
-      .grand-num { font-size: 4rem; }
-      .wendat-nom { font-size: 1rem; }
       .carte-droite #qrcode { display: none; } /* cache QR en sidebar paysage, trop serré (la carte image reste visible) */
       .carte-droite { align-self: center; }
 
       #carte-numero.visible {
         flex: 1;
+        min-height: 0;
         display: flex;
         flex-direction: column;
         justify-content: center;
+      }
+      #carte-numero.visible .carte-interieur {
+        min-height: 0;
+        max-height: 100%;
+        overflow: hidden;
       }
 
       #tableau {
@@ -548,20 +520,8 @@
   <!-- Carte numéro tiré -->
   <div id="carte-numero">
     <div class="carte-interieur">
-      <div class="carte-texte">
-        <span class="badge-ligne" id="badge-ligne">W</span>
-        <div class="grand-num"    id="grand-num">&#8212;</div>
-        <div class="wendat-nom"   id="wendat-nom"></div>
-        <div class="wendat-phon"  id="wendat-phon"></div>
-        <div class="langues">
-          <span class="lang-fr" id="lang-fr"></span>
-          <span class="lang-en" id="lang-en"></span>
-        </div>
-        <div class="msg-manquant" id="msg-manquant"></div>
-        <button class="btn-rejouer" onclick="rejouerSon()" style="margin-top:12px;">&#9654; Rejouer</button>
-      </div>
       <div class="carte-droite">
-        <img id="carte-image" alt="Carte du numéro" style="display:none; width:240px; max-width:100%; height:auto; border-radius:12px; box-shadow:0 4px 16px rgba(0,0,0,.4); cursor:pointer; margin-bottom:12px;" onclick="rejouerSon()">
+        <img id="carte-image" alt="Carte du numéro" style="display:none; width:100%; max-width:300px; height:auto; border-radius:12px; box-shadow:0 4px 16px rgba(0,0,0,.4); cursor:pointer; margin-bottom:12px;" onclick="rejouerSon()">
         <div id="qrcode"></div>
       </div>
     </div>
@@ -699,36 +659,17 @@
   // ── Carte numéro ──────────────────────────────────────────────────────
   function afficherCarte(num) {
     const carte  = document.getElementById('carte-numero');
-    const ligne  = ligneDeNumero(num);
-    const couleur = CONFIG[ligne].couleur;
-    const data   = NOMBRES[num];
+    const couleur = CONFIG[ligneDeNumero(num)].couleur;
 
     carte.classList.add('visible');
     carte.style.setProperty('--ligne-couleur', couleur);
 
-    document.getElementById('badge-ligne').textContent      = ligne;
-    document.getElementById('badge-ligne').style.background = couleur;
-    document.getElementById('grand-num').textContent        = num;
-    document.getElementById('grand-num').style.color        = couleur;
-
-    // Carte image physique
+    // Carte image (toute l'info — numéro, ligne, nom Wendat, phonétique, traductions — est dans l'image)
     const img = document.getElementById('carte-image');
     img.src = `cartes/${num}.jpg`;
     img.style.display = 'block';
     img.title = `Carte WENDIO numéro ${num} — clic pour rejouer le son`;
 
-    if (data) {
-      document.getElementById('wendat-nom').textContent   = data.wendat;
-      document.getElementById('wendat-phon').textContent  = data.phon;
-      document.getElementById('lang-fr').textContent      = '\uD83C\uDDEB\uD83C\uDDF7 ' + data.fr;
-      document.getElementById('lang-en').textContent      = '\uD83C\uDDEC\uD83C\uDDE7 ' + data.en;
-      document.getElementById('msg-manquant').textContent = '';
-    } else {
-      ['wendat-nom','wendat-phon','lang-fr','lang-en'].forEach(id => {
-        document.getElementById(id).textContent = '';
-      });
-      document.getElementById('msg-manquant').textContent = '\u2014 vocabulaire Wendat \u00e0 compl\u00e9ter \u2014';
-    }
 
     const base  = window.location.href.replace(/[^/]*$/, '');
     const qrEl  = document.getElementById('qrcode');
