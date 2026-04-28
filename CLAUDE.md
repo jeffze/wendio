@@ -54,17 +54,58 @@ Then open `http://localhost:3000` (redirects to `lobby.html`).
 
 ### Multiplayer (Socket.io)
 
-The server manages game sessions identified by a 4-character code (e.g. `AB3K`):
+The server manages game sessions identified by a 4-character code (e.g. `AB3K`).
+État stocké en mémoire dans `parties: Map<code, { maitre, clan, tirages, joueurs, tokenIndex, cartes, demarree, terminee }>`.
 
-| Event (client → server) | Meaning |
-|--------------------------|---------|
-| `creer` | Meneur creates a new game; server replies `partie-creee` with the code |
-| `rejoindre` `{ code, nom, clan }` | Player joins; server replies `rejoint` with existing draws |
-| `tirer` `{ code }` | Meneur draws a number; server broadcasts `numero-tire` to all |
-| `victoire` `{ code, nom, clan }` | Player declares win; server broadcasts `gagnant` with rank |
-| `terminer` `{ code }` | Meneur ends the game; server broadcasts `partie-terminee` |
+#### Events client → serveur
 
-If the meneur disconnects, the server automatically closes the game and notifies all players.
+| Event | Payload | Émetteur | Effet |
+|-------|---------|----------|-------|
+| `creer` | `{ clan }` | meneur | crée la partie avec le clan **imposé** ; reply `partie-creee` |
+| `rejoindre` | `{ code, nom, sessionToken }` | joueur | rejoint ou **se reconnecte** ; reply `rejoint` avec `{ tirages, clan, carte }` |
+| `demarrer` | `{ code }` | meneur | clôt les inscriptions ; broadcast `partie-demarree` |
+| `tirer` | `{ code }` | meneur | tire un numéro ; broadcast `numero-tire` |
+| `victoire` | `{ code }` | joueur | déclare victoire ; **validée serveur-side** ; broadcast `gagnant` + `partie-terminee` au 1er valide |
+| `terminer` | `{ code }` | meneur | force la fin ; broadcast `partie-terminee` |
+
+#### Events serveur → clients
+
+| Event | Cible | Payload |
+|-------|-------|---------|
+| `partie-creee` | meneur | `{ code, clan }` |
+| `rejoint` | joueur | `{ tirages, clan, carte }` |
+| `joueur-connecte` | meneur | `{ nom, clan, count }` |
+| `joueur-reconnecte` | meneur | `{ nom, count }` (token retrouvé, pas de doublon) |
+| `joueur-deconnecte` | meneur | `{ nom, count }` (count stable — peut revenir via token) |
+| `partie-demarree` | tous | (sans payload) |
+| `numero-tire` | tous | `{ num }` |
+| `gagnant` | tous | `{ nom, clan }` |
+| `partie-terminee` | tous | `{ raison: 'gagnant' \| 'meneur' \| 'meneur-deco' }` |
+| `tous-tires` | tous | (72 numéros tirés) |
+| `erreur` | émetteur | `string` |
+
+#### Règles invariantes du flow online
+
+1. **Clan imposé** : le meneur choisit un clan unique avant `creer`. Tous les joueurs jouent ce clan. Pas de sélection de clan côté joueur.
+2. **Cartes uniques** : générées côté serveur avec déduplication par hash dans `partie.cartes` (Set). Pas de doublon possible dans une même partie.
+3. **Premier gagnant = fin** : `victoire` valide → broadcast `gagnant` + `partie-terminee` immédiats, `partie.terminee = true`, partie supprimée. Plus aucune autre victoire acceptée.
+4. **Anti-troll** : `victoire` est validée côté serveur — le socket doit être inscrit dans la partie ET sa carte doit réellement remplir la condition (`victoireValide(carte, clan, tirages)` reproduit la logique de `verifierVictoire` côté client).
+5. **Reconnexion via sessionToken** : chaque joueur génère un UUID stocké en `sessionStorage` (clé `wendio-token`). À chaque `rejoindre`, le serveur cherche le token dans `partie.tokenIndex`. Si trouvé, il **migre l'entrée** vers le nouveau `socket.id` et renvoie la même carte. Le téléphone qui passe en veille retrouve sa partie sans perdre sa carte ni créer de doublon.
+6. **Démarrage = inscriptions closes** : après `demarrer`, les nouveaux `rejoindre` sont refusés (sauf reconnexions par token déjà connu). Le code et le QR sont cachés côté UI meneur.
+7. **Noms uniques par partie** (case-insensitive). Refus avec erreur claire si conflit.
+8. **Disconnect joueur ≠ kick** : on garde l'entrée dans `partie.joueurs` avec `deconnecte: true`. Le compteur reste stable. Permet la reconnexion via token.
+9. **Disconnect meneur = fin de partie** : si le meneur se déconnecte, broadcast `partie-terminee` raison `meneur-deco`, partie supprimée.
+
+#### Validation côté serveur
+
+- `creer.clan` : whitelist `{Chevreuil, Loup, Ours, Tortue}` (sinon `erreur`)
+- `rejoindre.nom` : trim + slice(0, 20) + non vide
+- `rejoindre.sessionToken` : slice(0, 64)
+- `tirer` : `partie.maitre === socket.id` && `!partie.terminee`
+- `victoire` : socket inscrit && carte remplit la condition pour `partie.clan`
+- `terminer`, `demarrer` : `partie.maitre === socket.id`
+
+`CLAN_VICTOIRE = { Chevreuil: 'ligne', Loup: 'coins', Ours: 'carre', Tortue: 'pleine' }` reproduit côté serveur. `victoireValide(carte, clan, tirages)` parcourt la grille selon le mode et retourne `true` ssi la condition est remplie. Idem `estCoeur` et `valeurCase` répliqués (depuis `data.js`).
 
 **Offline mode**: both `meneur.html` and `joueur.html` have a local/online toggle. In local mode, Socket.io is not used.
 
@@ -108,10 +149,14 @@ The 4 center heart cells display clan icons (🐢🐻🐺🦌) — they are not 
 ### `meneur.html`
 - `setMode(mode)` — toggles between `local` and `online` modes
 - `setModePhysique(physique)` — toggles between `aléatoire` and `physique` draw modes; adds/removes `body.mode-physique` class
-- `creerPartie()` — emits `creer` to server (online mode)
-- `actionTirer()` — draws a random number (locally or via socket); hidden in physical mode
+- `genererBoutonsClanMeneur()` / `choisirClanMeneur(nom)` — UI de sélection du clan **imposé** (4 boutons radio), avant la création de la partie
+- `creerPartie()` — emits `creer` with `{ clan: clanChoisi }` (bouton désactivé tant qu'aucun clan choisi)
+- `commencerPartie()` — emits `demarrer` ; cache `#zone-code` (code + lien) et `#qr-bloc` ; ne reste visible que la bannière clan + liste joueurs + bouton TIRER
+- `actionTirer()` — draws a random number (locally or via socket); hidden in physical mode ; early return si `partieTerminee`
 - `afficherCarte(num)` — adds `.visible` class to `#carte-numero` (never sets `style.display` directly — the class drives both portrait `display:block` and landscape `display:flex`)
-- `afficherGagnant(nom, clan, rang)` — shows win overlay + adds entry to classement bandeau
+- `afficherGagnant(nom, clan)` — shows win overlay (un seul gagnant par partie, plus de rang)
+- `terminerCoteMeneur(raison)` — handler de `partie-terminee` ; désactive btn-tirer ; transforme btn-arreter en bouton vert "🔄 Nouvelle partie" ; **fallback overlay** si raison='gagnant' et overlay non visible
+- `nouvellePartieMeneur({ skipTerminer })` — reset complet, retour à l'écran de choix de clan ; restaure btn-arreter dans son état initial
 - `resetJeu()` — resets game state; removes `.visible` from `#carte-numero`
 
 **Mode physique** (`body.mode-physique`) : le bouton "Tirer" est caché via CSS. Chaque case non-tirée de `#suivi-grille` est cliquable (cursor pointer + hover doré). Cliquer une case non-tirée appelle `tirages.push(num)` + `afficherCarte` + `jouerSon` + `mettreAJourSuivi`. Cliquer une case déjà tirée rejoue le son (comportement identique aux deux modes).
@@ -120,17 +165,32 @@ The 4 center heart cells display clan icons (🐢🐻🐺🦌) — they are not 
 - `setMode(mode)` — toggles local/online setup panels
 - `commencerLocal()` — generates card, switches to game view
 - `basculerVersJeu()` — hides title/toggle/setup, shows `#vue-jeu`
-- `nouvellePartie()` — resets all state, returns to setup view
+- `nouvellePartie()` — resets all state, returns to setup view (mode local uniquement — voir `quitterPartie()` pour le mode online)
+- `quitterPartie()` — disconnect socket + clear `sessionStorage['wendio-token']` + redirect vers `lobby.html`. Appelé depuis le win-overlay.
 - `demarrer()` — init; auto-activates online mode if `?code=` param present
-- `validerFormulaire()` — validates name + clan before joining
-- `rejoindrePartie()` — emits `rejoindre` to server
+- `validerFormulaire()` — validates name only (le clan est imposé par le meneur en mode online)
+- `rejoindrePartie()` — emits `rejoindre` with `{ code, nom, sessionToken }` ; le bouton est désactivé après le 1er click (anti double-click)
 - `marquerNumero(num)` — marks a called number on the card
-- `setClan(nom)` — sets active clan, highlights target cells via `estCible()`
+- `setClan(nom)` — local mode only ; sets active clan, highlights target cells via `estCible()` ; en online le clan vient du serveur via l'event `rejoint`
 - `rendreGrille()` — renders the card grid into the DOM
-- `verifierVictoire()` — checks win condition for active clan after each mark
-- `declarerVictoire()` — emits `victoire` to server
-- `afficherInfoNumero(num)` — affiche la carte complète du numéro dans `#annonce` (badge colonne coloré, numéro, nom Wendat, phonétique, fr/en) ; appelée au clic sur toute case non-cœur et à chaque `numero-tire` online
+- `verifierVictoire()` — checks win condition for active clan after each mark ; affiche le bouton WENDIO! (online) ou directement le win-overlay (local)
+- `declarerVictoire()` — emits `victoire { code }` ; le serveur valide la carte avant d'accepter
+- `afficherGagnant(nom, clan, isMoi)` — overlay vert ; texte différent si `isMoi` (« Bravo X ! ») ou non (« X a gagné »)
+- `afficherInfoNumero(num)` — affiche la carte complète du numéro dans `#annonce` (image PDF de la carte) ; appelée au clic sur toute case non-cœur et à chaque `numero-tire` online
 - `rejouerSon()` — rejoue le son du `dernierNumeroClique`
+
+#### sessionToken / reconnexion
+
+- Chaque onglet joueur génère un UUID au boot, stocké dans `sessionStorage['wendio-token']` (vidé à fermeture d'onglet).
+- Envoyé à chaque `rejoindre`. Permet au serveur de retrouver l'entrée si le socket s'est déconnecté.
+- Sur l'event `connect` Socket.io (reconnexion auto), si le joueur était déjà inscrit (`clanActuel && nomJoueur && codePartie && !partieTerminee`), on ré-emit `rejoindre` automatiquement.
+- Le handler `rejoint` détecte la **reconnexion silencieuse** (déjà en `vue-jeu` + `clanActuel` set) et remet juste à jour `tiresOnline` + `carteActuelle` sans repasser par le setup.
+- `visibilitychange` listener force `socket.connect()` quand l'onglet revient au premier plan (téléphone qui sort de veille).
+- Sur fin de partie ou abandon volontaire (`quitterPartie`), le token est supprimé pour éviter de réintégrer une partie déjà finie.
+
+#### body.partie-terminee
+
+CSS qui désactive les clics sur la grille et applique `opacity:.82` à `.bingo-grid`. Posée par le handler `partie-terminee` côté joueur. Permet de regarder sa carte en lecture seule après la fin sans pouvoir la modifier.
 
 ## Layout paysage (tablette)
 
