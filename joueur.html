@@ -304,6 +304,10 @@
     /* Images animaux dans les cases cœur */
     .coeur-animal { width: 100%; height: 100%; object-fit: contain; display: block; }
 
+    /* Partie terminée : grille en lecture seule */
+    body.partie-terminee .cell { pointer-events: none; }
+    body.partie-terminee .bingo-grid { opacity: .82; }
+
     /* Bouton WENDIO ! */
     #btn-wendio {
       display: none;
@@ -580,10 +584,12 @@
   <div class="form-rejoindre">
     <h2>Rejoindre la partie</h2>
     <div class="code-badge" id="badge-code">----</div>
+    <p style="font-size:.82rem;color:var(--muted);margin-bottom:6px;font-style:italic;">
+      Le clan est imposé par le meneur — il sera affiché dès que vous rejoignez.
+    </p>
     <label>Votre prénom</label>
-    <input type="text" id="input-nom" placeholder="ex : Marie" maxlength="20" />
-    <label>Votre clan</label>
-    <div class="form-clan" id="form-clan-grid"></div>
+    <input type="text" id="input-nom" placeholder="ex : Marie" maxlength="20"
+           onkeydown="if(event.key==='Enter' && !this.disabled) document.getElementById('btn-rejoindre-submit').click()" />
     <button class="btn-principal vert" id="btn-rejoindre-submit" onclick="rejoindrePartie()" disabled style="margin-top:20px;">Rejoindre &#8594;</button>
     <div class="msg-erreur" id="msg-erreur"></div>
   </div>
@@ -676,11 +682,11 @@
   let socket              = null;
   let codePartie          = null;
   let nomJoueur           = null;
-  let clanJoinForm        = null;
   let tiresOnline         = [];
   let dernierNumeroClique = null;
   let modeDemo            = false;
   let oursDataUrl         = null; // cache canvas : fond noir supprimé
+  let partieTerminee      = false;
 
   // ── Création DOM sécurisée d'un bouton clan ──────────────────────────
   function creerBoutonClan(nom, clan, className, onclickFn) {
@@ -768,22 +774,6 @@
     codePartie = code;
 
     document.getElementById('badge-code').textContent = codePartie;
-
-    const formClan = document.getElementById('form-clan-grid');
-    formClan.replaceChildren();
-    Object.entries(CLANS).forEach(([nom, clan]) => {
-      formClan.appendChild(
-        creerBoutonClan(nom, clan, 'btn-clan-join', () => {
-          clanJoinForm = nom;
-          document.querySelectorAll('.btn-clan-join').forEach(b => b.classList.remove('actif'));
-          document.querySelector('.btn-clan-join[data-nom="' + nom + '"]').classList.add('actif');
-          validerFormulaire();
-        })
-      );
-      // stocker nom dans dataset pour ciblage
-      formClan.lastChild.dataset.nom = nom;
-    });
-
     document.getElementById('input-nom').addEventListener('input', validerFormulaire);
     document.getElementById('overlay-rejoindre').classList.add('visible');
     chargerSocket();
@@ -791,7 +781,7 @@
 
   function validerFormulaire() {
     const nom = document.getElementById('input-nom').value.trim();
-    document.getElementById('btn-rejoindre-submit').disabled = !(nom && clanJoinForm);
+    document.getElementById('btn-rejoindre-submit').disabled = !nom;
   }
 
   // ── Socket.io ────────────────────────────────────────────────────────
@@ -810,12 +800,12 @@
   function connecterSocket() {
     socket = io();  // eslint-disable-line no-undef
 
-    socket.on('rejoint', ({ tirages }) => {
+    socket.on('rejoint', ({ tirages, clan, carte }) => {
       document.getElementById('overlay-rejoindre').classList.remove('visible');
-      clanActuel    = clanJoinForm;
+      clanActuel    = clan;
       nomJoueur     = document.getElementById('input-nom').value.trim();
       tiresOnline   = tirages;
-      carteActuelle = genererCarte();
+      carteActuelle = carte;
 
       afficherBadgeClan(clanActuel);
       document.getElementById('badge-online').style.display = 'inline-flex';
@@ -826,6 +816,7 @@
     });
 
     socket.on('numero-tire', ({ num }) => {
+      if (partieTerminee) return;
       tiresOnline.push(num);
       afficherInfoNumero(num);
       marquerNumero(num);
@@ -833,13 +824,26 @@
       verifierVictoire();
     });
 
-    socket.on('gagnant', ({ nom, clan, rang }) => {
-      if (nom === nomJoueur) afficherGagnant(nom, clan, rang);
-      else afficherToastGagnant(nom, clan, rang);
+    socket.on('gagnant', ({ nom, clan }) => {
+      if (nom === nomJoueur) afficherGagnant(nom, clan, true);
+      else afficherGagnant(nom, clan, false);
     });
 
-    socket.on('partie-terminee', () => {
-      alert('La partie a \u00e9t\u00e9 termin\u00e9e par le meneur.');
+    socket.on('partie-terminee', ({ raison }) => {
+      partieTerminee = true;
+      document.getElementById('btn-wendio').classList.remove('visible');
+      document.body.classList.add('partie-terminee');
+      // Si termin\u00e9e par le meneur (sans gagnant), informer le joueur
+      if (raison === 'meneur' || raison === 'meneur-deco') {
+        const winJoueur = document.getElementById('win-joueur');
+        // Si l'overlay 'gagnant' est d\u00e9j\u00e0 visible, ne pas l'\u00e9craser
+        if (!document.getElementById('win-overlay').classList.contains('visible')) {
+          winJoueur.textContent = '\u23f9 Partie termin\u00e9e';
+          document.getElementById('win-clan').textContent =
+            raison === 'meneur-deco' ? 'Le meneur s\u2019est d\u00e9connect\u00e9.' : 'Le meneur a clos la partie.';
+          document.getElementById('win-overlay').classList.add('visible');
+        }
+      }
     });
 
     socket.on('erreur', msg => {
@@ -851,8 +855,8 @@
 
   function rejoindrePartie() {
     const nom = document.getElementById('input-nom').value.trim();
-    if (!nom || !clanJoinForm || !socket) return;
-    socket.emit('rejoindre', { code: codePartie, nom, clan: clanJoinForm });
+    if (!nom || !socket) return;
+    socket.emit('rejoindre', { code: codePartie, nom });
   }
 
   // ── Bascule setup ↔ jeu ──────────────────────────────────────────────
@@ -879,6 +883,7 @@
 
   // ── Nouvelle carte / retour setup ────────────────────────────────────
   function nouvellePartie() {
+    if (socket) { try { socket.disconnect(); } catch (e) {} }
     clanActuel          = null;
     carteActuelle       = null;
     selectionnees       = new Set();
@@ -887,8 +892,9 @@
     socket              = null;
     codePartie          = null;
     nomJoueur           = null;
-    clanJoinForm        = null;
     dernierNumeroClique = null;
+    partieTerminee      = false;
+    document.body.classList.remove('partie-terminee');
 
     document.querySelectorAll('.btn-clan').forEach(b => b.classList.remove('actif'));
     document.getElementById('objectif').textContent    = 'S\u00e9lectionnez un clan pour voir votre objectif';
@@ -1029,6 +1035,7 @@
 
           cell.textContent = val;
           cell.onclick = () => {
+            if (partieTerminee) return;
             if (selectionnees.has(id)) selectionnees.delete(id);
             else selectionnees.add(id);
             afficherInfoNumero(val);
@@ -1083,7 +1090,7 @@
 
     if (gagne) {
       if (modeOnline) document.getElementById('btn-wendio').classList.add('visible');
-      else afficherGagnant(null, clanActuel, null);
+      else afficherGagnant(null, clanActuel, true);
     }
   }
 
@@ -1094,33 +1101,22 @@
     document.getElementById('btn-wendio').classList.remove('visible');
   }
 
-  const MEDAILLES = ['\uD83E\uDD47', '\uD83E\uDD48', '\uD83E\uDD49'];
+  const TROPHEE = '\uD83C\uDFC6';
 
-  function afficherGagnant(nom, clan, rang) {
-    const c       = CLANS[clan] || {};
-    const medaille = rang ? (MEDAILLES[rang - 1] || '#' + rang) : MEDAILLES[0];
-    document.getElementById('win-joueur').textContent = nom
-      ? medaille + ' ' + (c.icon || '') + ' ' + nom
-      : (c.icon || '') + ' Vous avez gagn\u00e9 !';
+  function afficherGagnant(nom, clan, isMoi) {
+    const c = CLANS[clan] || {};
+    const winJoueur = document.getElementById('win-joueur');
+    if (isMoi) {
+      winJoueur.textContent = TROPHEE + ' ' + (c.icon || '') + ' Bravo' + (nom ? ' ' + nom : '') + ' !';
+    } else {
+      winJoueur.textContent = (c.icon || '') + ' ' + nom + ' a gagn\u00e9';
+    }
     document.getElementById('win-clan').textContent = clan + ' \u2014 ' + (c.label || '');
     document.getElementById('win-overlay').classList.add('visible');
+    document.getElementById('btn-wendio').classList.remove('visible');
   }
 
-  let _toastTimer = null;
-  function afficherToastGagnant(nom, clan, rang) {
-    const c       = CLANS[clan] || {};
-    const medaille = MEDAILLES[rang - 1] || '#' + rang;
-    const ordinal  = rang === 1 ? '1re place' : rang + 'e place';
-    document.getElementById('toast-rang').textContent  = medaille + ' ' + ordinal;
-    document.getElementById('toast-nom').textContent   = (c.icon || '') + ' ' + nom + ' a gagn\u00e9 !';
-    document.getElementById('toast-clan').textContent  = clan + ' \u2014 Continuez \u00e0 jouer !';
-    document.getElementById('toast-gagnant').classList.add('visible');
-    clearTimeout(_toastTimer);
-    _toastTimer = setTimeout(fermerToast, 6000);
-  }
-
-  function fermerToast() { document.getElementById('toast-gagnant').classList.remove('visible'); }
-  function fermerWin()   { document.getElementById('win-overlay').classList.remove('visible'); }
+  function fermerWin() { document.getElementById('win-overlay').classList.remove('visible'); }
 
   demarrer();
 
