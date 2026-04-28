@@ -122,6 +122,7 @@ io.on('connection', socket => {
       joueurs:    new Map(),       // socketId → { nom, clan, carte, token, deconnecte }
       tokenIndex: new Map(),       // sessionToken → socketId (pour reconnexion)
       cartes:     new Set(),
+      demarree:   false,            // false = lobby ouvert, true = nouveaux joueurs refusés
       terminee:   false
     });
     socket.join(codePartie);
@@ -174,6 +175,12 @@ io.on('connection', socket => {
       }
     }
 
+    // ── Nouveau joueur : refusé si la partie a déjà commencé ───────────
+    if (partie.demarree) {
+      socket.emit('erreur', 'La partie a déjà commencé. Demande au meneur de t’ajouter à la prochaine.');
+      return;
+    }
+
     // ── Nouveau joueur : nom unique dans la partie ─────────────────────
     const nomDejaPris = Array.from(partie.joueurs.values()).some(j =>
       j.nom.toLowerCase() === nomPropre.toLowerCase()
@@ -224,6 +231,15 @@ io.on('connection', socket => {
 
     io.to(code).emit('numero-tire', { num });
     console.log(`[${code}] Numéro tiré : ${num}`);
+  });
+
+  // Meneur : démarrer la partie (clôt les inscriptions, code+QR cachés côté UI)
+  socket.on('demarrer', ({ code }) => {
+    const partie = parties.get(code);
+    if (!partie || partie.maitre !== socket.id || partie.demarree) return;
+    partie.demarree = true;
+    io.to(code).emit('partie-demarree');
+    console.log(`[${code}] Partie démarrée — ${partie.joueurs.size} joueur(s) verrouillé(s)`);
   });
 
   // Meneur : terminer la partie explicitement

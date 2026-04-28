@@ -521,7 +521,7 @@
     <h2>&#127805; WENDIO ! &#127805;</h2>
     <div class="win-joueur" id="win-joueur"></div>
     <div class="win-clan"   id="win-clan"></div>
-    <button onclick="nouvellePartieMeneur()">Nouvelle partie</button>
+    <button onclick="nouvellePartieMeneur()">🏁 Fermer la partie</button>
   </div>
 </div>
 
@@ -551,14 +551,17 @@
     <div class="online-actif" id="online-actif">
       <div>
         <div class="clan-actif-banner" id="clan-actif-banner"></div>
-        <div class="code-label">Code de la partie</div>
-        <div class="code-valeur" id="code-affiche">----</div>
-        <div class="lien-rejoin" id="lien-rejoin"></div>
+        <div id="zone-code">
+          <div class="code-label">Code de la partie</div>
+          <div class="code-valeur" id="code-affiche">----</div>
+          <div class="lien-rejoin" id="lien-rejoin"></div>
+        </div>
         <div class="joueurs-titre">Joueurs connect&#233;s : <strong id="joueurs-count">0</strong></div>
         <div id="joueurs-items"></div>
+        <button class="btn-creer" id="btn-commencer" onclick="commencerPartie()" style="margin-top:14px;display:none;" disabled>&#9654;&#65039; Commencer la partie</button>
         <button class="btn-arreter" id="btn-arreter" onclick="arreterPartie()">&#9646; Terminer la partie</button>
       </div>
-      <div class="qr-bloc">
+      <div class="qr-bloc" id="qr-bloc">
         <div id="qr-rejoindre"></div>
         <small>Lien joueur</small>
       </div>
@@ -696,6 +699,16 @@
       banner.appendChild(lbl);
       banner.classList.add('visible');
 
+      // Affiche le bouton "Commencer" (désactivé tant qu'aucun joueur)
+      const btnCommencer = document.getElementById('btn-commencer');
+      btnCommencer.style.display = 'block';
+      btnCommencer.disabled = true;
+      btnCommencer.textContent = '▶️ Commencer la partie';
+
+      // Réafficher zone-code + QR pour les nouvelles parties
+      document.getElementById('zone-code').style.display = '';
+      document.getElementById('qr-bloc').style.display = '';
+
       const qrEl = document.getElementById('qr-rejoindre');
       qrEl.replaceChildren();
       if (typeof QRCode !== 'undefined') {
@@ -718,6 +731,12 @@
       muted.textContent   = '\u00a0' + clan;
       item.append(icon, strong, muted);
       document.getElementById('joueurs-items').appendChild(item);
+
+      // Active le bouton "Commencer" d\u00e8s qu'un joueur a rejoint
+      const btnCommencer = document.getElementById('btn-commencer');
+      if (btnCommencer && btnCommencer.style.display !== 'none' && count > 0) {
+        btnCommencer.disabled = false;
+      }
     });
 
     socket.on('joueur-deconnecte', ({ count }) => {
@@ -752,6 +771,15 @@
   function creerPartie() {
     if (!socket || !clanChoisi) return;
     socket.emit('creer', { clan: clanChoisi });
+  }
+
+  function commencerPartie() {
+    if (!socket || !codePartie) return;
+    socket.emit('demarrer', { code: codePartie });
+    // Cache le code, le lien et le QR — la partie est lancée
+    document.getElementById('zone-code').style.display = 'none';
+    document.getElementById('qr-bloc').style.display = 'none';
+    document.getElementById('btn-commencer').style.display = 'none';
   }
 
   function terminerCoteMeneur(raison) {
@@ -808,6 +836,14 @@
     document.getElementById('joueurs-items').replaceChildren();
     document.getElementById('joueurs-count').textContent = '0';
     document.getElementById('clan-actif-banner').classList.remove('visible');
+
+    // Réinitialiser bouton commencer + zone code/QR pour la prochaine partie
+    const btnCommencer = document.getElementById('btn-commencer');
+    btnCommencer.style.display = 'none';
+    btnCommencer.disabled = true;
+    document.getElementById('zone-code').style.display = '';
+    document.getElementById('qr-bloc').style.display = '';
+
     fermerWin();
     resetJeu();
   }
