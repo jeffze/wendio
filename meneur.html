@@ -666,6 +666,12 @@
 
     socket.on('connect',    () => console.log('[WENDIO meneur] socket connecté id=', socket.id));
     socket.on('disconnect', r  => console.log('[WENDIO meneur] socket déconnecté :', r));
+    socket.on('connect_error', err => console.error('[WENDIO meneur] connect_error:', err.message));
+
+    // Trace TOUS les events reçus pour diagnostic
+    socket.onAny((event, ...args) => {
+      console.log('[WENDIO meneur] ←', event, args);
+    });
 
     socket.on('partie-creee', ({ code, clan }) => {
       codePartie = code;
