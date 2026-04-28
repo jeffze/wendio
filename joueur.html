@@ -688,6 +688,23 @@
   let oursDataUrl         = null; // cache canvas : fond noir supprimé
   let partieTerminee      = false;
 
+  // Token de session pour permettre la reconnexion (téléphone en veille, refresh, etc.)
+  // Stocké dans sessionStorage : un par onglet, partagé entre rechargements.
+  let sessionToken = (function () {
+    try {
+      let t = sessionStorage.getItem('wendio-token');
+      if (!t) {
+        t = (crypto && crypto.randomUUID)
+          ? crypto.randomUUID()
+          : 'tok-' + Math.random().toString(36).slice(2) + '-' + Date.now();
+        sessionStorage.setItem('wendio-token', t);
+      }
+      return t;
+    } catch (e) {
+      return 'tok-' + Math.random().toString(36).slice(2) + '-' + Date.now();
+    }
+  })();
+
   // ── Création DOM sécurisée d'un bouton clan ──────────────────────────
   function creerBoutonClan(nom, clan, className, onclickFn) {
     const btn    = document.createElement('button');
@@ -800,7 +817,24 @@
   function connecterSocket() {
     socket = io();  // eslint-disable-line no-undef
 
+    // Reconnexion automatique : si on était déjà dans la partie, re-rejoindre avec le token
+    socket.on('connect', () => {
+      if (clanActuel && nomJoueur && codePartie && !partieTerminee) {
+        socket.emit('rejoindre', { code: codePartie, nom: nomJoueur, sessionToken });
+      }
+    });
+
     socket.on('rejoint', ({ tirages, clan, carte }) => {
+      const enJeu = document.getElementById('vue-jeu').classList.contains('visible');
+      if (enJeu && clanActuel) {
+        // Reconnexion silencieuse — on garde nomJoueur, on resync les tirages et la carte
+        tiresOnline   = tirages;
+        carteActuelle = carte;
+        rendreGrille();
+        tirages.forEach(num => marquerNumero(num));
+        return;
+      }
+      // Premier rejoint
       document.getElementById('overlay-rejoindre').classList.remove('visible');
       clanActuel    = clan;
       nomJoueur     = document.getElementById('input-nom').value.trim();
@@ -850,14 +884,25 @@
       const el = document.getElementById('msg-erreur');
       el.textContent = msg;
       el.classList.add('visible');
+      // Réactive le bouton Rejoindre si on était en train de rejoindre
+      const btn = document.getElementById('btn-rejoindre-submit');
+      if (btn) btn.disabled = !document.getElementById('input-nom').value.trim();
     });
   }
 
   function rejoindrePartie() {
     const nom = document.getElementById('input-nom').value.trim();
     if (!nom || !socket) return;
-    socket.emit('rejoindre', { code: codePartie, nom });
+    document.getElementById('btn-rejoindre-submit').disabled = true; // anti double-click
+    socket.emit('rejoindre', { code: codePartie, nom, sessionToken });
   }
+
+  // Forcer la reconnexion socket au retour de veille (tel/onglet revient au premier plan)
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && socket && !socket.connected) {
+      try { socket.connect(); } catch (e) {}
+    }
+  });
 
   // ── Bascule setup ↔ jeu ──────────────────────────────────────────────
   function basculerVersJeu() {

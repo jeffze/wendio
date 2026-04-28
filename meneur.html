@@ -712,6 +712,12 @@
     });
 
     socket.on('joueur-deconnecte', ({ count }) => {
+      // On ne décrémente plus visuellement — le joueur peut se reconnecter via sessionToken.
+      // Le serveur garde l'entrée et renvoie le count actuel (stable).
+      document.getElementById('joueurs-count').textContent = count;
+    });
+
+    socket.on('joueur-reconnecte', ({ count }) => {
       document.getElementById('joueurs-count').textContent = count;
     });
 
@@ -723,8 +729,14 @@
       mettreAJourSuivi(num);
     });
 
-    socket.on('gagnant',          ({ nom, clan }) => afficherGagnant(nom, clan));
-    socket.on('partie-terminee',  ({ raison })   => terminerCoteMeneur(raison));
+    socket.on('gagnant', ({ nom, clan }) => {
+      console.log('[WENDIO] gagnant reçu :', nom, clan);
+      afficherGagnant(nom, clan);
+    });
+    socket.on('partie-terminee', ({ raison }) => {
+      console.log('[WENDIO] partie terminée :', raison);
+      terminerCoteMeneur(raison);
+    });
     socket.on('tous-tires', () => { document.getElementById('btn-tirer').disabled = true; });
   }
 
@@ -737,7 +749,15 @@
     partieTerminee = true;
     document.getElementById('btn-tirer').disabled = true;
     document.getElementById('btn-arreter').classList.remove('visible');
-    // L'overlay 'gagnant' s'affiche déjà via socket.on('gagnant') si raison='gagnant'.
+
+    // Fallback défensif : si on reçoit partie-terminee/gagnant SANS avoir reçu
+    // l'event 'gagnant' (race condition / glitch réseau), afficher un overlay générique.
+    if (raison === 'gagnant' &&
+        !document.getElementById('win-overlay').classList.contains('visible')) {
+      document.getElementById('win-joueur').textContent = TROPHEE + ' Un joueur a gagné !';
+      document.getElementById('win-clan').textContent   = 'Partie terminée — cliquez « Nouvelle partie »';
+      document.getElementById('win-overlay').classList.add('visible');
+    }
   }
 
   function arreterPartie() {

@@ -116,20 +116,21 @@ io.on('connection', socket => {
     }
     codePartie = genererCode();
     parties.set(codePartie, {
-      maitre:   socket.id,
+      maitre:     socket.id,
       clan,
-      tirages:  [],
-      joueurs:  new Map(),
-      cartes:   new Set(),
-      terminee: false
+      tirages:    [],
+      joueurs:    new Map(),       // socketId → { nom, clan, carte, token, deconnecte }
+      tokenIndex: new Map(),       // sessionToken → socketId (pour reconnexion)
+      cartes:     new Set(),
+      terminee:   false
     });
     socket.join(codePartie);
     socket.emit('partie-creee', { code: codePartie, clan });
     console.log(`[${codePartie}] Partie créée — clan imposé : ${clan}`);
   });
 
-  // Joueur : rejoindre une partie existante (clan ignoré, imposé par la partie)
-  socket.on('rejoindre', ({ code, nom }) => {
+  // Joueur : rejoindre une partie existante (clan imposé par la partie, sessionToken pour reconnexion)
+  socket.on('rejoindre', ({ code, nom, sessionToken }) => {
     const partie = parties.get(code);
     if (!partie) {
       socket.emit('erreur', 'Code de partie invalide. Vérifiez le code et réessayez.');
@@ -144,10 +145,45 @@ io.on('connection', socket => {
       socket.emit('erreur', 'Prénom requis.');
       return;
     }
+    const token = String(sessionToken || '').slice(0, 64);
     codePartie = code;
     socket.join(code);
 
-    // Génère une carte unique pour cette partie
+    // ── Reconnexion : même sessionToken déjà connu dans la partie ──────
+    if (token) {
+      const oldSocketId = partie.tokenIndex.get(token);
+      if (oldSocketId && partie.joueurs.has(oldSocketId)) {
+        const data = partie.joueurs.get(oldSocketId);
+        // Migre l'entrée vers le nouveau socketId
+        partie.joueurs.delete(oldSocketId);
+        data.nom        = nomPropre;
+        data.deconnecte = false;
+        partie.joueurs.set(socket.id, data);
+        partie.tokenIndex.set(token, socket.id);
+
+        socket.emit('rejoint', {
+          tirages: partie.tirages,
+          clan:    partie.clan,
+          carte:   data.carte
+        });
+        io.to(partie.maitre).emit('joueur-reconnecte', {
+          nom: nomPropre, count: partie.joueurs.size
+        });
+        console.log(`[${code}] ${nomPropre} reconnecté (${partie.joueurs.size} joueur(s))`);
+        return;
+      }
+    }
+
+    // ── Nouveau joueur : nom unique dans la partie ─────────────────────
+    const nomDejaPris = Array.from(partie.joueurs.values()).some(j =>
+      j.nom.toLowerCase() === nomPropre.toLowerCase()
+    );
+    if (nomDejaPris) {
+      socket.emit('erreur', 'Ce prénom est déjà pris dans cette partie. Choisissez-en un autre.');
+      return;
+    }
+
+    // ── Nouveau joueur : carte unique ──────────────────────────────────
     let carte, hash, attempts = 0;
     do {
       carte = genererCarte();
@@ -156,16 +192,14 @@ io.on('connection', socket => {
     } while (partie.cartes.has(hash) && attempts < 50);
     partie.cartes.add(hash);
 
-    partie.joueurs.set(socket.id, { nom: nomPropre, clan: partie.clan, carte });
+    partie.joueurs.set(socket.id, { nom: nomPropre, clan: partie.clan, carte, token, deconnecte: false });
+    if (token) partie.tokenIndex.set(token, socket.id);
 
-    // Envoie au joueur : tirages déjà faits, le clan imposé, sa carte
     socket.emit('rejoint', {
       tirages: partie.tirages,
       clan:    partie.clan,
       carte
     });
-
-    // Notifier le meneur
     io.to(partie.maitre).emit('joueur-connecte', {
       nom: nomPropre, clan: partie.clan, count: partie.joueurs.size
     });
@@ -238,14 +272,16 @@ io.on('connection', socket => {
       parties.delete(codePartie);
       console.log(`[${codePartie}] Partie terminée (meneur déconnecté)`);
     } else {
+      // Joueur déconnecté : on garde l'entrée pour permettre la reconnexion via sessionToken.
+      // Le compteur ne décrémente PAS — le meneur voit juste un statut "en veille" potentiel.
       const joueur = partie.joueurs.get(socket.id);
-      partie.joueurs.delete(socket.id);
       if (joueur) {
+        joueur.deconnecte = true;
         io.to(partie.maitre).emit('joueur-deconnecte', {
-          nom: joueur.nom,
+          nom:   joueur.nom,
           count: partie.joueurs.size
         });
-        console.log(`[${codePartie}] ${joueur.nom} déconnecté — ${partie.joueurs.size} joueur(s)`);
+        console.log(`[${codePartie}] ${joueur.nom} déconnecté (peut se reconnecter)`);
       }
     }
   });
