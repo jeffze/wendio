@@ -611,8 +611,8 @@
     <h2>&#127805; WENDIO ! &#127805;</h2>
     <div class="win-joueur" id="win-joueur"></div>
     <div class="win-clan"   id="win-clan"></div>
-    <button onclick="fermerWin()">Continuer</button>
-    <button onclick="nouvellePartie()">Nouvelle carte</button>
+    <button onclick="fermerWin()">Voir ma carte</button>
+    <button onclick="quitterPartie()">🚪 Quitter la partie</button>
   </div>
 </div>
 
@@ -1162,6 +1162,12 @@
   }
 
   function fermerWin() { document.getElementById('win-overlay').classList.remove('visible'); }
+
+  function quitterPartie() {
+    if (socket) { try { socket.disconnect(); } catch (e) {} }
+    try { sessionStorage.removeItem('wendio-token'); } catch (e) {}
+    window.location.href = 'lobby.html';
+  }
 
   demarrer();
 
