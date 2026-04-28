@@ -116,6 +116,58 @@
       font-family: inherit;
     }
     .btn-creer:hover { transform: translateY(-1px); box-shadow: 0 6px 22px rgba(30,144,80,.45); }
+    .btn-creer:disabled { opacity: .42; cursor: default; box-shadow: none; transform: none; }
+
+    /* Sélection du clan imposé (meneur) */
+    .clan-choix-titre { color: var(--muted); font-size: .85rem; text-align: center; margin-bottom: 12px; }
+    .clan-choix-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .btn-clan-meneur {
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 8px;
+      cursor: pointer;
+      color: var(--text);
+      font-weight: 700;
+      font-size: .9rem;
+      line-height: 1.35;
+      text-align: center;
+      transition: all .2s;
+      font-family: inherit;
+    }
+    .btn-clan-meneur:hover { border-color: var(--gold); background: #2a1c0c; }
+    .btn-clan-meneur.actif {
+      background: linear-gradient(135deg, var(--gold) 0%, var(--gold-lt) 100%);
+      color: #0c0a07;
+      border-color: transparent;
+      box-shadow: 0 3px 12px rgba(192,120,8,.35);
+    }
+    .btn-clan-meneur small { display: block; font-weight: 400; font-size: .76em; opacity: .85; margin-top: 2px; }
+    .clan-objectif {
+      text-align: center; font-size: .8rem; color: var(--muted);
+      font-style: italic; min-height: 18px; margin: 10px 0 4px;
+    }
+
+    /* Bannière du clan actif (après création) */
+    .clan-actif-banner {
+      background: linear-gradient(135deg, rgba(192,120,8,.18), rgba(232,168,40,.12));
+      border: 1px solid rgba(192,120,8,.42);
+      border-radius: 10px;
+      padding: 8px 12px;
+      margin-bottom: 14px;
+      font-size: .82rem;
+      color: var(--text);
+      display: none;
+      align-items: center;
+      gap: 8px;
+    }
+    .clan-actif-banner.visible { display: flex; }
+    .clan-actif-banner strong { color: var(--gold-lt); }
 
     .online-actif { display: none; }
     .online-actif.visible { display: grid; grid-template-columns: 1fr auto; gap: 20px; align-items: start; }
@@ -469,8 +521,7 @@
     <h2>&#127805; WENDIO ! &#127805;</h2>
     <div class="win-joueur" id="win-joueur"></div>
     <div class="win-clan"   id="win-clan"></div>
-    <button onclick="fermerWin()">Continuer</button>
-    <button onclick="resetJeu()">Nouvelle partie</button>
+    <button onclick="nouvellePartieMeneur()">Nouvelle partie</button>
   </div>
 </div>
 
@@ -491,12 +542,15 @@
 
   <!-- Panel online -->
   <div id="panneau-online">
-    <div id="online-creation" style="text-align:center;">
-      <p style="color:var(--muted);font-size:.9rem;">Cr&#233;ez une partie pour obtenir un code &#224; partager.</p>
-      <button class="btn-creer" onclick="creerPartie()">&#10010; Cr&#233;er une partie</button>
+    <div id="online-creation">
+      <div class="clan-choix-titre">Choisissez le clan que les joueurs incarneront pour cette partie&#160;:</div>
+      <div class="clan-choix-grid" id="clan-choix-grid"></div>
+      <div class="clan-objectif" id="clan-objectif">&#160;</div>
+      <button class="btn-creer" id="btn-creer-partie" onclick="creerPartie()" disabled>&#10010; Cr&#233;er la partie</button>
     </div>
     <div class="online-actif" id="online-actif">
       <div>
+        <div class="clan-actif-banner" id="clan-actif-banner"></div>
         <div class="code-label">Code de la partie</div>
         <div class="code-valeur" id="code-affiche">----</div>
         <div class="lien-rejoin" id="lien-rejoin"></div>
@@ -533,7 +587,7 @@
 <div id="tableau">
   <h2>Tableau des tirages</h2>
   <div id="bandeau-gagnant">
-    <div class="bandeau-titre">&#127805; Classement</div>
+    <div class="bandeau-titre">&#127942; Gagnant</div>
     <div id="gagnants-liste"></div>
   </div>
   <div class="suivi-grille" id="suivi-grille"></div>
@@ -544,12 +598,14 @@
 <script src="data.js"></script>
 <script>
   'use strict';
-  let tirages      = [];
-  let numeroActuel = null;
-  let modeOnline   = false;
-  let modePhysique = false;
-  let socket       = null;
-  let codePartie   = null;
+  let tirages        = [];
+  let numeroActuel   = null;
+  let modeOnline     = false;
+  let modePhysique   = false;
+  let socket         = null;
+  let codePartie     = null;
+  let clanChoisi     = null;
+  let partieTerminee = false;
 
   // ── Mode ──────────────────────────────────────────────────────────────
   function setMode(mode) {
@@ -575,10 +631,40 @@
     document.head.appendChild(s);
   }
 
+  // ── Sélection clan imposé ────────────────────────────────────────────
+  function genererBoutonsClanMeneur() {
+    const grid = document.getElementById('clan-choix-grid');
+    grid.replaceChildren();
+    Object.entries(CLANS).forEach(([nom, clan]) => {
+      const btn = document.createElement('button');
+      btn.className     = 'btn-clan-meneur';
+      btn.id            = 'meneur-clan-' + nom;
+      btn.dataset.nom   = nom;
+      const icon   = document.createTextNode(clan.icon + ' ');
+      const strong = document.createElement('strong');
+      strong.textContent = nom;
+      const small  = document.createElement('small');
+      small.textContent = clan.label;
+      btn.append(icon, strong, document.createElement('br'), small);
+      btn.onclick = () => choisirClanMeneur(nom);
+      grid.appendChild(btn);
+    });
+  }
+
+  function choisirClanMeneur(nom) {
+    clanChoisi = nom;
+    document.querySelectorAll('.btn-clan-meneur').forEach(b => b.classList.remove('actif'));
+    document.getElementById('meneur-clan-' + nom).classList.add('actif');
+    const clan = CLANS[nom];
+    document.getElementById('clan-objectif').textContent =
+      'Objectif des joueurs : ' + clan.label;
+    document.getElementById('btn-creer-partie').disabled = false;
+  }
+
   function connecterSocket() {
     socket = io();  // eslint-disable-line no-undef
 
-    socket.on('partie-creee', ({ code }) => {
+    socket.on('partie-creee', ({ code, clan }) => {
       codePartie = code;
       const lien = window.location.origin + '/joueur.html?code=' + code;
       document.getElementById('code-affiche').textContent = code;
@@ -586,12 +672,29 @@
       document.getElementById('online-creation').style.display = 'none';
       document.getElementById('online-actif').classList.add('visible');
       document.getElementById('btn-arreter').classList.add('visible');
+
+      // Bannière clan imposé
+      const c = CLANS[clan] || {};
+      const banner = document.getElementById('clan-actif-banner');
+      banner.replaceChildren();
+      banner.append(document.createTextNode((c.icon || '') + ' '));
+      const lbl = document.createElement('span');
+      lbl.append('Clan imposé : ');
+      const strong = document.createElement('strong');
+      strong.textContent = clan;
+      lbl.appendChild(strong);
+      lbl.append(' — ' + (c.label || ''));
+      banner.appendChild(lbl);
+      banner.classList.add('visible');
+
       const qrEl = document.getElementById('qr-rejoindre');
       qrEl.replaceChildren();
       if (typeof QRCode !== 'undefined') {
         new QRCode(qrEl, { text: lien, width: 120, height: 120 });  // eslint-disable-line no-undef
       }
     });
+
+    socket.on('erreur', msg => alert(msg));
 
     socket.on('joueur-connecte', ({ nom, clan, count }) => {
       document.getElementById('joueurs-count').textContent = count;
@@ -620,27 +723,54 @@
       mettreAJourSuivi(num);
     });
 
-    socket.on('gagnant',    ({ nom, clan, rang }) => afficherGagnant(nom, clan, rang));
+    socket.on('gagnant',          ({ nom, clan }) => afficherGagnant(nom, clan));
+    socket.on('partie-terminee',  ({ raison })   => terminerCoteMeneur(raison));
     socket.on('tous-tires', () => { document.getElementById('btn-tirer').disabled = true; });
   }
 
-  function creerPartie()  { if (socket) socket.emit('creer'); }
+  function creerPartie() {
+    if (!socket || !clanChoisi) return;
+    socket.emit('creer', { clan: clanChoisi });
+  }
+
+  function terminerCoteMeneur(raison) {
+    partieTerminee = true;
+    document.getElementById('btn-tirer').disabled = true;
+    document.getElementById('btn-arreter').classList.remove('visible');
+    // L'overlay 'gagnant' s'affiche déjà via socket.on('gagnant') si raison='gagnant'.
+  }
 
   function arreterPartie() {
     if (!socket || !codePartie) return;
     if (!confirm('Terminer la partie\u00a0? Tous les joueurs seront d\u00e9connect\u00e9s.')) return;
     socket.emit('terminer', { code: codePartie });
-    codePartie = null;
+    nouvellePartieMeneur({ skipTerminer: true });
+  }
+
+  function nouvellePartieMeneur(opts) {
+    opts = opts || {};
+    if (!opts.skipTerminer && socket && codePartie && !partieTerminee) {
+      socket.emit('terminer', { code: codePartie });
+    }
+    codePartie     = null;
+    clanChoisi     = null;
+    partieTerminee = false;
+    document.querySelectorAll('.btn-clan-meneur').forEach(b => b.classList.remove('actif'));
+    document.getElementById('clan-objectif').textContent = '\u00a0';
+    document.getElementById('btn-creer-partie').disabled = true;
     document.getElementById('online-actif').classList.remove('visible');
     document.getElementById('btn-arreter').classList.remove('visible');
     document.getElementById('online-creation').style.display = '';
     document.getElementById('joueurs-items').replaceChildren();
     document.getElementById('joueurs-count').textContent = '0';
+    document.getElementById('clan-actif-banner').classList.remove('visible');
+    fermerWin();
     resetJeu();
   }
 
   // ── Tirer ─────────────────────────────────────────────────────────────
   function actionTirer() {
+    if (partieTerminee) return;
     if (modeOnline && socket && codePartie) {
       socket.emit('tirer', { code: codePartie });
     } else {
@@ -699,7 +829,7 @@
           if (tirages.includes(num)) {
             jouerSon(num);
             surlignerActuel(num);
-          } else if (modePhysique) {
+          } else if (modePhysique && !partieTerminee) {
             tirages.push(num);
             numeroActuel = num;
             afficherCarte(num);
@@ -733,11 +863,11 @@
   function rejouerSon() { if (numeroActuel) jouerSon(numeroActuel); }
 
   // ── Gagnant ───────────────────────────────────────────────────────────
-  const MEDAILLES = ['\uD83E\uDD47', '\uD83E\uDD48', '\uD83E\uDD49'];
+  const TROPHEE = '\uD83C\uDFC6';
 
-  function afficherGagnant(nom, clan, rang) {
+  function afficherGagnant(nom, clan) {
     const c       = CLANS[clan] || {};
-    const medaille = MEDAILLES[rang - 1] || '#' + rang;
+    const medaille = TROPHEE;
 
     // Grand overlay
     document.getElementById('win-joueur').textContent = medaille + ' ' + (c.icon || '') + ' ' + nom;
@@ -781,6 +911,7 @@
   }
 
   initialiser();
+  genererBoutonsClanMeneur();
 
   // ── Mode démo (paramètre URL ?demo=) ──────────────────────────────────
   (function() {

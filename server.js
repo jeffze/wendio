@@ -11,12 +11,90 @@ const io         = new Server(httpServer);
 // Sert tous les fichiers statiques (HTML, JS, CSS, audio…)
 app.use(express.static(path.join(__dirname)));
 
+// ── Config grille (miroir de data.js) ────────────────────────────────
+const LIGNES = ['W', 'E', 'N', 'D', 'I', 'O'];
+const CONFIG = {
+  W: { min:  1, max: 12, count: 6 },
+  E: { min: 13, max: 24, count: 6 },
+  N: { min: 25, max: 36, count: 4 },
+  D: { min: 37, max: 48, count: 4 },
+  I: { min: 49, max: 60, count: 6 },
+  O: { min: 61, max: 72, count: 6 },
+};
+const CLANS_VALIDES   = new Set(['Chevreuil', 'Loup', 'Ours', 'Tortue']);
+const CLAN_VICTOIRE   = { Chevreuil: 'ligne', Loup: 'coins', Ours: 'carre', Tortue: 'pleine' };
+
+// Mêmes règles que data.js côté client (cases cœur N2,N3,D2,D3)
+function estCoeur(ligne, colIdx) {
+  return (ligne === 'N' || ligne === 'D') && (colIdx === 2 || colIdx === 3);
+}
+function valeurCase(carte, ligne, colIdx) {
+  if (estCoeur(ligne, colIdx)) return null;
+  if (ligne === 'N' || ligne === 'D') {
+    return colIdx < 2 ? carte[ligne][colIdx] : carte[ligne][colIdx - 2];
+  }
+  return carte[ligne][colIdx];
+}
+
+// Vérifie qu'une carte remplit la condition de victoire pour un clan donné
+function victoireValide(carte, clan, tirages) {
+  const cond = CLAN_VICTOIRE[clan];
+  if (!cond) return false;
+  const tireSet = new Set(tirages);
+  const has = (l, c) => {
+    if (estCoeur(l, c)) return false;
+    return tireSet.has(valeurCase(carte, l, c));
+  };
+  if (cond === 'coins') {
+    return has('W', 0) && has('W', 5) && has('O', 0) && has('O', 5);
+  }
+  if (cond === 'pleine') {
+    let n = 0;
+    for (const l of LIGNES) for (let c = 0; c < 6; c++) if (!estCoeur(l, c) && has(l, c)) n++;
+    return n >= 32;
+  }
+  if (cond === 'carre') {
+    for (let li = 1; li <= 4; li++) for (let ci = 1; ci <= 4; ci++) {
+      const l = LIGNES[li];
+      if (!estCoeur(l, ci) && !has(l, ci)) return false;
+    }
+    return true;
+  }
+  if (cond === 'ligne') {
+    for (let li = 0; li < 6; li++) {
+      const l = LIGNES[li]; let ok = true;
+      for (let ci = 0; ci < 6; ci++) if (!estCoeur(l, ci) && !has(l, ci)) { ok = false; break; }
+      if (ok) return true;
+    }
+    return false;
+  }
+  return false;
+}
+
+function genererCarte() {
+  const carte = {};
+  LIGNES.forEach(ligne => {
+    const { min, max, count } = CONFIG[ligne];
+    const pool = [];
+    for (let i = min; i <= max; i++) pool.push(i);
+    for (let i = pool.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [pool[i], pool[j]] = [pool[j], pool[i]];
+    }
+    carte[ligne] = pool.slice(0, count);
+  });
+  return carte;
+}
+
+function carteHash(carte) {
+  return LIGNES.map(l => carte[l].join(',')).join('|');
+}
+
 // ── Stockage des parties en mémoire ──────────────────────────────────
-// Map : code → { maitre: socketId, tirages: number[], joueurs: Map<socketId, {nom, clan}> }
+// Map : code → { maitre, clan, tirages, joueurs, cartes(Set), terminee }
 const parties = new Map();
 
 function genererCode() {
-  // Caractères sans ambiguïté visuelle (pas 0/O ni 1/I)
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   let code;
   do {
@@ -29,45 +107,75 @@ function genererCode() {
 io.on('connection', socket => {
   let codePartie = null;
 
-  // Meneur : créer une nouvelle partie
-  socket.on('creer', () => {
+  // Meneur : créer une nouvelle partie (clan imposé)
+  socket.on('creer', payload => {
+    const clan = payload && payload.clan;
+    if (!CLANS_VALIDES.has(clan)) {
+      socket.emit('erreur', 'Clan invalide.');
+      return;
+    }
     codePartie = genererCode();
     parties.set(codePartie, {
       maitre:   socket.id,
+      clan,
       tirages:  [],
       joueurs:  new Map(),
-      gagnants: []
+      cartes:   new Set(),
+      terminee: false
     });
     socket.join(codePartie);
-    socket.emit('partie-creee', { code: codePartie });
-    console.log(`[${codePartie}] Partie créée`);
+    socket.emit('partie-creee', { code: codePartie, clan });
+    console.log(`[${codePartie}] Partie créée — clan imposé : ${clan}`);
   });
 
-  // Joueur : rejoindre une partie existante
-  socket.on('rejoindre', ({ code, nom, clan }) => {
+  // Joueur : rejoindre une partie existante (clan ignoré, imposé par la partie)
+  socket.on('rejoindre', ({ code, nom }) => {
     const partie = parties.get(code);
     if (!partie) {
       socket.emit('erreur', 'Code de partie invalide. Vérifiez le code et réessayez.');
       return;
     }
+    if (partie.terminee) {
+      socket.emit('erreur', 'Cette partie est terminée.');
+      return;
+    }
+    const nomPropre = String(nom || '').trim().slice(0, 20);
+    if (!nomPropre) {
+      socket.emit('erreur', 'Prénom requis.');
+      return;
+    }
     codePartie = code;
     socket.join(code);
-    partie.joueurs.set(socket.id, { nom, clan });
 
-    // Envoyer les numéros déjà tirés au nouveau joueur
-    socket.emit('rejoint', { tirages: partie.tirages });
+    // Génère une carte unique pour cette partie
+    let carte, hash, attempts = 0;
+    do {
+      carte = genererCarte();
+      hash  = carteHash(carte);
+      attempts++;
+    } while (partie.cartes.has(hash) && attempts < 50);
+    partie.cartes.add(hash);
+
+    partie.joueurs.set(socket.id, { nom: nomPropre, clan: partie.clan, carte });
+
+    // Envoie au joueur : tirages déjà faits, le clan imposé, sa carte
+    socket.emit('rejoint', {
+      tirages: partie.tirages,
+      clan:    partie.clan,
+      carte
+    });
 
     // Notifier le meneur
     io.to(partie.maitre).emit('joueur-connecte', {
-      nom, clan, count: partie.joueurs.size
+      nom: nomPropre, clan: partie.clan, count: partie.joueurs.size
     });
-    console.log(`[${code}] ${nom} (${clan}) connecté — ${partie.joueurs.size} joueur(s)`);
+    console.log(`[${code}] ${nomPropre} (${partie.clan}) connecté — ${partie.joueurs.size} joueur(s)`);
   });
 
   // Meneur : tirer un numéro
   socket.on('tirer', ({ code }) => {
     const partie = parties.get(code);
-    if (!partie || partie.maitre !== socket.id) return;
+    if (!partie || partie.maitre !== socket.id || partie.terminee) return;
 
     const restants = [];
     for (let i = 1; i <= 72; i++) {
@@ -80,7 +188,6 @@ io.on('connection', socket => {
     const num = restants[Math.floor(Math.random() * restants.length)];
     partie.tirages.push(num);
 
-    // Diffuser à tous (meneur + joueurs)
     io.to(code).emit('numero-tire', { num });
     console.log(`[${code}] Numéro tiré : ${num}`);
   });
@@ -89,19 +196,35 @@ io.on('connection', socket => {
   socket.on('terminer', ({ code }) => {
     const partie = parties.get(code);
     if (!partie || partie.maitre !== socket.id) return;
-    io.to(code).emit('partie-terminee');
+    io.to(code).emit('partie-terminee', { raison: 'meneur' });
     parties.delete(code);
     console.log(`[${code}] Partie terminée par le meneur`);
   });
 
-  // Joueur : déclarer victoire
-  socket.on('victoire', ({ code, nom, clan }) => {
+  // Joueur : déclarer victoire — premier gagnant valide = fin de partie immédiate
+  socket.on('victoire', ({ code }) => {
     const partie = parties.get(code);
-    if (!partie) return;
-    partie.gagnants.push({ nom, clan });
-    const rang = partie.gagnants.length;
-    io.to(code).emit('gagnant', { nom, clan, rang });
-    console.log(`[${code}] WENDIO #${rang} ! ${nom} (${clan})`);
+    if (!partie || partie.terminee) return;
+
+    // Doit être un joueur inscrit dans cette partie (pas un client malveillant)
+    const joueur = partie.joueurs.get(socket.id);
+    if (!joueur) {
+      socket.emit('erreur', 'Vous n’êtes pas inscrit dans cette partie.');
+      return;
+    }
+
+    // Anti-troll : vérifie que la carte du joueur remplit vraiment la condition
+    if (!victoireValide(joueur.carte, partie.clan, partie.tirages)) {
+      socket.emit('erreur', 'Votre carte ne remplit pas encore la condition de victoire.');
+      console.log(`[${code}] Victoire refusée pour ${joueur.nom} (carte non gagnante)`);
+      return;
+    }
+
+    partie.terminee = true;
+    io.to(code).emit('gagnant', { nom: joueur.nom, clan: partie.clan });
+    io.to(code).emit('partie-terminee', { raison: 'gagnant' });
+    parties.delete(code);
+    console.log(`[${code}] WENDIO ! ${joueur.nom} (${partie.clan})`);
   });
 
   // Déconnexion
@@ -111,8 +234,7 @@ io.on('connection', socket => {
     if (!partie) return;
 
     if (partie.maitre === socket.id) {
-      // Meneur parti → on prévient tout le monde et on ferme la partie
-      io.to(codePartie).emit('partie-terminee');
+      io.to(codePartie).emit('partie-terminee', { raison: 'meneur-deco' });
       parties.delete(codePartie);
       console.log(`[${codePartie}] Partie terminée (meneur déconnecté)`);
     } else {
