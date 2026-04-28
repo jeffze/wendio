@@ -255,6 +255,10 @@ io.on('connection', socket => {
     }
 
     partie.terminee = true;
+    // Compte les sockets effectivement dans la room (debug — meneur + joueurs)
+    const room = io.sockets.adapter.rooms.get(code);
+    const nbSockets = room ? room.size : 0;
+    console.log(`[${code}] Broadcast 'gagnant' à ${nbSockets} socket(s) dans la room`);
     io.to(code).emit('gagnant', { nom: joueur.nom, clan: partie.clan });
     io.to(code).emit('partie-terminee', { raison: 'gagnant' });
     parties.delete(code);

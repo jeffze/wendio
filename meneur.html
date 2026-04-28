@@ -664,6 +664,9 @@
   function connecterSocket() {
     socket = io();  // eslint-disable-line no-undef
 
+    socket.on('connect',    () => console.log('[WENDIO meneur] socket connecté id=', socket.id));
+    socket.on('disconnect', r  => console.log('[WENDIO meneur] socket déconnecté :', r));
+
     socket.on('partie-creee', ({ code, clan }) => {
       codePartie = code;
       const lien = window.location.origin + '/joueur.html?code=' + code;
@@ -748,7 +751,14 @@
   function terminerCoteMeneur(raison) {
     partieTerminee = true;
     document.getElementById('btn-tirer').disabled = true;
-    document.getElementById('btn-arreter').classList.remove('visible');
+
+    // Le bouton "Terminer la partie" se transforme en "Nouvelle partie"
+    const btn = document.getElementById('btn-arreter');
+    btn.textContent = '🔄 Nouvelle partie';
+    btn.onclick = () => nouvellePartieMeneur({ skipTerminer: true });
+    btn.style.color = '#80edb5';
+    btn.style.borderColor = '#2ecc71';
+    btn.classList.add('visible'); // garantir qu'il reste visible
 
     // Fallback défensif : si on reçoit partie-terminee/gagnant SANS avoir reçu
     // l'event 'gagnant' (race condition / glitch réseau), afficher un overlay générique.
@@ -779,7 +789,15 @@
     document.getElementById('clan-objectif').textContent = '\u00a0';
     document.getElementById('btn-creer-partie').disabled = true;
     document.getElementById('online-actif').classList.remove('visible');
-    document.getElementById('btn-arreter').classList.remove('visible');
+
+    // Restaurer le bouton btn-arreter dans son \u00e9tat initial
+    const btn = document.getElementById('btn-arreter');
+    btn.textContent = '\u25a2 Terminer la partie';
+    btn.onclick = arreterPartie;
+    btn.style.color = '';
+    btn.style.borderColor = '';
+    btn.classList.remove('visible');
+
     document.getElementById('online-creation').style.display = '';
     document.getElementById('joueurs-items').replaceChildren();
     document.getElementById('joueurs-count').textContent = '0';
