@@ -12,7 +12,7 @@ const CONFIG = {
 };
 
 const CLANS = {
-  Chevreuil: { icon: '🦌', wendat: "Ohskénonton'", victoire: 'ligne',  points: 1, label: 'Ligne complète (6 cases)' },
+  Chevreuil: { icon: '🦌', wendat: "Ohskénonton'", victoire: 'ligne',  points: 1, label: 'Ligne complète (horizontale, verticale ou diagonale)' },
   Loup:      { icon: '🐺', wendat: "Yānariskwa'",  victoire: 'coins',  points: 2, label: 'Les 4 coins' },
   Ours:      { icon: '🐻', wendat: "Yānionyen'",   victoire: 'carre',  points: 3, label: 'Carré protecteur (12 cases)' },
   Tortue:    { icon: '🐢', wendat: "Yāndia'wich",  victoire: 'pleine', points: 4, label: 'Carte pleine (32 cases)' },

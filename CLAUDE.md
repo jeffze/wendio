@@ -107,6 +107,8 @@ The server manages game sessions identified by a 4-character code (e.g. `AB3K`).
 
 `CLAN_VICTOIRE = { Chevreuil: 'ligne', Loup: 'coins', Ours: 'carre', Tortue: 'pleine' }` reproduit côté serveur. `victoireValide(carte, clan, tirages)` parcourt la grille selon le mode et retourne `true` ssi la condition est remplie. Idem `estCoeur` et `valeurCase` répliqués (depuis `data.js`).
 
+Pour `'ligne'` (Chevreuil), la victoire accepte : (1) toute rangée horizontale, (2) toute colonne verticale, (3) la diagonale principale `\` (0,0)→(5,5), (4) la diagonale anti `/` (0,5)→(5,0). Les cases cœur (N2, N3, D2, D3) comptent comme libres dans toutes ces lignes — d'où des lignes effectives de 4 ou 6 cases selon le tracé.
+
 **Offline mode**: both `meneur.html` and `joueur.html` have a local/online toggle. In local mode, Socket.io is not used.
 
 ## Grid Anatomy
@@ -130,7 +132,7 @@ The grid is 6×6, columns labeled **W-E-N-D-I-O** (note: **I**, not A):
 
 | Clan | Wendat Name | Victory | Points |
 |------|-------------|---------|--------|
-| Chevreuil 🦌 | Ohskénonton' | One complete row (6 cells) | 1 pt |
+| Chevreuil 🦌 | Ohskénonton' | One complete line: horizontal, vertical, or main diagonal (4–6 cells, hearts count as free) | 1 pt |
 | Loup 🐺 | Yānariskwa' | All 4 corners | 2 pts |
 | Ours 🐻 | Yānionyen' | 12-cell protective ring around center | 3 pts |
 | Tortue 🐢 | Yāndia'wich | All 32 numbered cells | 4 pts |
