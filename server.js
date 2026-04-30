@@ -61,12 +61,35 @@ function victoireValide(carte, clan, tirages) {
     return true;
   }
   if (cond === 'ligne') {
+    // Horizontale : une des 6 rangées
     for (let li = 0; li < 6; li++) {
       const l = LIGNES[li]; let ok = true;
       for (let ci = 0; ci < 6; ci++) if (!estCoeur(l, ci) && !has(l, ci)) { ok = false; break; }
       if (ok) return true;
     }
-    return false;
+    // Verticale : une des 6 colonnes
+    for (let ci = 0; ci < 6; ci++) {
+      let ok = true;
+      for (let li = 0; li < 6; li++) {
+        const l = LIGNES[li];
+        if (!estCoeur(l, ci) && !has(l, ci)) { ok = false; break; }
+      }
+      if (ok) return true;
+    }
+    // Diagonale principale (\) : (0,0) à (5,5)
+    let okDiag = true;
+    for (let i = 0; i < 6; i++) {
+      const l = LIGNES[i];
+      if (!estCoeur(l, i) && !has(l, i)) { okDiag = false; break; }
+    }
+    if (okDiag) return true;
+    // Diagonale anti (/) : (0,5) à (5,0)
+    okDiag = true;
+    for (let i = 0; i < 6; i++) {
+      const l = LIGNES[i]; const ci = 5 - i;
+      if (!estCoeur(l, ci) && !has(l, ci)) { okDiag = false; break; }
+    }
+    return okDiag;
   }
   return false;
 }

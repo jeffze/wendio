@@ -379,7 +379,21 @@
       letter-spacing: .1em;
       color: white;
     }
-    .win-joueur { font-size: 1.5rem; font-weight: 700; margin-bottom: 6px; color: #80edb5; }
+    .win-joueur { font-size: 1.5rem; font-weight: 700; margin-bottom: 14px; color: #80edb5; }
+    .win-trophee {
+      display: none;
+      margin: 6px auto 18px;
+      max-width: 220px;
+      width: 60%;
+      border-radius: 14px;
+      box-shadow: 0 14px 38px rgba(0,0,0,.55), 0 0 36px rgba(232,201,108,.22);
+      animation: trophyIn .9s cubic-bezier(.22,1,.32,1) .15s both;
+    }
+    .win-trophee.visible { display: block; }
+    @keyframes trophyIn {
+      from { opacity: 0; transform: scale(.55) translateY(30px); }
+      to   { opacity: 1; transform: scale(1)   translateY(0); }
+    }
     .win-clan   { font-size: 1rem; color: #58b880; margin-bottom: 28px; }
     .win-card button {
       background: rgba(255,255,255,.1);
@@ -520,6 +534,7 @@
   <div class="win-card">
     <h2>&#127805; WENDIO ! &#127805;</h2>
     <div class="win-joueur" id="win-joueur"></div>
+    <img class="win-trophee" id="win-trophee" alt="Carte-trophée du clan">
     <div class="win-clan"   id="win-clan"></div>
     <button onclick="nouvellePartieMeneur()">🏁 Fermer la partie</button>
   </div>
@@ -800,6 +815,7 @@
         !document.getElementById('win-overlay').classList.contains('visible')) {
       document.getElementById('win-joueur').textContent = TROPHEE + ' Un joueur a gagné !';
       document.getElementById('win-clan').textContent   = 'Partie terminée — cliquez « Nouvelle partie »';
+      document.getElementById('win-trophee').classList.remove('visible');
       document.getElementById('win-overlay').classList.add('visible');
     }
   }
@@ -952,6 +968,13 @@
     // Grand overlay
     document.getElementById('win-joueur').textContent = medaille + ' ' + (c.icon || '') + ' ' + nom;
     document.getElementById('win-clan').textContent   = clan + ' \u2014 ' + (c.label || '');
+    const trophee = document.getElementById('win-trophee');
+    if (c.points) {
+      trophee.src = 'cartes/clan-' + c.points + 'pt.jpg';
+      trophee.classList.add('visible');
+    } else {
+      trophee.classList.remove('visible');
+    }
     document.getElementById('win-overlay').classList.add('visible');
 
     // Bandeau classement

@@ -473,7 +473,21 @@
       letter-spacing: .1em;
       color: white;
     }
-    .win-joueur { font-size: 1.5rem; font-weight: 700; margin-bottom: 6px; color: #80edb5; }
+    .win-joueur { font-size: 1.5rem; font-weight: 700; margin-bottom: 14px; color: #80edb5; }
+    .win-trophee {
+      display: none;
+      margin: 6px auto 16px;
+      max-width: 200px;
+      width: 58%;
+      border-radius: 14px;
+      box-shadow: 0 14px 38px rgba(0,0,0,.55), 0 0 36px rgba(232,201,108,.22);
+      animation: trophyIn .9s cubic-bezier(.22,1,.32,1) .15s both;
+    }
+    .win-trophee.visible { display: block; }
+    @keyframes trophyIn {
+      from { opacity: 0; transform: scale(.55) translateY(30px); }
+      to   { opacity: 1; transform: scale(1)   translateY(0); }
+    }
     .win-clan   { font-size: .95rem; color: #58b880; margin-bottom: 24px; }
     .win-card button {
       background: rgba(255,255,255,.1);
@@ -610,6 +624,7 @@
   <div class="win-card">
     <h2>&#127805; WENDIO ! &#127805;</h2>
     <div class="win-joueur" id="win-joueur"></div>
+    <img class="win-trophee" id="win-trophee" alt="Carte-trophée du clan">
     <div class="win-clan"   id="win-clan"></div>
     <button onclick="fermerWin()">Voir ma carte</button>
     <button onclick="quitterPartie()">🚪 Quitter la partie</button>
@@ -875,6 +890,7 @@
           winJoueur.textContent = '\u23f9 Partie termin\u00e9e';
           document.getElementById('win-clan').textContent =
             raison === 'meneur-deco' ? 'Le meneur s\u2019est d\u00e9connect\u00e9.' : 'Le meneur a clos la partie.';
+          document.getElementById('win-trophee').classList.remove('visible');
           document.getElementById('win-overlay').classList.add('visible');
         }
       }
@@ -1125,10 +1141,38 @@
           if (!estCoeur(l,ci) && !has(l,ci)) gagne = false;
         }
     } else if (v === 'ligne') {
+      // Horizontale
       for (let li = 0; li < 6 && !gagne; li++) {
         const l = LIGNES[li];
         let ok = true;
         for (let ci = 0; ci < 6; ci++) if (!estCoeur(l,ci) && !has(l,ci)) { ok = false; break; }
+        if (ok) gagne = true;
+      }
+      // Verticale
+      for (let ci = 0; ci < 6 && !gagne; ci++) {
+        let ok = true;
+        for (let li = 0; li < 6; li++) {
+          const l = LIGNES[li];
+          if (!estCoeur(l,ci) && !has(l,ci)) { ok = false; break; }
+        }
+        if (ok) gagne = true;
+      }
+      // Diagonale principale (\)
+      if (!gagne) {
+        let ok = true;
+        for (let i = 0; i < 6; i++) {
+          const l = LIGNES[i];
+          if (!estCoeur(l,i) && !has(l,i)) { ok = false; break; }
+        }
+        if (ok) gagne = true;
+      }
+      // Diagonale anti (/)
+      if (!gagne) {
+        let ok = true;
+        for (let i = 0; i < 6; i++) {
+          const l = LIGNES[i]; const ci = 5 - i;
+          if (!estCoeur(l,ci) && !has(l,ci)) { ok = false; break; }
+        }
         if (ok) gagne = true;
       }
     }
@@ -1157,6 +1201,13 @@
       winJoueur.textContent = (c.icon || '') + ' ' + nom + ' a gagn\u00e9';
     }
     document.getElementById('win-clan').textContent = clan + ' \u2014 ' + (c.label || '');
+    const trophee = document.getElementById('win-trophee');
+    if (c.points) {
+      trophee.src = 'cartes/clan-' + c.points + 'pt.jpg';
+      trophee.classList.add('visible');
+    } else {
+      trophee.classList.remove('visible');
+    }
     document.getElementById('win-overlay').classList.add('visible');
     document.getElementById('btn-wendio').classList.remove('visible');
   }
