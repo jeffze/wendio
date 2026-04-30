@@ -32,25 +32,34 @@ Then open `http://localhost:3000` (redirects to `lobby.html`).
 
 ### Entry Point
 
-**`lobby.html`** — Landing page with navigation to the three modes:
+**`index.html`** — Cover splash (concept « Feu de conseil ») : la couverture client `couverture.png` encadrée et flottante sur fond chaud avec particules braises animées. Bouton « COMMENCER → » ou clic / tap / Entrée / Espace → `lobby.html`. L'ancienne landing animée 4 clans est sauvée dans `accueil.html` (non liée).
+
+**`lobby.html`** — Hub de navigation (atteint après la couverture) :
 - Meneur de Jeu (`meneur.html`)
 - Cartes à imprimer (`imprimer.html`)
 - Carte numérique joueur (`joueur.html`)
+- Mode Démo (`demo.html`)
 
 ### Files
 
 | File | Role |
 |------|------|
-| `lobby.html` | Main entry — navigation hub |
+| `index.html` | Page de couverture client (splash « Feu de conseil ») |
+| `accueil.html` | Backup : ancienne landing animée 4 clans (non liée mais accessible) |
+| `couverture.png` | Image officielle de couverture fournie par le client |
+| `lobby.html` | Hub de navigation après la couverture |
 | `meneur.html` | Game master: draws numbers, broadcasts via Socket.io |
 | `joueur.html` | Player card: marks numbers, declares victory |
 | `imprimer.html` | Generates 4 random cards on an A4 page for printing |
+| `demo.html` | Mode démo : sélection de scénario avec config automatique |
 | `data.js` | Shared game data: grid config, clans, Wendat vocabulary, card generation |
 | `server.js` | Node.js + Express + Socket.io multiplayer server |
 | `qrcode.min.js` | QR code generation library (used by meneur to share game code) |
 | `script.js` / `style.css` | Legacy stubs — **not used**; all logic and styles are inline |
+| `cartes/` | 72 cartes numérotées + 4 cartes-trophées clan (`clan-{1..4}pt.jpg`) |
 | `sound/` | WAV audio files named `Wendat numbers {num}.wav` |
-| `Manual/` | Documents de référence : présentations PPTX, canevas carte, vidéo démo |
+| `sources/` | PNG des 4 animaux clans (utilisés dans `accueil.html`) |
+| `Manual/` | Documents de référence (gitignored) : PPTX, PDFs règles, vidéo démo |
 
 ### Multiplayer (Socket.io)
 
@@ -153,10 +162,10 @@ The 4 center heart cells display clan icons (🐢🐻🐺🦌) — they are not 
 - `setModePhysique(physique)` — toggles between `aléatoire` and `physique` draw modes; adds/removes `body.mode-physique` class
 - `genererBoutonsClanMeneur()` / `choisirClanMeneur(nom)` — UI de sélection du clan **imposé** (4 boutons radio), avant la création de la partie
 - `creerPartie()` — emits `creer` with `{ clan: clanChoisi }` (bouton désactivé tant qu'aucun clan choisi)
-- `commencerPartie()` — emits `demarrer` ; cache `#zone-code` (code + lien) et `#qr-bloc` ; ne reste visible que la bannière clan + liste joueurs + bouton TIRER
+- `commencerPartie()` — emits `demarrer` ; cache `#zone-code` (code + lien), `#qr-bloc`, `#barre-connexion` (toggle Local/En ligne) et `#barre-tirage` (toggle Aléatoire/Physique) ; affiche le pill `#status-online` « 🌐 Partie en ligne » à la place. Toggles immutables une fois la partie lancée. Restauration auto via `nouvellePartieMeneur()`.
 - `actionTirer()` — draws a random number (locally or via socket); hidden in physical mode ; early return si `partieTerminee`
 - `afficherCarte(num)` — adds `.visible` class to `#carte-numero` (never sets `style.display` directly — the class drives both portrait `display:block` and landscape `display:flex`)
-- `afficherGagnant(nom, clan)` — shows win overlay (un seul gagnant par partie, plus de rang)
+- `afficherGagnant(nom, clan)` — shows win overlay (un seul gagnant par partie, plus de rang) ; affiche aussi la carte-trophée `cartes/clan-{points}pt.jpg` dans `#win-trophee` selon `CLANS[clan].points`
 - `terminerCoteMeneur(raison)` — handler de `partie-terminee` ; désactive btn-tirer ; transforme btn-arreter en bouton vert "🔄 Nouvelle partie" ; **fallback overlay** si raison='gagnant' et overlay non visible
 - `nouvellePartieMeneur({ skipTerminer })` — reset complet, retour à l'écran de choix de clan ; restaure btn-arreter dans son état initial
 - `resetJeu()` — resets game state; removes `.visible` from `#carte-numero`
@@ -177,7 +186,7 @@ The 4 center heart cells display clan icons (🐢🐻🐺🦌) — they are not 
 - `rendreGrille()` — renders the card grid into the DOM
 - `verifierVictoire()` — checks win condition for active clan after each mark ; affiche le bouton WENDIO! (online) ou directement le win-overlay (local)
 - `declarerVictoire()` — emits `victoire { code }` ; le serveur valide la carte avant d'accepter
-- `afficherGagnant(nom, clan, isMoi)` — overlay vert ; texte différent si `isMoi` (« Bravo X ! ») ou non (« X a gagné »)
+- `afficherGagnant(nom, clan, isMoi)` — overlay vert ; texte différent si `isMoi` (« Bravo X ! ») ou non (« X a gagné ») ; affiche la carte-trophée `cartes/clan-{points}pt.jpg` (Chevreuil=1pt, Loup=2pt, Ours=3pt, Tortue=4pt) avec animation pop
 - `afficherInfoNumero(num)` — affiche la carte complète du numéro dans `#annonce` (image PDF de la carte) ; appelée au clic sur toute case non-cœur et à chaque `numero-tire` online
 - `rejouerSon()` — rejoue le son du `dernierNumeroClique`
 
