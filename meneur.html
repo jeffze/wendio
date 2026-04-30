@@ -169,6 +169,25 @@
     .clan-actif-banner.visible { display: flex; }
     .clan-actif-banner strong { color: var(--gold-lt); }
 
+    /* Pill « En ligne » affiché en jeu (quand toggles cachés) */
+    .status-online {
+      display: none;
+      margin-bottom: 12px;
+      padding: 6px 14px;
+      background: rgba(46,204,113,.12);
+      border: 1px solid rgba(46,204,113,.42);
+      border-radius: 999px;
+      font-size: .72rem;
+      color: #80edb5;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      font-weight: 600;
+      width: fit-content;
+      align-items: center;
+      gap: 6px;
+    }
+    .status-online.visible { display: inline-flex; }
+
     .online-actif { display: none; }
     .online-actif.visible { display: grid; grid-template-columns: 1fr auto; gap: 20px; align-items: start; }
 
@@ -545,6 +564,8 @@
 
   <h1>WENDIO &#8212; Meneur</h1>
 
+  <div class="status-online" id="status-online">&#127760; Partie en ligne</div>
+
   <div class="mode-bar" id="barre-connexion">
     <button class="btn-mode actif" id="btn-local"  onclick="setMode('local')">&#128244; Local</button>
     <button class="btn-mode"       id="btn-online" onclick="setMode('online')">&#127760; En ligne</button>
@@ -795,6 +816,10 @@
     document.getElementById('zone-code').style.display = 'none';
     document.getElementById('qr-bloc').style.display = 'none';
     document.getElementById('btn-commencer').style.display = 'none';
+    // Cache les toggles (mode connexion + tirage) — figés pour la partie
+    document.getElementById('barre-connexion').style.display = 'none';
+    document.getElementById('barre-tirage').style.display    = 'none';
+    document.getElementById('status-online').classList.add('visible');
   }
 
   function terminerCoteMeneur(raison) {
@@ -859,6 +884,11 @@
     btnCommencer.disabled = true;
     document.getElementById('zone-code').style.display = '';
     document.getElementById('qr-bloc').style.display = '';
+
+    // Restaurer les toggles + cacher le pill « En ligne »
+    document.getElementById('barre-connexion').style.display = '';
+    document.getElementById('barre-tirage').style.display    = '';
+    document.getElementById('status-online').classList.remove('visible');
 
     fermerWin();
     resetJeu();
