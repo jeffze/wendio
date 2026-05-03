@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>WENDIO — Vos commentaires</title>
+<style>
+  :root {
+    --amber: #c8843a;
+    --amber-soft: #e0a55c;
+    --bg: #1a1008;
+    --bg2: #2c1a0e;
+    --card: #2a1e12;
+    --card-edge: #3d2a18;
+    --text: #f4ead8;
+    --muted: #b8a384;
+    --ok: #4ea05a;
+    --nok: #c45c4a;
+    --na: #7a6a55;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: linear-gradient(160deg, var(--bg) 0%, var(--bg2) 100%);
+    color: var(--text);
+    line-height: 1.5;
+    min-height: 100vh;
+    padding: 24px 16px 80px;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; }
+  header {
+    text-align: center;
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--card-edge);
+  }
+  h1 {
+    font-family: 'Cinzel', Georgia, serif;
+    font-size: clamp(1.6rem, 5vw, 2.2rem);
+    color: var(--amber-soft);
+    margin: 0 0 8px;
+    letter-spacing: 0.05em;
+  }
+  .sub { color: var(--muted); font-size: .95rem; }
+  section {
+    background: var(--card);
+    border: 1px solid var(--card-edge);
+    border-radius: 14px;
+    padding: 18px 20px;
+    margin-bottom: 18px;
+  }
+  h2 {
+    font-family: 'Cinzel', Georgia, serif;
+    color: var(--amber-soft);
+    font-size: 1.15rem;
+    margin: 0 0 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed var(--card-edge);
+  }
+  .item { margin-bottom: 14px; padding-bottom: 14px; border-bottom: 1px dotted #3a2a1a; }
+  .item:last-child { border-bottom: none; padding-bottom: 0; margin-bottom: 0; }
+  .label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: .98rem;
+  }
+  .triple {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+  }
+  .triple input[type="radio"] { position: absolute; opacity: 0; pointer-events: none; }
+  .triple label {
+    flex: 1;
+    min-width: 80px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    background: #1f1409;
+    border: 1px solid var(--card-edge);
+    color: var(--muted);
+    text-align: center;
+    cursor: pointer;
+    font-size: .9rem;
+    transition: all .15s;
+    user-select: none;
+  }
+  .triple label:hover { border-color: var(--amber); }
+  .triple input:checked + label.ok  { background: var(--ok);  color: #fff; border-color: var(--ok); }
+  .triple input:checked + label.nok { background: var(--nok); color: #fff; border-color: var(--nok); }
+  .triple input:checked + label.na  { background: var(--na);  color: #fff; border-color: var(--na); }
+  .note {
+    width: 100%;
+    background: #1f1409;
+    border: 1px solid var(--card-edge);
+    border-radius: 8px;
+    color: var(--text);
+    padding: 8px 10px;
+    font-family: inherit;
+    font-size: .9rem;
+    resize: vertical;
+    min-height: 38px;
+  }
+  .note:focus, input:focus { outline: 2px solid var(--amber); outline-offset: -2px; }
+  .field { margin-bottom: 14px; }
+  .field label { display: block; margin-bottom: 6px; color: var(--amber-soft); font-size: .9rem; }
+  .field input[type="text"] {
+    width: 100%;
+    background: #1f1409;
+    border: 1px solid var(--card-edge);
+    border-radius: 8px;
+    color: var(--text);
+    padding: 10px 12px;
+    font-family: inherit;
+    font-size: 1rem;
+  }
+  textarea.libre { min-height: 140px; }
+  .question {
+    background: #3a2818;
+    border-left: 3px solid var(--amber);
+    padding: 10px 14px;
+    margin: 8px 0;
+    border-radius: 4px;
+    font-style: italic;
+    color: var(--amber-soft);
+    font-size: .9rem;
+  }
+  .actions {
+    position: sticky;
+    bottom: 16px;
+    background: var(--card);
+    border: 1px solid var(--card-edge);
+    border-radius: 14px;
+    padding: 14px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    box-shadow: 0 8px 24px rgba(0,0,0,.5);
+    margin-top: 24px;
+  }
+  button {
+    flex: 1;
+    min-width: 140px;
+    padding: 12px 18px;
+    border: none;
+    border-radius: 10px;
+    font-family: 'Cinzel', Georgia, serif;
+    font-size: 1rem;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    font-weight: 600;
+  }
+  .btn-send {
+    background: var(--amber);
+    color: #1a1008;
+  }
+  .btn-send:hover { background: var(--amber-soft); }
+  .btn-copy {
+    background: transparent;
+    color: var(--amber-soft);
+    border: 1px solid var(--amber);
+  }
+  .btn-copy:hover { background: rgba(200,132,58,.15); }
+  #status {
+    text-align: center;
+    margin-top: 12px;
+    font-size: .9rem;
+    min-height: 1.2em;
+  }
+  #status.ok  { color: var(--ok); }
+  #status.err { color: var(--nok); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>WENDIO — Vos commentaires</h1>
+    <div class="sub">Présentation du 4 mai 2026 — merci de prendre 20-30 min pour tester</div>
+  </header>
+
+  <form id="form">
+
+    <section>
+      <h2>Qui es-tu ?</h2>
+      <div class="field">
+        <label for="f-name">Ton nom (optionnel)</label>
+        <input type="text" id="f-name" maxlength="80" autocomplete="name">
+      </div>
+      <div class="field">
+        <label for="f-device">Quel appareil tu utilises pour tester ?</label>
+        <input type="text" id="f-device" maxlength="80" placeholder="ex : iPad, iPhone 13, ordinateur portable…">
+      </div>
+    </section>
+
+    <div id="sections"></div>
+
+    <section>
+      <h2>Commentaires libres</h2>
+      <p class="sub" style="margin-top:0;margin-bottom:10px">Tout ce qui surprend, dérange, ou que tu voudrais voir évoluer.</p>
+      <textarea class="note libre" id="f-libre" maxlength="5000" placeholder="Tes idées, suggestions, remarques générales…"></textarea>
+    </section>
+
+    <div class="actions">
+      <button type="button" class="btn-send" id="btn-send">📤 Envoyer mes commentaires</button>
+      <button type="button" class="btn-copy" id="btn-copy">📋 Copier le rapport</button>
+    </div>
+    <div id="status"></div>
+  </form>
+</div>
+
+<script>
+const SECTIONS = [
+  {
+    titre: "1. Couverture & accueil",
+    items: [
+      "La page d'ouverture (« Feu de conseil ») se charge avec l'image de couverture encadrée, le fond chaud et les particules de braises animées",
+      "Le bouton « COMMENCER → » mène au lobby",
+      "Le lobby affiche les 4 entrées : Meneur de Jeu / Cartes à imprimer / Carte joueur / Démo"
+    ]
+  },
+  {
+    titre: "2. Visuel des cartes",
+    questions: [
+      "Préfères-tu ce rendu (fond bouleau brut, plus contrasté) ou la version précédente (fond plus délavé / plus blanc) ? Si tu veux le délavé, on peut le réappliquer en 5 min.",
+      "L'image officielle de couverture (couverture.png) te convient toujours ?"
+    ],
+    items: [
+      "Cartes 6 et 11 : le mot Wendat et la traduction FR/EN sont bons (avant : « Trois » et « Cinq »)",
+      "Les ~8 autres cartes refournies — tout le vocabulaire est cohérent ?"
+    ]
+  },
+  {
+    titre: "3. Création d'une partie (meneur, sur tablette)",
+    items: [
+      "Activer mode « En ligne » → choisir un clan → cliquer « Créer la partie »",
+      "Code à 4 caractères + QR code apparaissent",
+      "La condition de victoire affichée correspond bien au clan choisi (ligne / coins / carré / pleine)"
+    ]
+  },
+  {
+    titre: "4. Inscription des joueurs (téléphone, scanner le QR)",
+    items: [
+      "Le formulaire demande seulement le nom (pas le clan — il est imposé)",
+      "Saisir 2-3 joueurs depuis 2 téléphones différents → tous apparaissent côté meneur avec le bon clan",
+      "Mettre un téléphone en veille 30 sec puis le rallumer → le joueur retrouve sa carte automatiquement, sans doublon côté meneur"
+    ]
+  },
+  {
+    titre: "5. Démarrage et tirage",
+    items: [
+      "Cliquer « ▶️ Commencer la partie » → code et QR disparaissent, pill « 🌐 Partie en ligne » s'affiche",
+      "Tirer 5-10 numéros → chaque tirage joue le son Wendat + affiche la carte du chiffre côté meneur ET côté joueur",
+      "Côté joueur : cliquer sur une case déjà tirée rejoue le son du chiffre"
+    ]
+  },
+  {
+    titre: "6. Victoire & couronnement",
+    items: [
+      "Forcer une victoire (Chevreuil = une ligne) → overlay vert « Bravo X ! » avec la carte-trophée du clan",
+      "Côté meneur : le même overlay s'affiche avec le nom du gagnant et la carte-trophée",
+      "Côté joueur non-gagnant : message « X a gagné » avec la carte-trophée",
+      "Une fois la partie finie, la grille du joueur reste visible mais grisée/non-cliquable"
+    ]
+  },
+  {
+    titre: "7. Mode physique (cartes papier)",
+    items: [
+      "Sur le meneur, basculer toggle « Aléatoire » → « Physique »",
+      "Le bouton « Tirer » disparaît ; cliquer une case du suivi joue le son et marque comme tirée",
+      "Les joueurs en ligne reçoivent les numéros normalement"
+    ]
+  },
+  {
+    titre: "8. Cartes à imprimer",
+    items: [
+      "Page « Cartes à imprimer » : choisir 1, 2 ou 4 cartes par feuille → impression PDF lisible"
+    ]
+  },
+  {
+    titre: "9. Cohérence linguistique",
+    items: [
+      "Tous les termes Wendat (clans, chiffres) sont bien orthographiés ?",
+      "Phonétiques FR (bleu) et EN (rouge) cohérentes ?"
+    ]
+  },
+  {
+    titre: "10. Confort sur l'appareil",
+    items: [
+      "Plein écran fonctionne sur tablette (bouton ⛶)",
+      "Pas de bug d'affichage en passant tablette en portrait/paysage",
+      "Texte lisible à distance d'un bras"
+    ]
+  }
+];
+
+const sectionsEl = document.getElementById('sections');
+
+function el(tag, attrs, ...children) {
+  const e = document.createElement(tag);
+  if (attrs) for (const k in attrs) {
+    if (k === 'class') e.className = attrs[k];
+    else if (k.startsWith('data-')) e.setAttribute(k, attrs[k]);
+    else e[k] = attrs[k];
+  }
+  children.forEach(c => {
+    if (c == null) return;
+    e.appendChild(typeof c === 'string' ? document.createTextNode(c) : c);
+  });
+  return e;
+}
+
+SECTIONS.forEach((sec, si) => {
+  const secEl = el('section', null, el('h2', null, sec.titre));
+
+  if (sec.questions) {
+    sec.questions.forEach((q, qi) => {
+      const item = el('div', { class: 'item' },
+        el('div', { class: 'question' }, '❓ ' + q),
+        el('textarea', { class: 'note', 'data-kind': 'question', 'data-section': String(si), 'data-q': String(qi), placeholder: 'Ta réponse…' })
+      );
+      secEl.appendChild(item);
+    });
+  }
+
+  sec.items.forEach((it, ii) => {
+    const baseId = `i-${si}-${ii}`;
+    const triple = el('div', { class: 'triple' });
+    [['ok', '✅ OK'], ['nok', '❌ Problème'], ['na', '➖ N/A']].forEach(([val, lbl]) => {
+      const inputId = `${baseId}-${val}`;
+      const radio = el('input', { type: 'radio', name: baseId, id: inputId, value: val });
+      const label = el('label', { class: val }, lbl);
+      label.htmlFor = inputId;
+      triple.appendChild(radio);
+      triple.appendChild(label);
+    });
+    const item = el('div', { class: 'item' },
+      el('div', { class: 'label' }, it),
+      triple,
+      el('textarea', { class: 'note', 'data-kind': 'item', 'data-section': String(si), 'data-item': String(ii), placeholder: 'Commentaire (optionnel)' })
+    );
+    secEl.appendChild(item);
+  });
+
+  sectionsEl.appendChild(secEl);
+});
+
+function collect() {
+  const sections = SECTIONS.map((sec, si) => {
+    const items = sec.items.map((label, ii) => {
+      const checked = document.querySelector(`input[name="i-${si}-${ii}"]:checked`);
+      const note = document.querySelector(`textarea[data-kind="item"][data-section="${si}"][data-item="${ii}"]`);
+      return {
+        label,
+        status: checked ? checked.value : null,
+        note: note ? note.value.trim() : ''
+      };
+    });
+    const questions = (sec.questions || []).map((q, qi) => {
+      const note = document.querySelector(`textarea[data-kind="question"][data-section="${si}"][data-q="${qi}"]`);
+      return { question: q, answer: note ? note.value.trim() : '' };
+    });
+    return { titre: sec.titre, items, questions };
+  });
+  return {
+    name: document.getElementById('f-name').value.trim(),
+    device: document.getElementById('f-device').value.trim(),
+    sections,
+    free_text: document.getElementById('f-libre').value.trim()
+  };
+}
+
+function asText(data) {
+  const lines = [];
+  lines.push(`WENDIO — Commentaires de ${data.name || '(anonyme)'}`);
+  lines.push(`Appareil : ${data.device || '(non précisé)'}`);
+  lines.push(`Date : ${new Date().toLocaleString('fr-CA')}`);
+  lines.push('');
+  data.sections.forEach(sec => {
+    lines.push(`═══ ${sec.titre} ═══`);
+    sec.questions.forEach(q => {
+      lines.push(`❓ ${q.question}`);
+      if (q.answer) lines.push(`   → ${q.answer}`);
+      lines.push('');
+    });
+    sec.items.forEach(it => {
+      const flag = it.status === 'ok' ? '✅' : it.status === 'nok' ? '❌' : it.status === 'na' ? '➖' : '⬜';
+      lines.push(`${flag} ${it.label}`);
+      if (it.note) lines.push(`   ↳ ${it.note}`);
+    });
+    lines.push('');
+  });
+  if (data.free_text) {
+    lines.push('═══ Commentaires libres ═══');
+    lines.push(data.free_text);
+  }
+  return lines.join('\n');
+}
+
+const status = document.getElementById('status');
+function setStatus(msg, kind) {
+  status.textContent = msg;
+  status.className = kind || '';
+}
+
+document.getElementById('btn-send').addEventListener('click', async () => {
+  const data = collect();
+  setStatus('Envoi en cours…');
+  try {
+    const r = await fetch('/api/feedback', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    setStatus('✅ Merci ! Tes commentaires ont bien été envoyés.', 'ok');
+  } catch (e) {
+    setStatus('❌ Échec de l\'envoi. Utilise « Copier le rapport » et envoie-le par mail/WhatsApp.', 'err');
+  }
+});
+
+document.getElementById('btn-copy').addEventListener('click', async () => {
+  const text = asText(collect());
+  try {
+    await navigator.clipboard.writeText(text);
+    setStatus('📋 Rapport copié dans le presse-papiers.', 'ok');
+  } catch (e) {
+    const w = window.open('', '_blank');
+    if (w) {
+      const pre = w.document.createElement('pre');
+      pre.style.cssText = 'white-space:pre-wrap;font-family:monospace;padding:20px';
+      pre.textContent = text;
+      w.document.body.appendChild(pre);
+      setStatus('📋 Rapport ouvert dans un nouvel onglet (sélectionne et copie).', 'ok');
+    } else {
+      setStatus('❌ Impossible de copier. Sélectionne le texte ci-dessous manuellement.', 'err');
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.cssText = 'width:100%;min-height:200px;margin-top:12px';
+      status.after(ta);
+    }
+  }
+});
+</script>
+</body>
+</html>
