@@ -292,7 +292,8 @@
     .cell.marque::after {
       content: '';
       position: absolute;
-      width: 1.65rem; height: 1.65rem;
+      top: 3px; right: 3px;
+      width: 1rem; height: 1rem;
       background: url('grain-mais.svg') center/contain no-repeat;
       z-index: 2;
       filter: drop-shadow(0 1px 2px rgba(0,0,0,.35));
@@ -578,13 +579,13 @@
 <body>
 
 
-<a id="btn-accueil" href="lobby.html" title="Accueil">
+<a id="btn-accueil" href="lobby.html" data-i18n-attr="title:joueur.tooltip.accueil" title="Accueil">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
     <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
   </svg>
 </a>
 
-<button id="btn-fullscreen" title="Plein &#233;cran" onclick="toggleFullscreen()">
+<button id="btn-fullscreen" data-i18n-attr="title:joueur.tooltip.fullscreen" title="Plein &#233;cran" onclick="toggleFullscreen()">
   <svg class="icon-expand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
     <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
   </svg>
@@ -596,15 +597,16 @@
 <!-- Overlay connexion en ligne -->
 <div id="overlay-rejoindre">
   <div class="form-rejoindre">
-    <h2>Rejoindre la partie</h2>
+    <h2 data-i18n="joueur.rejoindre.titre">Rejoindre la partie</h2>
     <div class="code-badge" id="badge-code">----</div>
-    <p style="font-size:.82rem;color:var(--muted);margin-bottom:6px;font-style:italic;">
+    <p style="font-size:.82rem;color:var(--muted);margin-bottom:6px;font-style:italic;" data-i18n="joueur.rejoindre.info_clan">
       Le clan est imposé par le meneur — il sera affiché dès que vous rejoignez.
     </p>
-    <label>Votre prénom</label>
+    <label data-i18n="joueur.rejoindre.label_nom">Votre prénom</label>
     <input type="text" id="input-nom" placeholder="ex : Marie" maxlength="20"
+           data-i18n-attr="placeholder:joueur.rejoindre.ph_nom"
            onkeydown="if(event.key==='Enter' && !this.disabled) document.getElementById('btn-rejoindre-submit').click()" />
-    <button class="btn-principal vert" id="btn-rejoindre-submit" onclick="rejoindrePartie()" disabled style="margin-top:20px;">Rejoindre &#8594;</button>
+    <button class="btn-principal vert" id="btn-rejoindre-submit" onclick="rejoindrePartie()" disabled style="margin-top:20px;" data-i18n="joueur.rejoindre.btn">Rejoindre &#8594;</button>
     <div class="msg-erreur" id="msg-erreur"></div>
   </div>
 </div>
@@ -622,12 +624,12 @@
 <!-- Overlay victoire -->
 <div id="win-overlay">
   <div class="win-card">
-    <h2>&#127805; WENDIO ! &#127805;</h2>
+    <h2 data-i18n="joueur.win.titre">&#127805; WENDIO ! &#127805;</h2>
     <div class="win-joueur" id="win-joueur"></div>
     <img class="win-trophee" id="win-trophee" alt="Carte-trophée du clan">
     <div class="win-clan"   id="win-clan"></div>
-    <button onclick="fermerWin()">Voir ma carte</button>
-    <button onclick="quitterPartie()">🚪 Quitter la partie</button>
+    <button onclick="fermerWin()"   data-i18n="joueur.win.btn_voir">Voir ma carte</button>
+    <button onclick="quitterPartie()" data-i18n="joueur.win.btn_quitter">🚪 Quitter la partie</button>
   </div>
 </div>
 
@@ -635,28 +637,29 @@
 <h1>WENDIO</h1>
 
 <div class="mode-bar" id="barre-mode">
-  <button class="btn-mode actif" id="btn-local"  onclick="setMode('local')">Local</button>
-  <button class="btn-mode"       id="btn-online" onclick="setMode('online')">En ligne</button>
+  <button class="btn-mode actif" id="btn-local"  onclick="setMode('local')"  data-i18n="joueur.btn_local">Local</button>
+  <button class="btn-mode"       id="btn-online" onclick="setMode('online')" data-i18n="joueur.btn_online">En ligne</button>
 </div>
 
 <div id="vue-setup">
 
   <!-- Setup local -->
   <div class="setup-panel" id="setup-local">
-    <div class="section-titre">Choisissez votre clan</div>
+    <div class="section-titre" data-i18n="joueur.setup_local.titre">Choisissez votre clan</div>
     <div class="clan-grid" id="clan-grid"></div>
-    <div class="objectif" id="objectif">S&#233;lectionnez un clan pour voir votre objectif</div>
-    <button class="btn-principal brun" id="btn-jouer" onclick="commencerLocal()" disabled>Jouer &#8594;</button>
+    <div class="objectif" id="objectif" data-i18n="joueur.objectif_default">S&#233;lectionnez un clan pour voir votre objectif</div>
+    <button class="btn-principal brun" id="btn-jouer" onclick="commencerLocal()" disabled data-i18n="joueur.btn_jouer">Jouer &#8594;</button>
   </div>
 
   <!-- Setup en ligne -->
   <div class="setup-panel" id="setup-online" style="display:none;">
-    <div class="section-titre">Rejoindre une partie en ligne</div>
+    <div class="section-titre" data-i18n="joueur.setup_online.titre">Rejoindre une partie en ligne</div>
     <div class="code-entree">
       <input type="text" id="input-code" placeholder="CODE" maxlength="4"
+        data-i18n-attr="placeholder:joueur.setup_online.ph_code"
         oninput="this.value=this.value.toUpperCase(); validerCode()"
         onkeydown="if(event.key==='Enter') entrerCode()" />
-      <button class="btn-principal vert" id="btn-entrer-code" onclick="entrerCode()" disabled style="flex:1;">Rejoindre &#8594;</button>
+      <button class="btn-principal vert" id="btn-entrer-code" onclick="entrerCode()" disabled style="flex:1;" data-i18n="joueur.setup_online.btn">Rejoindre &#8594;</button>
     </div>
     <div class="msg-erreur" id="msg-erreur-code"></div>
   </div>
@@ -669,16 +672,16 @@
   <div id="jeu-sidebar">
     <div id="jeu-info">
       <span class="info-badge clan"   id="badge-clan"   style="display:none;"></span>
-      <span class="info-badge online" id="badge-online" style="display:none;">&#127760; En ligne</span>
-      <button class="btn-retour" onclick="nouvellePartie()">&#8617; Nouvelle carte</button>
+      <span class="info-badge online" id="badge-online" style="display:none;" data-i18n="joueur.badge_online">&#127760; En ligne</span>
+      <button class="btn-retour" onclick="nouvellePartie()" data-i18n="joueur.btn_nouvelle_carte">&#8617; Nouvelle carte</button>
     </div>
 
     <div id="annonce">
-      <div class="annonce-label">Case s&#233;lectionn&#233;e</div>
+      <div class="annonce-label" data-i18n="joueur.annonce.label">Case s&#233;lectionn&#233;e</div>
       <img id="annonce-image" alt="Carte WENDIO" style="display:none; width:100%; max-width:280px; height:auto; margin:0 auto; border-radius:10px; box-shadow:0 3px 12px rgba(0,0,0,.4); cursor:pointer;" onclick="rejouerSon()">
     </div>
 
-    <button id="btn-wendio" onclick="declarerVictoire()">&#127805; WENDIO !</button>
+    <button id="btn-wendio" onclick="declarerVictoire()" data-i18n="joueur.btn_wendio">&#127805; WENDIO !</button>
   </div>
 
   <div class="bingo-wrap">
@@ -688,6 +691,7 @@
 </div>
 
 <script src="data.js"></script>
+<script src="i18n.js"></script>
 <script>
   'use strict';
   let carteActuelle       = null;
@@ -719,6 +723,24 @@
       return 'tok-' + Math.random().toString(36).slice(2) + '-' + Date.now();
     }
   })();
+
+  // Persistance des cases marquées par le joueur (anti-perte au retour de
+  // veille). Sylvain veut que le joueur marque lui-même → si on perdait les
+  // marques à chaque mise en veille, ce serait pénible. sessionStorage suffit
+  // (survit aux veilles, pas à la fermeture d'onglet).
+  const SELECTIONS_KEY = 'wendio-selections-' + sessionToken;
+  function persistSelections() {
+    try { sessionStorage.setItem(SELECTIONS_KEY, JSON.stringify([...selectionnees])); } catch (e) {}
+  }
+  function loadSelections() {
+    try {
+      const raw = sessionStorage.getItem(SELECTIONS_KEY);
+      if (raw) selectionnees = new Set(JSON.parse(raw));
+    } catch (e) {}
+  }
+  function clearSelections() {
+    try { sessionStorage.removeItem(SELECTIONS_KEY); } catch (e) {}
+  }
 
   // ── Création DOM sécurisée d'un bouton clan ──────────────────────────
   function creerBoutonClan(nom, clan, className, onclickFn) {
@@ -770,20 +792,38 @@
     document.getElementById('setup-online').style.display = modeOnline ? 'block' : 'none';
   }
 
+  // ── Helpers i18n ─────────────────────────────────────────────────────
+  function clanLabel(nom) {
+    const key = 'clan.' + nom + '.victoire';
+    const txt = t(key);
+    if (txt && txt !== key) return txt;
+    return (CLANS[nom] && CLANS[nom].label) || '';
+  }
+  function objectifTexte(nom) {
+    const clan = CLANS[nom] || {};
+    return t('joueur.objectif_format', {
+      label: clanLabel(nom),
+      n:     clan.points,
+      s:     clan.points > 1 ? 's' : '',
+    });
+  }
+
   // ── Setup local ──────────────────────────────────────────────────────
   function setClan(nom) {
     clanActuel = nom;
     document.querySelectorAll('.btn-clan').forEach(b => b.classList.remove('actif'));
     document.getElementById('clan-' + nom).classList.add('actif');
-    const clan = CLANS[nom];
-    document.getElementById('objectif').textContent =
-      'Objectif : ' + clan.label + ' \u2014 ' + clan.points + ' pt' + (clan.points > 1 ? 's' : '') + ' WENDIO';
+    const objEl = document.getElementById('objectif');
+    objEl.dataset.clan = nom;
+    objEl.removeAttribute('data-i18n');
+    objEl.textContent = objectifTexte(nom);
     document.getElementById('btn-jouer').disabled = false;
   }
 
   function commencerLocal() {
     carteActuelle = genererCarte();
     selectionnees = new Set();
+    clearSelections();
     afficherBadgeClan(clanActuel);
     basculerVersJeu();
     rendreGrille();
@@ -823,7 +863,7 @@
     s.onload   = connecterSocket;
     s.onerror  = () => {
       const el = document.getElementById('msg-erreur');
-      el.textContent = 'Impossible de joindre le serveur.';
+      el.textContent = t('joueur.serveur_introuvable');
       el.classList.add('visible');
     };
     document.head.appendChild(s);
@@ -842,14 +882,17 @@
     socket.on('rejoint', ({ tirages, clan, carte }) => {
       const enJeu = document.getElementById('vue-jeu').classList.contains('visible');
       if (enJeu && clanActuel) {
-        // Reconnexion silencieuse — on garde nomJoueur, on resync les tirages et la carte
+        // Reconnexion silencieuse — on garde nomJoueur, on resync les tirages
+        // et la carte. Les marques du joueur sont restaurées depuis
+        // sessionStorage (Sylvain Lavertu : le joueur marque lui-même).
         tiresOnline   = tirages;
         carteActuelle = carte;
+        loadSelections();
         rendreGrille();
-        tirages.forEach(num => marquerNumero(num));
         return;
       }
-      // Premier rejoint
+      // Premier rejoint — pas d'auto-marquage : le joueur tap pour rattraper
+      // s'il arrive après que des tirages ont déjà eu lieu.
       document.getElementById('overlay-rejoindre').classList.remove('visible');
       clanActuel    = clan;
       nomJoueur     = document.getElementById('input-nom').value.trim();
@@ -861,16 +904,17 @@
       document.getElementById('annonce').classList.add('visible');
       basculerVersJeu();
       rendreGrille();
-      tirages.forEach(num => marquerNumero(num));
     });
 
     socket.on('numero-tire', ({ num }) => {
       if (partieTerminee) return;
       tiresOnline.push(num);
       afficherInfoNumero(num);
-      marquerNumero(num);
-      jouerSon(num);
-      verifierVictoire();
+      // Pas d'auto-marquage ni de son : le joueur marque lui-même sa carte
+      // au tap (Sylvain Lavertu, feedback 2026-05-04 — « le joueur marque
+      // lui-même sa carte pour le garder actif »). La case devient juste
+      // .auto-marque (fond jaune pâle) tant qu'il n'a pas cliqué.
+      rendreGrille();
     });
 
     socket.on('gagnant', ({ nom, clan }) => {
@@ -887,9 +931,9 @@
         const winJoueur = document.getElementById('win-joueur');
         // Si l'overlay 'gagnant' est d\u00e9j\u00e0 visible, ne pas l'\u00e9craser
         if (!document.getElementById('win-overlay').classList.contains('visible')) {
-          winJoueur.textContent = '\u23f9 Partie termin\u00e9e';
+          winJoueur.textContent = t('joueur.partie_terminee');
           document.getElementById('win-clan').textContent =
-            raison === 'meneur-deco' ? 'Le meneur s\u2019est d\u00e9connect\u00e9.' : 'Le meneur a clos la partie.';
+            raison === 'meneur-deco' ? t('joueur.meneur_deco') : t('joueur.meneur_clos');
           document.getElementById('win-trophee').classList.remove('visible');
           document.getElementById('win-overlay').classList.add('visible');
         }
@@ -945,6 +989,7 @@
   // ── Nouvelle carte / retour setup ────────────────────────────────────
   function nouvellePartie() {
     if (socket) { try { socket.disconnect(); } catch (e) {} }
+    clearSelections();
     clanActuel          = null;
     carteActuelle       = null;
     selectionnees       = new Set();
@@ -958,7 +1003,10 @@
     document.body.classList.remove('partie-terminee');
 
     document.querySelectorAll('.btn-clan').forEach(b => b.classList.remove('actif'));
-    document.getElementById('objectif').textContent    = 'S\u00e9lectionnez un clan pour voir votre objectif';
+    const objEl = document.getElementById('objectif');
+    delete objEl.dataset.clan;
+    objEl.setAttribute('data-i18n', 'joueur.objectif_default');
+    objEl.textContent = t('joueur.objectif_default');
     document.getElementById('btn-jouer').disabled      = true;
     document.getElementById('input-code').value        = '';
     document.getElementById('btn-entrer-code').disabled = true;
@@ -984,25 +1032,13 @@
     const img = document.getElementById('annonce-image');
     img.src = `cartes/${num}.jpg`;
     img.style.display = 'block';
-    img.title = `Carte WENDIO ${num} — clic pour rejouer le son`;
+    img.title = t('joueur.carte_tooltip', { n: num });
 
     annonce.classList.add('visible');
   }
 
   function rejouerSon() {
     if (dernierNumeroClique) jouerSon(dernierNumeroClique);
-  }
-
-  // ── Marquage ─────────────────────────────────────────────────────────
-  function marquerNumero(num) {
-    LIGNES.forEach(ligne => {
-      for (let col = 0; col < 6; col++) {
-        if (!estCoeur(ligne, col) && valeurCase(carteActuelle, ligne, col) === num) {
-          selectionnees.add(ligne + col);
-        }
-      }
-    });
-    rendreGrille();
   }
 
   // ── Suppression fond noir de l'ours par flood fill depuis les bords ──
@@ -1097,12 +1133,19 @@
           cell.textContent = val;
           cell.onclick = () => {
             if (partieTerminee) return;
-            if (selectionnees.has(id)) selectionnees.delete(id);
-            else selectionnees.add(id);
+            // En online, anti-triche : marquage permis seulement si le chiffre
+            // a été tiré (Sylvain Lavertu, feedback 2026-05-04). Le tap reste
+            // libre pour afficher l'info + rejouer le son.
+            const peutMarquer = !modeOnline || tiresOnline.includes(val);
+            if (peutMarquer) {
+              if (selectionnees.has(id)) selectionnees.delete(id);
+              else selectionnees.add(id);
+              persistSelections();
+            }
             afficherInfoNumero(val);
             jouerSon(val);
             rendreGrille();
-            if (!modeOnline) verifierVictoire();
+            if (peutMarquer) verifierVictoire();
           };
         }
         grille.appendChild(cell);
@@ -1195,12 +1238,16 @@
   function afficherGagnant(nom, clan, isMoi) {
     const c = CLANS[clan] || {};
     const winJoueur = document.getElementById('win-joueur');
+    winJoueur.dataset.gagnant = JSON.stringify({ nom, clan, isMoi });
     if (isMoi) {
-      winJoueur.textContent = TROPHEE + ' ' + (c.icon || '') + ' Bravo' + (nom ? ' ' + nom : '') + ' !';
+      const bravo = nom ? t('joueur.bravo', { nom }) : t('joueur.bravo_anon');
+      winJoueur.textContent = TROPHEE + ' ' + (c.icon || '') + ' ' + bravo;
     } else {
-      winJoueur.textContent = (c.icon || '') + ' ' + nom + ' a gagn\u00e9';
+      winJoueur.textContent = (c.icon || '') + ' ' + t('joueur.a_gagne', { nom });
     }
-    document.getElementById('win-clan').textContent = clan + ' \u2014 ' + (c.label || '');
+    const winClanEl = document.getElementById('win-clan');
+    winClanEl.dataset.clan = clan;
+    winClanEl.textContent = clan + ' \u2014 ' + clanLabel(clan);
     const trophee = document.getElementById('win-trophee');
     if (c.points) {
       trophee.src = 'cartes/clan-' + c.points + 'pt.jpg';
@@ -1216,11 +1263,38 @@
 
   function quitterPartie() {
     if (socket) { try { socket.disconnect(); } catch (e) {} }
+    clearSelections();
     try { sessionStorage.removeItem('wendio-token'); } catch (e) {}
     window.location.href = 'lobby.html';
   }
 
   demarrer();
+
+  // i18n : re-traduit les textes composés (objectif, win-clan, gagnant)
+  // quand la langue change.
+  i18n.onLangChange(() => {
+    const objEl = document.getElementById('objectif');
+    if (objEl.dataset.clan) {
+      objEl.textContent = objectifTexte(objEl.dataset.clan);
+    }
+    const winClan = document.getElementById('win-clan');
+    if (winClan.dataset.clan) {
+      winClan.textContent = winClan.dataset.clan + ' — ' + clanLabel(winClan.dataset.clan);
+    }
+    const winJoueur = document.getElementById('win-joueur');
+    if (winJoueur.dataset.gagnant) {
+      try {
+        const { nom, clan, isMoi } = JSON.parse(winJoueur.dataset.gagnant);
+        const c = CLANS[clan] || {};
+        if (isMoi) {
+          const bravo = nom ? t('joueur.bravo', { nom }) : t('joueur.bravo_anon');
+          winJoueur.textContent = TROPHEE + ' ' + (c.icon || '') + ' ' + bravo;
+        } else {
+          winJoueur.textContent = (c.icon || '') + ' ' + t('joueur.a_gagne', { nom });
+        }
+      } catch (e) {}
+    }
+  });
 
   // Plein écran
   function toggleFullscreen() {

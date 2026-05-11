@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>WENDIO — Trophées à imprimer</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body { font-family: 'Segoe UI', sans-serif; background: #f4e7d3; padding: 16px; }
+
+    .controls {
+      max-width: 210mm;
+      margin: 0 auto 14px;
+      background: white;
+      border-radius: 10px;
+      padding: 16px 18px;
+      box-shadow: 0 2px 6px rgba(0,0,0,.1);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 18px;
+      align-items: flex-end;
+    }
+    .controls-section { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 200px; }
+    .controls-titre { font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; color: #999; font-weight: 700; }
+
+    /* Sélecteur clan */
+    .clan-selector { display: flex; flex-wrap: wrap; gap: 6px; }
+    .btn-clan {
+      padding: 8px 14px; border: 2px solid #ddd; border-radius: 6px;
+      background: #fafafa; cursor: pointer; font-size: .9rem; font-weight: 700;
+      transition: .2s; display: flex; align-items: center; gap: 6px;
+    }
+    .btn-clan:hover { border-color: var(--c); }
+    .btn-clan.actif { background: var(--c); color: white; border-color: var(--c); }
+    .btn-clan .wendat { font-size: .68rem; font-weight: normal; font-style: italic; opacity: .8; }
+
+    /* Champs texte */
+    .controls input[type="text"] {
+      padding: 9px 12px;
+      border: 2px solid #ddd;
+      border-radius: 6px;
+      font-size: .95rem;
+      font-family: inherit;
+    }
+    .controls input[type="text"]:focus { outline: none; border-color: #5d4037; }
+
+    /* Boutons action */
+    .btn-bar { display: flex; gap: 8px; align-items: flex-end; }
+    .btn-bar button { padding: 10px 22px; border: none; border-radius: 6px; font-weight: 700; font-size: .95rem; cursor: pointer; }
+    .btn-print { background: #d35400; color: white; }
+    .btn-print:hover { opacity: .85; }
+    .btn-print:disabled { background: #ccc; cursor: not-allowed; opacity: 1; }
+
+    /* ── Page A4 portrait ── */
+    .pages-wrap { display: flex; flex-direction: column; gap: 12px; align-items: center; }
+    .page {
+      width: 210mm; height: 297mm;
+      background: white;
+      box-shadow: 0 4px 16px rgba(0,0,0,.15);
+      padding: 18mm 16mm;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid var(--clan-c, #5d4037);
+      page-break-after: always;
+    }
+
+    .trophee-titre {
+      font-family: 'Cinzel', Georgia, serif;
+      font-size: 24pt;
+      font-weight: 900;
+      letter-spacing: .08em;
+      color: var(--clan-c, #5d4037);
+      text-align: center;
+      margin-bottom: 8mm;
+      text-transform: uppercase;
+    }
+    .trophee-gagnant {
+      font-size: 32pt;
+      font-weight: 900;
+      color: #2a1a08;
+      text-align: center;
+      margin-bottom: 6mm;
+      min-height: 1em; /* préserve la mise en page si vide */
+    }
+    .trophee-gagnant em {
+      color: #999;
+      font-style: italic;
+      font-weight: 400;
+      font-size: 18pt;
+    }
+
+    .trophee-img-wrap {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      max-height: 160mm;
+      margin: 6mm 0;
+    }
+    .trophee-img-wrap img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      border-radius: 4mm;
+      box-shadow: 0 4px 16px rgba(0,0,0,.2);
+    }
+
+    .trophee-clan-bloc {
+      text-align: center;
+      margin-top: 4mm;
+    }
+    .trophee-clan-nom {
+      font-family: 'Cinzel', Georgia, serif;
+      font-size: 22pt;
+      font-weight: 800;
+      letter-spacing: .06em;
+      color: var(--clan-c, #5d4037);
+      margin-bottom: 2mm;
+    }
+    .trophee-clan-wendat {
+      font-size: 14pt;
+      font-style: italic;
+      color: #555;
+      margin-bottom: 4mm;
+    }
+    .trophee-points {
+      display: inline-block;
+      background: var(--clan-c, #5d4037);
+      color: white;
+      padding: 3mm 8mm;
+      border-radius: 8mm;
+      font-size: 14pt;
+      font-weight: 800;
+      letter-spacing: .04em;
+    }
+    .trophee-date {
+      margin-top: 8mm;
+      font-size: 10pt;
+      color: #888;
+      font-style: italic;
+    }
+    .trophee-footer {
+      margin-top: 6mm;
+      font-size: 9pt;
+      color: #aaa;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    /* ── Impression ── */
+    .page, .trophee-clan-nom, .trophee-titre, .trophee-points {
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    @media print {
+      body { background: white; padding: 0; }
+      .controls, .empty-state { display: none; }
+      .pages-wrap { gap: 0; }
+      .page { box-shadow: none; margin: 0; }
+      @page { size: A4 portrait; margin: 0; }
+    }
+
+    .empty-state {
+      text-align: center;
+      color: #888;
+      padding: 60px 20px;
+      font-size: 1.1rem;
+    }
+  </style>
+</head>
+<body>
+
+<div class="controls">
+  <div class="controls-section">
+    <div class="controls-titre" data-i18n="trophees.clan_titre">Clan(s) à imprimer</div>
+    <div class="clan-selector" id="clan-selector"></div>
+  </div>
+
+  <div class="controls-section">
+    <div class="controls-titre" data-i18n="trophees.nom_titre">Nom du gagnant (optionnel)</div>
+    <input type="text" id="input-nom" placeholder="ex : Marie, Jean…"
+           data-i18n-attr="placeholder:trophees.nom_ph" maxlength="40">
+  </div>
+
+  <div class="controls-section" style="flex: 0 0 auto;">
+    <div class="controls-titre" data-i18n="trophees.date_titre">Date</div>
+    <input type="text" id="input-date" placeholder="JJ/MM/AAAA"
+           data-i18n-attr="placeholder:trophees.date_ph" maxlength="20">
+  </div>
+
+  <div class="btn-bar">
+    <button class="btn-print" id="btn-print" onclick="window.print()" disabled data-i18n="trophees.btn_print">🖨️ Imprimer</button>
+  </div>
+</div>
+
+<div class="pages-wrap" id="pages-wrap">
+  <div class="empty-state" data-i18n="trophees.empty">Choisissez un ou plusieurs clans ci-dessus pour générer les pages-trophées.</div>
+</div>
+
+<script src="data.js"></script>
+<script src="i18n.js"></script>
+<script>
+  'use strict';
+
+  const COULEURS = {
+    Chevreuil: '#27ae60',
+    Loup:      '#2980b9',
+    Ours:      '#8e44ad',
+    Tortue:    '#d35400',
+  };
+
+  const clansSelectionnes = new Set();
+
+  function initSelector() {
+    const sel = document.getElementById('clan-selector');
+    Object.entries(CLANS).forEach(([nom, clan]) => {
+      const btn = document.createElement('button');
+      btn.className = 'btn-clan';
+      btn.id = 'btn-' + nom;
+      btn.style.setProperty('--c', COULEURS[nom]);
+      btn.dataset.clan = nom;
+      const icon  = document.createTextNode(clan.icon + ' ');
+      const strong = document.createElement('strong');
+      strong.textContent = nom;
+      const wend = document.createElement('span');
+      wend.className = 'wendat';
+      wend.textContent = ' ' + clan.wendat;
+      btn.append(icon, strong, wend);
+      btn.onclick = () => toggleClan(nom);
+      sel.appendChild(btn);
+    });
+  }
+
+  function toggleClan(nom) {
+    if (clansSelectionnes.has(nom)) clansSelectionnes.delete(nom);
+    else clansSelectionnes.add(nom);
+    document.getElementById('btn-' + nom).classList.toggle('actif', clansSelectionnes.has(nom));
+    document.getElementById('btn-print').disabled = clansSelectionnes.size === 0;
+    rendre();
+  }
+
+  function rendre() {
+    const wrap = document.getElementById('pages-wrap');
+    wrap.replaceChildren();
+
+    if (clansSelectionnes.size === 0) {
+      const empty = document.createElement('div');
+      empty.className = 'empty-state';
+      empty.setAttribute('data-i18n', 'trophees.empty');
+      empty.textContent = t('trophees.empty');
+      wrap.appendChild(empty);
+      return;
+    }
+
+    const nom  = document.getElementById('input-nom').value.trim();
+    const date = document.getElementById('input-date').value.trim();
+
+    // Ordre fixe : on respecte l'ordre WENDIO logique (Chevreuil → Loup → Ours → Tortue)
+    Object.keys(CLANS).forEach(clanNom => {
+      if (!clansSelectionnes.has(clanNom)) return;
+      wrap.appendChild(creerPage(clanNom, nom, date));
+    });
+  }
+
+  function creerPage(clanNom, gagnantNom, dateStr) {
+    const clan = CLANS[clanNom];
+    const couleur = COULEURS[clanNom];
+
+    const page = document.createElement('div');
+    page.className = 'page';
+    page.style.setProperty('--clan-c', couleur);
+
+    // Titre
+    const titre = document.createElement('div');
+    titre.className = 'trophee-titre';
+    titre.textContent = t('trophees.titre');
+    page.appendChild(titre);
+
+    // Gagnant
+    const gagnant = document.createElement('div');
+    gagnant.className = 'trophee-gagnant';
+    if (gagnantNom) {
+      gagnant.textContent = t('trophees.bravo', { nom: gagnantNom });
+    } else {
+      const em = document.createElement('em');
+      em.textContent = t('trophees.bravo_default');
+      gagnant.appendChild(em);
+    }
+    page.appendChild(gagnant);
+
+    // Image trophée
+    const imgWrap = document.createElement('div');
+    imgWrap.className = 'trophee-img-wrap';
+    const img = document.createElement('img');
+    img.src = 'cartes/clan-' + clan.points + 'pt.jpg';
+    img.alt = 'Carte-trophée ' + clanNom;
+    imgWrap.appendChild(img);
+    page.appendChild(imgWrap);
+
+    // Bloc clan
+    const clanBloc = document.createElement('div');
+    clanBloc.className = 'trophee-clan-bloc';
+
+    const clanNomEl = document.createElement('div');
+    clanNomEl.className = 'trophee-clan-nom';
+    clanNomEl.textContent = clan.icon + ' ' + t('trophees.clan_prefix') + clanNom;
+    clanBloc.appendChild(clanNomEl);
+
+    const clanWendat = document.createElement('div');
+    clanWendat.className = 'trophee-clan-wendat';
+    clanWendat.textContent = clan.wendat;
+    clanBloc.appendChild(clanWendat);
+
+    const points = document.createElement('div');
+    points.className = 'trophee-points';
+    points.textContent = t('trophees.points', {
+      n: clan.points, s: clan.points > 1 ? 's' : '',
+    });
+    clanBloc.appendChild(points);
+
+    page.appendChild(clanBloc);
+
+    // Date
+    if (dateStr) {
+      const date = document.createElement('div');
+      date.className = 'trophee-date';
+      date.textContent = dateStr;
+      page.appendChild(date);
+    }
+
+    // Footer
+    const footer = document.createElement('div');
+    footer.className = 'trophee-footer';
+    footer.textContent = t('trophees.footer');
+    page.appendChild(footer);
+
+    return page;
+  }
+
+  // Date par défaut : aujourd'hui (FR : JJ/MM/AAAA)
+  (function initDate() {
+    const d = new Date();
+    const jj = String(d.getDate()).padStart(2, '0');
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const aaaa = d.getFullYear();
+    document.getElementById('input-date').value = jj + '/' + mm + '/' + aaaa;
+  })();
+
+  // Re-rendu à chaque modification de nom ou date
+  document.getElementById('input-nom').addEventListener('input', rendre);
+  document.getElementById('input-date').addEventListener('input', rendre);
+
+  initSelector();
+
+  // Re-render quand la langue change
+  if (typeof i18n !== 'undefined') i18n.onLangChange(rendre);
+</script>
+</body>
+</html>

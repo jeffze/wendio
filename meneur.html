@@ -90,14 +90,16 @@
 
     /* ── Panneau en ligne ── */
     #panneau-online {
-      display: none;
       background: var(--card);
       border-radius: 16px;
       border: 1px solid var(--border);
       padding: 20px;
       box-shadow: 0 4px 24px rgba(0,0,0,.4);
     }
-    #panneau-online.visible { display: block; }
+    /* Le btn « Créer la partie » n'est utile qu'en mode online.
+       En local, le choix de clan active directement le bouton TIRER. */
+    body:not(.mode-online) #btn-creer-partie { display: none; }
+    body:not(.mode-online) .clan-choix-titre.online-only { display: none; }
 
     .btn-creer {
       background: linear-gradient(135deg, var(--green) 0%, var(--green-lt) 100%);
@@ -480,6 +482,11 @@
         justify-content: center;
         padding: 12px;
         gap: 14px;
+        /* Contraint à la hauteur du viewport : sinon une colonne gauche
+           trop haute (code + QR + boutons) pousse le tableau à dépasser,
+           ce qui cache la ligne « O » et étire les cases en hauteur. */
+        height: 100vh;
+        overflow: hidden;
       }
 
       #colonne-gauche {
@@ -487,6 +494,8 @@
         max-width: none;
         flex-shrink: 0;
         gap: 12px;
+        min-height: 0;
+        overflow-y: auto;
       }
 
       h1 {
@@ -497,7 +506,11 @@
 
       .mode-bar { max-width: none; margin: 0; }
 
-      .carte-droite #qrcode { display: none; } /* cache QR en sidebar paysage, trop serré (la carte image reste visible) */
+      /* QR audio en paysage : réduit pour tenir dans la sidebar (carte image au-dessus) */
+      .carte-droite #qrcode { padding: 4px !important; margin-top: 8px; }
+      .carte-droite #qrcode canvas, .carte-droite #qrcode img {
+        width: 80px !important; height: 80px !important;
+      }
       .carte-droite { align-self: center; }
 
       #carte-numero.visible {
@@ -534,13 +547,13 @@
 </head>
 <body>
 
-<a id="btn-accueil" href="lobby.html" title="Accueil">
+<a id="btn-accueil" href="lobby.html" data-i18n-attr="title:meneur.tooltip.accueil" title="Accueil">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
     <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
   </svg>
 </a>
 
-<button id="btn-fullscreen" title="Plein &#233;cran" onclick="toggleFullscreen()">
+<button id="btn-fullscreen" data-i18n-attr="title:meneur.tooltip.fullscreen" title="Plein &#233;cran" onclick="toggleFullscreen()">
   <svg class="icon-expand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
     <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
   </svg>
@@ -551,63 +564,63 @@
 
 <div id="win-overlay">
   <div class="win-card">
-    <h2>&#127805; WENDIO ! &#127805;</h2>
+    <h2 data-i18n="meneur.win_titre">&#127805; WENDIO ! &#127805;</h2>
     <div class="win-joueur" id="win-joueur"></div>
     <img class="win-trophee" id="win-trophee" alt="Carte-trophée du clan">
     <div class="win-clan"   id="win-clan"></div>
-    <button onclick="nouvellePartieMeneur()">🏁 Fermer la partie</button>
+    <button data-i18n="meneur.btn_fermer_partie" onclick="nouvellePartieMeneur()">🏁 Fermer la partie</button>
   </div>
 </div>
 
 <!-- ── Colonne gauche ── -->
 <div id="colonne-gauche">
 
-  <h1>WENDIO &#8212; Meneur</h1>
+  <h1 data-i18n="meneur.title">WENDIO &#8212; Meneur</h1>
 
-  <div class="status-online" id="status-online">&#127760; Partie en ligne</div>
+  <div class="status-online" id="status-online" data-i18n="meneur.status_online">&#127760; Partie en ligne</div>
 
   <div class="mode-bar" id="barre-connexion">
-    <button class="btn-mode actif" id="btn-local"  onclick="setMode('local')">&#128244; Local</button>
-    <button class="btn-mode"       id="btn-online" onclick="setMode('online')">&#127760; En ligne</button>
+    <button class="btn-mode actif" id="btn-local"  onclick="setMode('local')"  data-i18n="meneur.btn_local">&#128244; Local</button>
+    <button class="btn-mode"       id="btn-online" onclick="setMode('online')" data-i18n="meneur.btn_online">&#127760; En ligne</button>
   </div>
 
   <div class="mode-bar" id="barre-tirage" style="margin-top:8px;">
-    <button class="btn-mode actif" id="btn-auto"     onclick="setModePhysique(false)">&#127922; Al&#233;atoire</button>
-    <button class="btn-mode"       id="btn-physique" onclick="setModePhysique(true)">&#127183; Physique</button>
+    <button class="btn-mode actif" id="btn-auto"     onclick="setModePhysique(false)" data-i18n="meneur.btn_auto">&#127922; Al&#233;atoire</button>
+    <button class="btn-mode"       id="btn-physique" onclick="setModePhysique(true)"  data-i18n="meneur.btn_physique">&#127183; Physique</button>
   </div>
 
   <!-- Panel online -->
   <div id="panneau-online">
     <div id="online-creation">
-      <div class="clan-choix-titre">Choisissez le clan que les joueurs incarneront pour cette partie&#160;:</div>
+      <div class="clan-choix-titre" data-i18n="meneur.clan_choix_titre">Choisissez le clan que les joueurs incarneront&#160;:</div>
       <div class="clan-choix-grid" id="clan-choix-grid"></div>
       <div class="clan-objectif" id="clan-objectif">&#160;</div>
-      <button class="btn-creer" id="btn-creer-partie" onclick="creerPartie()" disabled>&#10010; Cr&#233;er la partie</button>
+      <button class="btn-creer" id="btn-creer-partie" onclick="creerPartie()" disabled data-i18n="meneur.btn_creer">&#10010; Cr&#233;er la partie</button>
     </div>
     <div class="online-actif" id="online-actif">
       <div>
         <div class="clan-actif-banner" id="clan-actif-banner"></div>
         <div id="zone-code">
-          <div class="code-label">Code de la partie</div>
+          <div class="code-label" data-i18n="meneur.code_label">Code de la partie</div>
           <div class="code-valeur" id="code-affiche">----</div>
           <div class="lien-rejoin" id="lien-rejoin"></div>
         </div>
-        <div class="joueurs-titre">Joueurs connect&#233;s : <strong id="joueurs-count">0</strong></div>
+        <div class="joueurs-titre"><span data-i18n="meneur.joueurs_titre">Joueurs connect&#233;s :</span> <strong id="joueurs-count">0</strong></div>
         <div id="joueurs-items"></div>
-        <button class="btn-creer" id="btn-commencer" onclick="commencerPartie()" style="margin-top:14px;display:none;" disabled>&#9654;&#65039; Commencer la partie</button>
-        <button class="btn-arreter" id="btn-arreter" onclick="arreterPartie()">&#9646; Terminer la partie</button>
+        <button class="btn-creer" id="btn-commencer" onclick="commencerPartie()" style="margin-top:14px;display:none;" disabled data-i18n="meneur.btn_commencer">&#9654;&#65039; Commencer la partie</button>
+        <button class="btn-arreter" id="btn-arreter" onclick="arreterPartie()" data-i18n="meneur.btn_arreter">&#9646; Terminer la partie</button>
       </div>
       <div class="qr-bloc" id="qr-bloc">
         <div id="qr-rejoindre"></div>
-        <small>Lien joueur</small>
+        <small data-i18n="meneur.qr_lien_joueur">Lien joueur</small>
       </div>
     </div>
   </div>
 
   <!-- Boutons action -->
   <div class="btn-bar">
-    <button class="btn-tirer" id="btn-tirer" onclick="actionTirer()">&#127922; TIRER UN NUM&#201;RO</button>
-    <button class="btn-reset"               onclick="resetJeu()">&#8635; R&#233;init.</button>
+    <button class="btn-tirer" id="btn-tirer" onclick="actionTirer()" disabled data-i18n="meneur.btn_tirer">&#127922; TIRER UN NUM&#201;RO</button>
+    <button class="btn-reset"               onclick="resetJeu()"             data-i18n="meneur.btn_reset">&#8635; R&#233;init.</button>
   </div>
 
   <!-- Carte numéro tiré -->
@@ -624,9 +637,9 @@
 
 <!-- ── Tableau de suivi ── -->
 <div id="tableau">
-  <h2>Tableau des tirages</h2>
+  <h2 data-i18n="meneur.tableau_titre">Tableau des tirages</h2>
   <div id="bandeau-gagnant">
-    <div class="bandeau-titre">&#127942; Gagnant</div>
+    <div class="bandeau-titre" data-i18n="meneur.bandeau_gagnant">&#127942; Gagnant</div>
     <div id="gagnants-liste"></div>
   </div>
   <div class="suivi-grille" id="suivi-grille"></div>
@@ -635,6 +648,7 @@
 
 <script src="qrcode.min.js"></script>
 <script src="data.js"></script>
+<script src="i18n.js"></script>
 <script>
   'use strict';
   let tirages        = [];
@@ -649,9 +663,13 @@
   // ── Mode ──────────────────────────────────────────────────────────────
   function setMode(mode) {
     modeOnline = (mode === 'online');
+    document.body.classList.toggle('mode-online', modeOnline);
     document.getElementById('btn-local').classList.toggle('actif', !modeOnline);
     document.getElementById('btn-online').classList.toggle('actif', modeOnline);
-    document.getElementById('panneau-online').classList.toggle('visible', modeOnline);
+    // Quand on switche en online avant que la partie soit lancée, le tirage
+    // doit être désactivé (il s'activera via commencerPartie). En local,
+    // l'état dépend juste du choix de clan.
+    document.getElementById('btn-tirer').disabled = modeOnline || !clanChoisi;
     if (modeOnline && !socket) chargerSocket();
   }
 
@@ -666,8 +684,17 @@
     const s   = document.createElement('script');
     s.src     = '/socket.io/socket.io.js';
     s.onload  = connecterSocket;
-    s.onerror = () => alert('Serveur introuvable. Lancez server.js avec Node.js.');
+    s.onerror = () => alert(t('meneur.serveur_introuvable'));
     document.head.appendChild(s);
+  }
+
+  // Helper i18n : retourne le label de victoire traduit pour un clan donné.
+  // Fallback sur le label FR de data.js si la clé i18n est absente.
+  function clanLabel(nom) {
+    const key = 'clan.' + nom + '.victoire';
+    const txt = t(key);
+    if (txt && txt !== key) return txt;
+    return (CLANS[nom] && CLANS[nom].label) || '';
   }
 
   // ── Sélection clan imposé ────────────────────────────────────────────
@@ -683,7 +710,9 @@
       const strong = document.createElement('strong');
       strong.textContent = nom;
       const small  = document.createElement('small');
-      small.textContent = clan.label;
+      // data-i18n pour que le label suive la langue dynamiquement
+      small.setAttribute('data-i18n', 'clan.' + nom + '.victoire');
+      small.textContent = clanLabel(nom);
       btn.append(icon, strong, document.createElement('br'), small);
       btn.onclick = () => choisirClanMeneur(nom);
       grid.appendChild(btn);
@@ -694,10 +723,15 @@
     clanChoisi = nom;
     document.querySelectorAll('.btn-clan-meneur').forEach(b => b.classList.remove('actif'));
     document.getElementById('meneur-clan-' + nom).classList.add('actif');
-    const clan = CLANS[nom];
-    document.getElementById('clan-objectif').textContent =
-      'Objectif des joueurs : ' + clan.label;
+    // Mémorise le nom pour pouvoir re-traduire au changement de langue
+    const objEl = document.getElementById('clan-objectif');
+    objEl.dataset.clan = nom;
+    objEl.textContent = t('meneur.objectif_prefix') + clanLabel(nom);
     document.getElementById('btn-creer-partie').disabled = false;
+    // Sylvain : aucun tirage tant qu'un clan n'a pas été choisi. En local,
+    // on active btn-tirer immédiatement. En online, on attend que le meneur
+    // ait cliqué « Commencer la partie » (cf. commencerPartie).
+    if (!modeOnline) document.getElementById('btn-tirer').disabled = false;
   }
 
   function connecterSocket() {
@@ -724,14 +758,15 @@
       // Bannière clan imposé
       const c = CLANS[clan] || {};
       const banner = document.getElementById('clan-actif-banner');
+      banner.dataset.clan = clan; // pour la re-traduction
       banner.replaceChildren();
       banner.append(document.createTextNode((c.icon || '') + ' '));
       const lbl = document.createElement('span');
-      lbl.append('Clan imposé : ');
+      lbl.append(t('meneur.clan_impose_prefix'));
       const strong = document.createElement('strong');
       strong.textContent = clan;
       lbl.appendChild(strong);
-      lbl.append(' — ' + (c.label || ''));
+      lbl.append(' — ' + clanLabel(clan));
       banner.appendChild(lbl);
       banner.classList.add('visible');
 
@@ -739,7 +774,7 @@
       const btnCommencer = document.getElementById('btn-commencer');
       btnCommencer.style.display = 'block';
       btnCommencer.disabled = true;
-      btnCommencer.textContent = '▶️ Commencer la partie';
+      btnCommencer.textContent = t('meneur.btn_commencer');
 
       // Réafficher zone-code + QR pour les nouvelles parties
       document.getElementById('zone-code').style.display = '';
@@ -812,6 +847,8 @@
   function commencerPartie() {
     if (!socket || !codePartie) return;
     socket.emit('demarrer', { code: codePartie });
+    // Active le tirage maintenant que la partie est lancée
+    document.getElementById('btn-tirer').disabled = false;
     // Cache le code, le lien et le QR — la partie est lancée
     document.getElementById('zone-code').style.display = 'none';
     document.getElementById('qr-bloc').style.display = 'none';
@@ -828,7 +865,8 @@
 
     // Le bouton "Terminer la partie" se transforme en "Nouvelle partie"
     const btn = document.getElementById('btn-arreter');
-    btn.textContent = '🔄 Nouvelle partie';
+    btn.setAttribute('data-i18n', 'meneur.btn_nouvelle_partie');
+    btn.textContent = t('meneur.btn_nouvelle_partie');
     btn.onclick = () => nouvellePartieMeneur({ skipTerminer: true });
     btn.style.color = '#80edb5';
     btn.style.borderColor = '#2ecc71';
@@ -838,8 +876,8 @@
     // l'event 'gagnant' (race condition / glitch réseau), afficher un overlay générique.
     if (raison === 'gagnant' &&
         !document.getElementById('win-overlay').classList.contains('visible')) {
-      document.getElementById('win-joueur').textContent = TROPHEE + ' Un joueur a gagné !';
-      document.getElementById('win-clan').textContent   = 'Partie terminée — cliquez « Nouvelle partie »';
+      document.getElementById('win-joueur').textContent = TROPHEE + ' ' + t('meneur.un_joueur_gagne');
+      document.getElementById('win-clan').textContent   = t('meneur.partie_terminee_msg');
       document.getElementById('win-trophee').classList.remove('visible');
       document.getElementById('win-overlay').classList.add('visible');
     }
@@ -847,7 +885,7 @@
 
   function arreterPartie() {
     if (!socket || !codePartie) return;
-    if (!confirm('Terminer la partie\u00a0? Tous les joueurs seront d\u00e9connect\u00e9s.')) return;
+    if (!confirm(t('meneur.confirm_terminer'))) return;
     socket.emit('terminer', { code: codePartie });
     nouvellePartieMeneur({ skipTerminer: true });
   }
@@ -863,11 +901,13 @@
     document.querySelectorAll('.btn-clan-meneur').forEach(b => b.classList.remove('actif'));
     document.getElementById('clan-objectif').textContent = '\u00a0';
     document.getElementById('btn-creer-partie').disabled = true;
+    document.getElementById('btn-tirer').disabled = true; // re-d\u00e9sactiv\u00e9 jusqu'au prochain choix de clan
     document.getElementById('online-actif').classList.remove('visible');
 
     // Restaurer le bouton btn-arreter dans son \u00e9tat initial
     const btn = document.getElementById('btn-arreter');
-    btn.textContent = '\u25a2 Terminer la partie';
+    btn.setAttribute('data-i18n', 'meneur.btn_arreter');
+    btn.textContent = t('meneur.btn_arreter');
     btn.onclick = arreterPartie;
     btn.style.color = '';
     btn.style.borderColor = '';
@@ -897,6 +937,7 @@
   // ── Tirer ─────────────────────────────────────────────────────────────
   function actionTirer() {
     if (partieTerminee) return;
+    if (!clanChoisi) return; // garde-fou : un clan doit être choisi (Sylvain 2026-05-04)
     if (modeOnline && socket && codePartie) {
       socket.emit('tirer', { code: codePartie });
     } else {
@@ -924,7 +965,7 @@
     const img = document.getElementById('carte-image');
     img.src = `cartes/${num}.jpg`;
     img.style.display = 'block';
-    img.title = `Carte WENDIO numéro ${num} — clic pour rejouer le son`;
+    img.title = t('meneur.carte_tooltip', { n: num });
 
 
     const base  = window.location.href.replace(/[^/]*$/, '');
@@ -975,7 +1016,7 @@
       cell.classList.add('tire', 'actuel');
       cell.style.background = CONFIG[ligneDeNumero(num)].couleur;
     }
-    document.getElementById('compteur').textContent = tirages.length + ' / 72 num\u00e9ros tir\u00e9s';
+    document.getElementById('compteur').textContent = t('meneur.compteur', { n: tirages.length });
     if (tirages.length >= 72) document.getElementById('btn-tirer').disabled = true;
   }
 
@@ -997,7 +1038,9 @@
 
     // Grand overlay
     document.getElementById('win-joueur').textContent = medaille + ' ' + (c.icon || '') + ' ' + nom;
-    document.getElementById('win-clan').textContent   = clan + ' \u2014 ' + (c.label || '');
+    const winClanEl = document.getElementById('win-clan');
+    winClanEl.dataset.clan = clan;
+    winClanEl.textContent  = clan + ' \u2014 ' + clanLabel(clan);
     const trophee = document.getElementById('win-trophee');
     if (c.points) {
       trophee.src = 'cartes/clan-' + c.points + 'pt.jpg';
@@ -1019,7 +1062,8 @@
     nomDiv.textContent = nom;
     const clanDiv  = document.createElement('div');
     clanDiv.className   = 'bandeau-clan-info';
-    clanDiv.textContent = (c.icon || '') + ' ' + clan + ' \u2014 ' + (c.label || '');
+    clanDiv.dataset.clan = clan;
+    clanDiv.textContent = (c.icon || '') + ' ' + clan + ' \u2014 ' + clanLabel(clan);
     infoDiv.append(nomDiv, clanDiv);
     item.append(rangEl, infoDiv);
     document.getElementById('gagnants-liste').appendChild(item);
@@ -1031,10 +1075,11 @@
   function resetJeu() {
     tirages = []; numeroActuel = null;
     fermerWin();
-    document.getElementById('btn-tirer').disabled          = false;
+    // btn-tirer reste actif uniquement si un clan est encore choisi
+    document.getElementById('btn-tirer').disabled          = !clanChoisi;
     document.getElementById('carte-numero').classList.remove('visible');
     document.getElementById('carte-image').style.display   = 'none';
-    document.getElementById('compteur').textContent        = '0 / 72 num\u00e9ros tir\u00e9s';
+    document.getElementById('compteur').textContent        = t('meneur.compteur', { n: 0 });
     document.getElementById('gagnants-liste').replaceChildren();
     document.getElementById('bandeau-gagnant').classList.remove('visible');
     document.querySelectorAll('.suivi-cell').forEach(c => {
@@ -1045,6 +1090,42 @@
 
   initialiser();
   genererBoutonsClanMeneur();
+  // Compteur initial dans la langue active
+  document.getElementById('compteur').textContent = t('meneur.compteur', { n: 0 });
+
+  // i18n : re-traduit les textes composés (préfixe + label clan) quand la
+  // langue change. Les éléments concernés ont un attribut dataset.clan.
+  i18n.onLangChange(() => {
+    const obj = document.getElementById('clan-objectif');
+    if (obj.dataset.clan) {
+      obj.textContent = t('meneur.objectif_prefix') + clanLabel(obj.dataset.clan);
+    }
+    const banner = document.getElementById('clan-actif-banner');
+    if (banner.dataset.clan) {
+      const clan = banner.dataset.clan;
+      const c = CLANS[clan] || {};
+      banner.replaceChildren();
+      banner.append(document.createTextNode((c.icon || '') + ' '));
+      const lbl = document.createElement('span');
+      lbl.append(t('meneur.clan_impose_prefix'));
+      const strong = document.createElement('strong');
+      strong.textContent = clan;
+      lbl.appendChild(strong);
+      lbl.append(' — ' + clanLabel(clan));
+      banner.appendChild(lbl);
+    }
+    const winClan = document.getElementById('win-clan');
+    if (winClan.dataset.clan) {
+      winClan.textContent = winClan.dataset.clan + ' — ' + clanLabel(winClan.dataset.clan);
+    }
+    document.querySelectorAll('.bandeau-clan-info[data-clan]').forEach(el => {
+      const clan = el.dataset.clan;
+      const c = CLANS[clan] || {};
+      el.textContent = (c.icon || '') + ' ' + clan + ' — ' + clanLabel(clan);
+    });
+    // Compteur : suit la langue si tirages déjà commencés
+    document.getElementById('compteur').textContent = t('meneur.compteur', { n: tirages.length });
+  });
 
   // ── Mode démo (paramètre URL ?demo=) ──────────────────────────────────
   (function() {
