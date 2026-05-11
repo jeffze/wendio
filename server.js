@@ -369,11 +369,14 @@ io.on('connection', socket => {
 });
 
 // ── Démarrage ─────────────────────────────────────────────────────────
+// En prod (VPS derrière Caddy), bind sur 127.0.0.1 via HOST=127.0.0.1
+// dans le systemd unit. En dev local, default 0.0.0.0 pour tester depuis
+// un téléphone sur le LAN.
 const PORT = process.env.PORT || 3000;
-httpServer.listen(PORT, '0.0.0.0', () => {
+const HOST = process.env.HOST || '0.0.0.0';
+httpServer.listen(PORT, HOST, () => {
   console.log('\n╔══════════════════════════════════════╗');
   console.log('║   ✅  Serveur WENDIO démarré          ║');
-  console.log(`║   Local  : http://localhost:${PORT}       ║`);
-  console.log('║   Réseau : http://[votre-ip]:' + PORT + '      ║');
+  console.log(`║   ${HOST}:${PORT}`);
   console.log('╚══════════════════════════════════════╝\n');
 });
