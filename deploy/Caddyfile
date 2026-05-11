@@ -1,0 +1,44 @@
+# Caddyfile — VPS Jeux Sylvain (Ubuntu 24.04)
+#
+# Reverse proxy HTTPS automatique (Let's Encrypt). Caddy v2 gère le
+# WebSocket upgrade automatiquement dans reverse_proxy, donc aucune
+# directive spéciale n'est nécessaire pour Socket.io.
+#
+# Convention multi-jeux :
+#   - Chaque jeu vit dans ~/jeux/<jeu>/
+#   - Service systemd : <jeu>.service
+#   - Port loopback : 5000, 5001, 5002... (incrément par jeu)
+#   - Bloc Caddy : un par sous-domaine
+#
+# Pour ajouter un nouveau jeu :
+#   1. Ajouter un bloc { reverse_proxy 127.0.0.1:<port> } ci-dessous
+#   2. sudo systemctl reload caddy
+#   3. Vérifier : tail -f /var/log/caddy/<jeu>.log
+
+# Options globales
+{
+  email jfzahnen@gmail.com
+  # admin off  # décommenter pour désactiver l'API admin sur :2019 si besoin
+}
+
+# ── WENDIO ───────────────────────────────────────────────────────────
+wendio.jeuxlirlok.com {
+  reverse_proxy 127.0.0.1:5000
+
+  log {
+    output file /var/log/caddy/wendio.log {
+      roll_size 10mb
+      roll_keep 5
+    }
+    format console
+  }
+
+  encode gzip zstd
+}
+
+# ── Futur jeu 2 — décommenter et ajuster quand prêt ──────────────────
+# <jeu2>.jeuxlirlok.com {
+#   reverse_proxy 127.0.0.1:5001
+#   log { output file /var/log/caddy/<jeu2>.log }
+#   encode gzip zstd
+# }
