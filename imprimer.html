@@ -112,8 +112,8 @@
 
     /* En-tête */
     .carte-entete { flex-shrink: 0; text-align: center; }
-    .carte-jeu     { font-size: var(--head-font, 10pt); font-weight: 900; letter-spacing: .06em; }
-    .carte-consigne { font-size: var(--sub-font, 6.5pt); color: #888; margin-top: 1px; }
+    .carte-jeu     { font-size: var(--head-font, 10pt); font-weight: 900; letter-spacing: .06em; color: #5d4037; }
+    .carte-consigne { font-size: var(--sub-font, 6.5pt); color: #5d4037; margin-top: 1px; font-weight: 600; }
 
     /* Bandeau clan */
     .clan-bandeau {
@@ -188,7 +188,15 @@
       box-shadow: 0 0 0 1px var(--clan-c);
     }
 
-    /* ── Impression ── */
+    /* ── Impression ──
+       Force le rendu couleur des fonds (par défaut Chrome/Firefox/Safari
+       n'impriment PAS les background-color, ce qui rend invisibles le texte
+       blanc des row-label et clan-bandeau). */
+    .row-label, .clan-bandeau, .bingo-grid, .cell.cible,
+    .clan-item.actif, .coeur-merged, .coeur-img-wrap {
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
     @media print {
       body { background: white; padding: 0; }
       .controls { display: none; }
@@ -205,22 +213,22 @@
 <div class="controls">
 
   <div class="controls-section">
-    <div class="controls-titre">Nombre de cartes</div>
+    <div class="controls-titre" data-i18n="imprimer.nb_titre">Nombre de cartes</div>
     <div class="nb-selector">
-      <button class="btn-nb" id="btn-nb-1" onclick="setNb(1)">1 carte</button>
-      <button class="btn-nb" id="btn-nb-2" onclick="setNb(2)">2 cartes — paysage</button>
-      <button class="btn-nb actif" id="btn-nb-4" onclick="setNb(4)">4 cartes</button>
+      <button class="btn-nb" id="btn-nb-1" onclick="setNb(1)" data-i18n="imprimer.nb_1">1 carte</button>
+      <button class="btn-nb" id="btn-nb-2" onclick="setNb(2)" data-i18n="imprimer.nb_2">2 cartes — paysage</button>
+      <button class="btn-nb actif" id="btn-nb-4" onclick="setNb(4)" data-i18n="imprimer.nb_4">4 cartes</button>
     </div>
   </div>
 
   <div class="controls-section">
-    <div class="controls-titre">Clan</div>
+    <div class="controls-titre" data-i18n="imprimer.clan_titre">Clan</div>
     <div class="clan-selector" id="clan-selector"></div>
   </div>
 
   <div class="btn-bar">
-    <button class="btn-regen" onclick="regenerer()">&#x1F504; Nouvelles cartes</button>
-    <button class="btn-print" onclick="window.print()">&#x1F5A8;&#xFE0F; Imprimer</button>
+    <button class="btn-regen" onclick="regenerer()" data-i18n="imprimer.btn_regen">&#x1F504; Nouvelles cartes</button>
+    <button class="btn-print" onclick="window.print()" data-i18n="imprimer.btn_print">&#x1F5A8;&#xFE0F; Imprimer</button>
   </div>
 
 </div>
@@ -228,6 +236,7 @@
 <div class="page n4" id="page"></div>
 
 <script src="data.js"></script>
+<script src="i18n.js"></script>
 <script>
   'use strict';
   let clanChoisi = null;
@@ -270,7 +279,8 @@
     btnGen.style.setProperty('--c', '#5d4037');
     const genIcon = document.createTextNode('\uD83D\uDCCB ');
     const genSpan = document.createElement('span');
-    genSpan.textContent = 'G\u00e9n\u00e9rique';
+    genSpan.setAttribute('data-i18n', 'imprimer.generique');
+    genSpan.textContent = t('imprimer.generique');
     btnGen.append(genIcon, genSpan);
     btnGen.onclick = () => setClan(null);
     sel.appendChild(btnGen);
@@ -281,7 +291,8 @@
     btnMix.style.setProperty('--c', '#555');
     const mixIcon = document.createTextNode('\uD83D\uDD00 ');
     const mixSpan = document.createElement('span');
-    mixSpan.textContent = 'Un de chaque';
+    mixSpan.setAttribute('data-i18n', 'imprimer.melange');
+    mixSpan.textContent = t('imprimer.melange');
     btnMix.append(mixIcon, mixSpan);
     btnMix.onclick = () => setClan('melange');
     sel.appendChild(btnMix);
@@ -345,10 +356,12 @@
     entete.className = 'carte-entete';
     const titre = document.createElement('div');
     titre.className = 'carte-jeu';
-    titre.textContent = 'WENDIO \u2014 Le Jeu des Clans';
+    titre.setAttribute('data-i18n', 'imprimer.carte_titre');
+    titre.textContent = t('imprimer.carte_titre');
     const consigne = document.createElement('div');
     consigne.className = 'carte-consigne';
-    consigne.textContent = 'Marquez les cases avec un grain de ma\u00efs \uD83C\uDF3D';
+    consigne.setAttribute('data-i18n', 'imprimer.carte_consigne');
+    consigne.textContent = t('imprimer.carte_consigne');
     entete.append(titre, consigne);
     div.appendChild(entete);
 
@@ -368,7 +381,12 @@
       wendEl.textContent = infoClan.wendat;
       const objEl = document.createElement('span');
       objEl.className = 'clan-obj';
-      objEl.textContent = infoClan.label;
+      objEl.setAttribute('data-i18n', 'clan.' + clan + '.victoire');
+      objEl.textContent = (function() {
+        const k = 'clan.' + clan + '.victoire';
+        const tx = t(k);
+        return (tx && tx !== k) ? tx : infoClan.label;
+      })();
       bandeau.append(icone, nomEl, wendEl, objEl);
     }
     div.appendChild(bandeau);
@@ -414,8 +432,12 @@
       const icon   = document.createTextNode(c.icon + ' ');
       const strong = document.createElement('strong');
       strong.textContent = nom;
-      const dash = document.createTextNode(' \u2014 ' + c.label);
-      item.append(icon, strong, dash);
+      const labelKey = 'clan.' + nom + '.victoire';
+      const labelTxt = t(labelKey);
+      const labelSpan = document.createElement('span');
+      labelSpan.setAttribute('data-i18n', labelKey);
+      labelSpan.textContent = (labelTxt && labelTxt !== labelKey) ? labelTxt : c.label;
+      item.append(icon, strong, document.createTextNode(' \u2014 '), labelSpan);
       legende.appendChild(item);
     });
     div.appendChild(legende);

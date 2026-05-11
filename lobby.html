@@ -152,12 +152,12 @@
 
   <div class="titre-bloc">
     <div class="titre">WENDIO</div>
-    <div class="sous-titre">Le Jeu des Clans</div>
-    <div class="devise">« Une main sur le passé, une oreille sur l'avenir. »</div>
+    <div class="sous-titre" data-i18n="lobby.subtitle">Le Jeu des Clans</div>
+    <div class="devise" data-i18n="lobby.devise">« Une main sur le passé, une oreille sur l'avenir. »</div>
   </div>
 
   <div class="clans-deco">
-    <img src="sources/Chevreuil.png" alt="Chevreuil" title="Chevreuil — Ohskénonton'">
+    <img src="sources/Chevreuil.png" alt="Chevreuil" title="Chevreuil — Ohskënonton'">
     <img src="sources/Loup.png"      alt="Loup"      title="Loup — Yānariskwa'">
     <img src="sources/Ours.png"      alt="Ours"      title="Ours — Yānionyen'">
     <img src="sources/Tortue.png"    alt="Tortue"    title="Tortue — Yāndia'wich">
@@ -167,15 +167,15 @@
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
     </svg>
-    <span>Pour une exp&#233;rience optimale sur tablette, utilisez le <strong>mode plein &#233;cran</strong> &#8212; un bouton est disponible sur chaque &#233;cran de jeu.</span>
+    <span data-i18n="lobby.conseil_fs">Pour une exp&#233;rience optimale sur tablette, utilisez le <strong>mode plein &#233;cran</strong> &#8212; un bouton est disponible sur chaque &#233;cran de jeu.</span>
   </div>
 
   <div class="nav-grille">
 
     <a class="nav-carte" href="meneur.html" style="--couleur: #d35400;">
       <div class="icone">🎲</div>
-      <div class="label">Meneur de Jeu</div>
-      <div class="description">
+      <div class="label" data-i18n="lobby.meneur.label">Meneur de Jeu</div>
+      <div class="description" data-i18n="lobby.meneur.desc">
         Tirez les numéros, suivez les tirages et lancez les sons Wendat pour tous les joueurs.
       </div>
       <div class="fleche">→</div>
@@ -183,17 +183,26 @@
 
     <a class="nav-carte" href="imprimer.html" style="--couleur: #27ae60;">
       <div class="icone">🖨️</div>
-      <div class="label">Cartes à imprimer</div>
-      <div class="description">
+      <div class="label" data-i18n="lobby.imprimer.label">Cartes à imprimer</div>
+      <div class="description" data-i18n="lobby.imprimer.desc">
         Générez 4 cartes aléatoires sur une page A4. Régénérez autant de fois que nécessaire avant d'imprimer.
+      </div>
+      <div class="fleche">→</div>
+    </a>
+
+    <a class="nav-carte" href="imprimer-trophees.html" style="--couleur: #f39c12;">
+      <div class="icone">🏆</div>
+      <div class="label" data-i18n="lobby.trophees.label">Trophées à imprimer</div>
+      <div class="description" data-i18n="lobby.trophees.desc">
+        Imprimez une carte-trophée par clan, avec nom du gagnant et date — idéal pour récompenser à l’école ou en salle.
       </div>
       <div class="fleche">→</div>
     </a>
 
     <a class="nav-carte" href="joueur.html" style="--couleur: #2980b9;">
       <div class="icone">📱</div>
-      <div class="label">Carte numérique</div>
-      <div class="description">
+      <div class="label" data-i18n="lobby.joueur.label">Carte numérique</div>
+      <div class="description" data-i18n="lobby.joueur.desc">
         Jouez directement sur tablette ou téléphone avec une carte générée aléatoirement.
       </div>
       <div class="fleche">→</div>
@@ -201,8 +210,8 @@
 
     <a class="nav-carte" href="demo.html" style="--couleur: #8e44ad;">
       <div class="icone">🎬</div>
-      <div class="label">Mode Démo</div>
-      <div class="description">
+      <div class="label" data-i18n="lobby.demo.label">Mode Démo</div>
+      <div class="description" data-i18n="lobby.demo.desc">
         Choisissez un scénario de démonstration — configuration automatique.
       </div>
       <div class="fleche">→</div>
@@ -211,10 +220,11 @@
   </div>
 
   <footer>
-    Une expérience de revitalisation linguistique hybride<br>
-    Wendat &nbsp;→&nbsp; Français &nbsp;→&nbsp; Anglais
+    <div data-i18n="lobby.footer.line1">Une expérience de revitalisation linguistique hybride</div>
+    <div data-i18n="lobby.footer.line2">Wendat &nbsp;→&nbsp; Français &nbsp;→&nbsp; Anglais</div>
   </footer>
 
+<script src="i18n.js"></script>
 <script>
   // Cacher le conseil si l'API fullscreen est absente (Safari iPad)
   if (!document.documentElement.requestFullscreen) {
