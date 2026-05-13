@@ -43,9 +43,12 @@ log "Configuration UFW : SSH + HTTP + HTTPS"
 sudo ufw --force reset
 sudo ufw default deny incoming
 sudo ufw default allow outgoing
-sudo ufw allow 22/tcp comment 'SSH'
+sudo ufw allow 2243/tcp comment 'SSH (port custom WHC)'
 sudo ufw allow 80/tcp comment 'HTTP - Let''s Encrypt + redirect HTTPS'
 sudo ufw allow 443/tcp comment 'HTTPS'
+# Tailscale : autoriser tout le trafic depuis le tailnet (sinon UFW coupe la session 100.x)
+sudo ufw allow in on tailscale0 comment 'Tailscale tailnet'
+sudo ufw allow from 100.64.0.0/10 comment 'Tailscale CGNAT range'
 sudo ufw --force enable
 sudo ufw status verbose
 

@@ -11,7 +11,8 @@ set -euo pipefail
 
 # ── Config (override possible via env) ───────────────────────────────
 VPS_USER="${VPS_USER:-darkvador}"
-VPS_HOST="${VPS_HOST:-100.72.111.50}"   # IP Tailscale (à mettre à jour avec la vraie quand reçue)
+VPS_HOST="${VPS_HOST:-100.84.108.49}"   # IP Tailscale du VPS Wendio
+VPS_PORT="${VPS_PORT:-2243}"            # Port SSH custom imposé par WHC
 APP_NAME="wendio"
 REMOTE_DIR="/home/${VPS_USER}/jeux/${APP_NAME}"
 HEALTH_URL="${HEALTH_URL:-https://wendio.jeuxlirlok.com/}"
@@ -37,6 +38,7 @@ log "Source : $REPO_ROOT"
 # ── Sync code (exclure node_modules, .git, données runtime) ──────────
 log "Sync via rsync"
 rsync -avz --delete \
+  -e "ssh -p ${VPS_PORT}" \
   --exclude '.git/' \
   --exclude 'node_modules/' \
   --exclude 'feedback-data.json' \
@@ -50,13 +52,13 @@ ok "Code synchronisé"
 
 # ── Install deps prod sur le VPS ─────────────────────────────────────
 log "npm ci --omit=dev sur le VPS"
-ssh "${VPS_USER}@${VPS_HOST}" \
+ssh -p "${VPS_PORT}" "${VPS_USER}@${VPS_HOST}" \
   "cd ${REMOTE_DIR} && npm ci --omit=dev"
 ok "Dépendances installées"
 
 # ── Restart service ──────────────────────────────────────────────────
 log "Restart systemd service ${APP_NAME}"
-ssh "${VPS_USER}@${VPS_HOST}" \
+ssh -p "${VPS_PORT}" "${VPS_USER}@${VPS_HOST}" \
   "sudo systemctl restart ${APP_NAME} && sudo systemctl status ${APP_NAME} --no-pager -l | head -20"
 ok "Service redémarré"
 
