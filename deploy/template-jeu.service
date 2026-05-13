@@ -1,0 +1,55 @@
+# Template systemd pour un nouveau jeu sur le VPS Jeux Sylvain.
+#
+# Usage :
+#   1. Copier ce fichier en `<jeu>.service` (remplacer <jeu> par le nom du jeu, ex: tabacanto)
+#   2. Remplacer TOUS les placeholders :
+#        <JEU>       → nom du jeu (lowercase, sans espaces)        ex: tabacanto
+#        <DESC>      → description courte                          ex: TABACANTO — Memory Wendat
+#        <REPO_URL>  → URL GitHub du repo                          ex: https://github.com/jeffze/tabacanto
+#        <PORT>      → port loopback unique (incrément depuis 5000) ex: 5001
+#   3. Déposer sur le VPS dans /etc/systemd/system/<jeu>.service
+#   4. sudo systemctl daemon-reload && sudo systemctl enable --now <jeu>
+#
+# Convention de ports loopback déjà attribués :
+#   - 5000 : wendio
+#   - 5001 : (libre)
+#   - 5002 : (libre)
+#   - 5003 : (libre)
+
+[Unit]
+Description=<DESC>
+Documentation=<REPO_URL>
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=darkvador
+Group=darkvador
+WorkingDirectory=/home/darkvador/jeux/<JEU>
+ExecStart=/usr/bin/node server.js
+Restart=always
+RestartSec=3
+
+# Bind loopback : Caddy gère l'exposition publique
+Environment=PORT=<PORT>
+Environment=HOST=127.0.0.1
+Environment=NODE_ENV=production
+
+# Logs vers journald (consulter avec : sudo journalctl -u <JEU> -f)
+StandardOutput=journal
+StandardError=journal
+
+# Durcissement basique
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/home/darkvador/jeux/<JEU>
+PrivateTmp=true
+PrivateDevices=true
+
+# Limites raisonnables
+LimitNOFILE=4096
+
+[Install]
+WantedBy=multi-user.target
