@@ -289,8 +289,74 @@ Cible : VPS WHC Ubuntu 24.04 LTS **dédié aux jeux Sylvain** (séparé du VPS c
 | `Caddyfile` | Reverse proxy HTTPS auto (Let's Encrypt). Bloc `wendio.jeuxlirlok.com → 127.0.0.1:5000`, commentaire pour ajouter futurs jeux | Copié en `/etc/caddy/Caddyfile` par `install-wendio.sh` |
 | `wendio.service` | systemd unit : `User=darkvador`, `Environment=PORT=5000 HOST=127.0.0.1 NODE_ENV=production`, durcissement (`ProtectSystem=strict`, `ProtectHome=read-only`, `NoNewPrivileges`) | Copié en `/etc/systemd/system/` par `install-wendio.sh` |
 | `install-wendio.sh` | 1re installation : copie systemd unit + Caddyfile, activate au boot, démarre le service | **1× sur le VPS** après le 1er deploy |
-| `deploy.sh` | rsync code (exclut `node_modules`, `.git`, `feedback-data.json`, `Manual/`, `deploy/`) + `npm ci --omit=dev` + restart systemd + healthcheck HTTP | **Depuis le poste local**, à chaque push |
+| `deploy.sh` | rsync code (exclut `node_modules`, `.git`, `feedback-data.json`, `Manual/`, `deploy/`) + `npm ci --omit=dev` + restart systemd + healthcheck HTTP. Variables : `VPS_HOST=100.84.108.49`, `VPS_PORT=2243` | **Depuis le poste local**, à chaque push |
+| `template-jeu.service` | Squelette systemd pour ajouter un futur jeu (placeholders `<JEU>`, `<PORT>`, etc.) | À copier-renommer-éditer puis déposer dans `/etc/systemd/system/<jeu>.service` |
 
 ### Note sécurité
 
-UFW ouvre 80/443 **avant** le 1er démarrage Caddy (sinon Let's Encrypt rate-limite). Le service tourne sous `darkvador` (jamais root). `feedback-data.json` est gitignored et non synchronisé par `deploy.sh` (donnée runtime).
+UFW ouvre 80/443 **avant** le 1er démarrage Caddy (sinon Let's Encrypt rate-limite). UFW ouvre aussi `2243/tcp` (port SSH custom WHC) et autorise `tailscale0` + `100.64.0.0/10` (sinon la session Tailscale tombe dès l'activation du firewall). Le service tourne sous `darkvador` (jamais root). `feedback-data.json` est gitignored et non synchronisé par `deploy.sh` (donnée runtime).
+
+### État du déploiement (2026-05-13)
+
+**VPS WHC** « Apps VPS 2G » Ubuntu 24.04 LTS, conteneur **LXC** (pas KVM — visible via `zzz-lxc-service.conf` drop-in systemd) :
+- Hostname : `cloud288212.mywhc.ca`
+- IP publique : `23.27.253.63`
+- IP Tailscale : `100.84.108.49` (device `cloud288212-wendio`, expiry désactivée, même tailnet que VPS Compta)
+- Port SSH : **`2243`** (custom WHC après essais ratés du 11-13 mai, **pas 22**)
+- User : `darkvador` (sudo avec mdp), root login désactivé, password auth désactivée — uniquement clé SSH
+- Connexion : `ssh darkvador@100.84.108.49 -p 2243` (via Tailscale, indépendant du VPN)
+
+**Services tournants** :
+- `wendio.service` : Node 20.20.2 / server.js, écoute `127.0.0.1:5000`
+- `caddy.service` : reverse proxy HTTPS auto sur ports 80/443, config dans `/etc/caddy/Caddyfile`
+- `tailscaled.service` : mesh VPN, interface `tailscale0`
+- `fail2ban.service` : actif, jail sshd par défaut (ban 1h après 5 tentatives ratées)
+
+**DNS** :
+- Domaine `jeuxlirlok.com` géré chez WHC (registrar + hébergement)
+- Nameservers migrés de `parking1.whc.ca` / `parking2.whc.ca` vers `ns1.whc.ca` / `ns2.whc.ca` le 2026-05-13 (propagation TLD 1-24h)
+- A record : `wendio.jeuxlirlok.com → 23.27.253.63` (TTL 300, créé dans DNS Zone Editor cPanel)
+- Cert Let's Encrypt : auto-provisionné par Caddy dès que DNS pointe sur le VPS
+
+**⚠ Limitation connue — accès direct bloqué pour l'IP de JF** :
+Depuis le 2026-05-11, l'IP publique de JF (`207.96.200.53`, ISP COC Charlesbourg) ne peut pas joindre `23.27.253.63` directement (tous ports, tous protocoles — paquets droppés au hop 6 dans iWeb edge `184.107.194.135`). Diagnostic vérifié via check-host.net : **7/8 nœuds internet mondiaux atteignent le VPS sans souci**, seule l'IP de JF est bloquée. Ticket WHC ouvert. Workaround **permanent et propre** : passer par Tailscale (`100.84.108.49`). Le bootstrap initial (création darkvador + Tailscale) a été fait via **VPN Toronto** une seule fois. Tant que ce bug WHC n'est pas levé, conserver Tailscale comme moyen d'accès principal.
+
+**Étapes de bootstrap historiques (1× exécutées le 2026-05-13)** :
+1. SSH root via VPN Toronto sur `23.27.253.63:2243`
+2. Création user `darkvador` + sudo + dépose clé SSH `~/.ssh/id_ed25519.pub`
+3. Installation Tailscale + `tailscale up`, IP `100.84.108.49` reçue
+4. Validation SSH via Tailscale depuis hors VPN
+5. Durcissement SSH : drop-in `/etc/ssh/sshd_config.d/99-hardening.conf` (`PermitRootLogin no`, `PasswordAuthentication no`, `PubkeyAuthentication yes`) + restart
+6. Lancement `setup-vps.sh` (apt upgrade, Node 20, Caddy, UFW, fail2ban, Tailscale idempotent)
+7. `git clone github.com/jeffze/wendio.git ~/jeux/wendio`, `npm ci --omit=dev`
+8. `install-wendio.sh` (systemd unit + Caddyfile + démarrage service)
+9. Caddyfile : `caddy:caddy` ownership sur `/var/log/caddy/wendio.log` (sinon reload fail permission denied)
+10. DNS : NS du domaine basculés vers ns1/ns2.whc.ca + A record `wendio` → `23.27.253.63`
+
+### Ajouter un nouveau jeu sur ce VPS
+
+Convention multi-jeux : chaque jeu occupe un port loopback distinct (5001, 5002...), son propre service systemd, son propre sous-domaine `*.jeuxlirlok.com`. Procédure :
+
+1. **DNS** (panel WHC cPanel → DNS Zone Editor) :
+   - A record : `<jeu>.jeuxlirlok.com → 23.27.253.63` (TTL 300)
+2. **Code** (sur le VPS) :
+   ```bash
+   cd ~/jeux && git clone <repo> <jeu>
+   cd <jeu> && npm ci --omit=dev
+   ```
+3. **systemd** : copier `deploy/template-jeu.service` en remplaçant `<JEU>` et `<PORT>`, installer dans `/etc/systemd/system/<jeu>.service`
+4. **Caddyfile** : ajouter un bloc dans `/etc/caddy/Caddyfile` :
+   ```
+   <jeu>.jeuxlirlok.com {
+     reverse_proxy 127.0.0.1:<port>
+     log { output file /var/log/caddy/<jeu>.log { roll_size 10mb roll_keep 5 } format console }
+     encode gzip zstd
+   }
+   ```
+   Puis : `sudo touch /var/log/caddy/<jeu>.log && sudo chown caddy:caddy /var/log/caddy/<jeu>.log`
+5. **Activer** :
+   ```bash
+   sudo systemctl daemon-reload && sudo systemctl enable --now <jeu>
+   sudo systemctl reload caddy
+   ```
+6. **Vérifier** : `curl -I https://<jeu>.jeuxlirlok.com` (laisse 30-60s à Caddy pour le cert Let's Encrypt)
