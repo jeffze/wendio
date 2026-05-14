@@ -295,6 +295,40 @@ Cible : VPS WHC Ubuntu 24.04 LTS **dédié aux jeux Sylvain** (séparé du VPS c
 
 UFW ouvre 80/443 **avant** le 1er démarrage Caddy (sinon Let's Encrypt rate-limite). UFW ouvre aussi `2243/tcp` (port SSH custom WHC) et autorise `tailscale0` + `100.64.0.0/10` (sinon la session Tailscale tombe dès l'activation du firewall). Le service tourne sous `darkvador` (jamais root).
 
+## Intégration Support (bug tracker + error tracking, livré 2026-05-14)
+
+Le service [`D:\Support\`](../Support/CLAUDE.md) (sous-domaine prévu `support.jeuxlirlok.com`) collecte les crashes serveur, erreurs JS client et tickets soumis depuis le widget.
+
+### Côté serveur (Node)
+
+- `error-reporter.js` charge en tête de `server.js` (`require('./error-reporter')` ligne 2)
+- Pose handlers `uncaughtException` + `unhandledRejection` qui POST sur `${SUPPORT_URL}/api/errors` avec `X-Api-Key`
+- Désactivé silencieusement si `SUPPORT_URL` ou `SUPPORT_API_KEY` manquant (le service tourne normalement, juste sans error tracking)
+- Variables `.env` (gitignored, posées via systemd en prod) : `SUPPORT_URL`, `SUPPORT_API_KEY` (secret, lue dans la table `games` côté Support), `SUPPORT_GAME_ID=wendio`
+
+### Côté client (HTML)
+
+Chaque page utilisateur (`lobby`, `meneur`, `joueur`, `imprimer`, `imprimer-trophees`, `demo`) a `<script src="/_widget-loader.js" defer></script>` juste avant `</body>`.
+
+- `/_widget-loader.js` est une route Node qui sert un snippet d'injection paramétré par `SUPPORT_URL` + `SUPPORT_GAME_ID` du `.env`. Permet de garder les URLs hors du HTML versionné (différent entre dev et prod).
+- Le loader injecte `<script src="${SUPPORT_URL}/widget.js" data-game-id="wendio" data-support-url="${SUPPORT_URL}">` qui :
+  - Pose un bouton flottant "💬 Signaler" en bas à droite (caché à l'impression)
+  - Modal de soumission (type/titre/description/email opt-in) → `POST /api/widget/feedback` cross-origin avec `credentials:'include'` (envoie le cookie `sid` de support si Sylvain est connecté à `support.jeuxlirlok.com`)
+  - Capture auto `window.error` + `unhandledrejection` → `POST /api/errors/client`
+  - Dédupe les fingerprints en RAM pendant 60s pour éviter de poster 100 fois la même erreur
+
+### Lancement local (avec Support)
+
+```powershell
+# Terminal 1 : Support
+cd D:/Support; npm start
+
+# Terminal 2 : Wendio (SUPPORT_URL hérité du .env)
+cd D:/Wendio; npm start
+```
+
+Wendio sur `http://localhost:3000`, Support sur `http://localhost:5099`. `ALLOWED_ORIGINS` de Support doit inclure `http://localhost:3000`.
+
 ### État du déploiement (2026-05-13)
 
 **VPS WHC** « Apps VPS 2G » Ubuntu 24.04 LTS, conteneur **LXC** (pas KVM — visible via `zzz-lxc-service.conf` drop-in systemd) :

@@ -56,13 +56,17 @@ sudo ufw status verbose
 log "Activation fail2ban"
 sudo systemctl enable --now fail2ban
 
-# ── 5. Node.js 20 LTS via NodeSource ─────────────────────────────────
-if ! command -v node >/dev/null || [[ "$(node -v)" != v20* ]]; then
-  log "Installation Node.js 20 LTS"
-  curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+# ── 5. Node.js 24 LTS via NodeSource ─────────────────────────────────
+# Node 24 requis pour node:sqlite builtin stable (utilisé par le service Support).
+# Wendio (Express + socket.io) tourne sans souci sur 24.
+NODE_MAJOR_TARGET=24
+CURRENT_NODE_MAJOR=$(node --version 2>/dev/null | sed -E 's/^v([0-9]+).*/\1/' || echo "0")
+if [[ "$CURRENT_NODE_MAJOR" != "$NODE_MAJOR_TARGET" ]]; then
+  log "Installation Node.js $NODE_MAJOR_TARGET LTS (actuel : $(node --version 2>/dev/null || echo 'aucun'))"
+  curl -fsSL "https://deb.nodesource.com/setup_${NODE_MAJOR_TARGET}.x" | sudo -E bash -
   sudo apt-get install -y nodejs
 else
-  log "Node.js déjà installé : $(node -v)"
+  log "Node.js déjà à la bonne version : $(node -v)"
 fi
 node -v
 npm -v

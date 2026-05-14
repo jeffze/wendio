@@ -4,7 +4,8 @@
   "description": "WENDIO — Le Jeu des Clans (serveur multijoueur)",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node --env-file-if-exists=.env server.js",
+    "start:nodot": "node server.js"
   },
   "dependencies": {
     "express": "^4.18.2",
