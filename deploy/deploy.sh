@@ -41,7 +41,6 @@ rsync -avz --delete \
   -e "ssh -p ${VPS_PORT}" \
   --exclude '.git/' \
   --exclude 'node_modules/' \
-  --exclude 'feedback-data.json' \
   --exclude 'Manual/' \
   --exclude 'sources/*.psd' \
   --exclude 'deploy/' \

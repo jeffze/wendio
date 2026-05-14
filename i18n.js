@@ -204,11 +204,6 @@ const TRANSLATIONS = {
   'trophees.footer':           { fr: 'Une main sur le passé, une oreille sur l’avenir',
                                  en: 'One hand on the past, one ear on the future' },
 
-  // ── Feedback ───────────────────────────────────────────────────────
-  // Note : la page feedback est un formulaire long. On traduit les
-  // éléments structurels ; les questions de la checklist gardent leur
-  // formulation FR (rédigées par JF pour le client francophone Sylvain).
-
   // ── Démo ───────────────────────────────────────────────────────────
   'demo.sous_titre':           { fr: 'Mode Démo', en: 'Demo Mode' },
   'demo.consigne':             { fr: 'Choisissez un scénario — la configuration s’applique automatiquement.',
