@@ -1,4 +1,5 @@
 'use strict';
+require('./error-reporter');
 const express  = require('express');
 const http     = require('http');
 const { Server } = require('socket.io');
@@ -12,6 +13,20 @@ const io         = new Server(httpServer);
 app.disable('x-powered-by');
 
 app.use(express.json({ limit: '100kb' }));
+
+// Loader du widget Support — injecte dynamiquement le script avec la bonne SUPPORT_URL.
+// En dev : SUPPORT_URL=http://localhost:5099. En prod : https://support.jeuxlirlok.com.
+const SUPPORT_URL = process.env.SUPPORT_URL || '';
+const SUPPORT_GAME_ID = process.env.SUPPORT_GAME_ID || 'wendio';
+app.get('/_widget-loader.js', (_req, res) => {
+  res.setHeader('Cache-Control', 'public, max-age=300');
+  res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+  if (!SUPPORT_URL) {
+    return res.send('/* SUPPORT_URL non configuré, widget désactivé */');
+  }
+  const code = `(function(){var s=document.createElement('script');s.src=${JSON.stringify(SUPPORT_URL + '/widget.js')};s.dataset.gameId=${JSON.stringify(SUPPORT_GAME_ID)};s.dataset.supportUrl=${JSON.stringify(SUPPORT_URL)};s.defer=true;document.head.appendChild(s);})();`;
+  res.send(code);
+});
 
 // Sert tous les fichiers statiques (HTML, JS, CSS, audio…)
 app.use(express.static(path.join(__dirname)));
