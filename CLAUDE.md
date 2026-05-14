@@ -359,3 +359,66 @@ Convention multi-jeux : chaque jeu occupe un port loopback distinct (5001, 5002.
    sudo systemctl reload caddy
    ```
 6. **Vérifier** : `curl -I https://<jeu>.jeuxlirlok.com` (laisse 30-60s à Caddy pour le cert Let's Encrypt)
+
+### Audit sécurité approfondi (livré 2026-05-13)
+
+VPS durci niveau CIS Benchmark adapté à un container LXC. Tout est rejouable via `deploy/post-bootstrap.sh` après un rebuild from scratch.
+
+**Système** :
+- Sudoers `90-incus` vidé (le template cloud image WHC créait une règle `ubuntu ALL=(ALL) NOPASSWD:ALL` — piège latent même si user inexistant)
+- `unattended-upgrades` installé, security patches seulement (Tailscale/Caddy/Node exclus par pinning, restent manuels via `sudo apt update && sudo apt upgrade`)
+- SSH durci via drop-in `/etc/ssh/sshd_config.d/99-hardening.conf` : `PermitRootLogin no`, `PasswordAuthentication no`, `PubkeyAuthentication yes`
+- Sysctl strict via `/etc/sysctl.d/99-security.conf` : `rp_filter=1`, `tcp_syncookies=1`. `kernel.kptr_restrict` et `kernel.dmesg_restrict` rejetés en LXC (kernel shared host), fichier conservé pour fallback KVM
+- fail2ban : 2 jails actives — `sshd` (5 essais en 10 min → ban 10 min) + **`recidive`** (5 bans en 24h → ban 1 semaine, via UFW)
+- UFW : `2243/tcp`, `80/tcp`, `443/tcp` + autorisation totale sur `tailscale0` et `100.64.0.0/10`
+
+**Caddy** :
+- `admin off` dans options globales (l'API admin sur 127.0.0.1:2019 est désactivée — utiliser `sudo systemctl restart caddy` au lieu de `reload`)
+- Snippet `(security-headers)` réutilisable : HSTS 6 mois, X-Frame-Options SAMEORIGIN, X-Content-Type-Options nosniff, Referrer-Policy, Permissions-Policy (caméra/micro/geo/payment/usb/cohort désactivés), `-Server` (header caché)
+- CSP par site : `default-src 'self'` + Google Fonts + WebSocket `wss://`. `'unsafe-inline'` conservé pour les `<script>`/`<style>` inline (refactor nonces = chantier futur)
+
+**App Wendio** :
+- `app.disable('x-powered-by')` : cache le header Express
+- `MAX_PARTIES = 50` : limite anti-DOS sur création de parties simultanées
+- Système feedback **supprimé** (était `/api/feedback`, `/api/feedback-list`, `feedback-admin.html` — exposait publiquement les commentaires sans auth)
+- Validation inputs : whitelist clan, slice nom 20 char, slice token 64 char, body JSON 100kb max
+- Anti-troll victoire : validation serveur-side (`victoireValide()`)
+- `npm audit` prod : 0 vulnérabilités
+
+**Wendio systemd** drop-in `/etc/systemd/system/wendio.service.d/limits.conf` :
+- `MemoryMax=512M` : OOM-kill si Node leak ou attaque
+- `TasksMax=100` : empêche fork-bomb
+
+### Runbook incident
+
+**Si Wendio crash en pleine partie** :
+- `systemd` Restart=always → recovery automatique en 3 sec
+- Vérifier : `sudo journalctl -u wendio -n 50` (logs des 50 dernières lignes)
+- Si crash répété : `sudo systemctl status wendio` pour voir Restart count, puis lire les logs Node
+
+**Si Caddy down (HTTPS inaccessible)** :
+- `sudo systemctl status caddy` puis `sudo journalctl -u caddy -n 30`
+- Si problème de cert Let's Encrypt : `sudo journalctl -u caddy | grep -i acme | tail -20`
+- Restart : `sudo systemctl restart caddy`
+
+**Si compromis suspecté** :
+1. **Couper l'accès public** : `sudo ufw disable` (HTTPS down mais SSH via Tailscale reste OK)
+2. **Inspecter** : `sudo fail2ban-client banned`, `sudo last`, `sudo journalctl -u ssh --since "24 hours ago"`, `sudo ss -tnp`
+3. **Snapshot des logs** : `sudo cp -r /var/log /tmp/forensic-$(date +%s)` puis `tar czf` + télécharger
+4. **Rotation des secrets** : changer mdp `darkvador`, regen clé SSH côté local, redéployer
+5. **Nuclear option** : détruire le VPS via panel WHC, recréer un nouveau VPS, rejouer `setup-vps.sh` + `post-bootstrap.sh` + `git clone wendio` + `install-wendio.sh`. Temps de recovery ≈ 30 min.
+
+**Monitoring externe à mettre en place (todo)** :
+- UptimeRobot (gratuit, 50 monitors) : ping HTTPS sur chaque jeu toutes les 5 min, alerte email si down
+- Healthcheck simple : `GET https://wendio.jeuxlirlok.com` doit retourner 200
+
+**Rebuild from scratch** (référence) :
+```bash
+# Sur un nouveau VPS Ubuntu 24.04 LTS, en darkvador avec sudo :
+bash setup-vps.sh          # Bootstrap : Node + Caddy + UFW + Tailscale + fail2ban
+sudo tailscale up          # Lier au compte Tailscale
+bash post-bootstrap.sh     # Durcissement (sudoers, SSH, sysctl, fail2ban recidive, wendio limits)
+cd ~/jeux && git clone https://github.com/jeffze/wendio.git
+cd wendio && npm ci --omit=dev
+sudo bash deploy/install-wendio.sh  # systemd unit + Caddyfile + start
+```
