@@ -12,33 +12,63 @@
 #
 # Pour ajouter un nouveau jeu :
 #   1. Ajouter un bloc { reverse_proxy 127.0.0.1:<port> } ci-dessous
-#   2. sudo systemctl reload caddy
+#   2. sudo systemctl restart caddy  (PAS reload, car admin API désactivée — voir options globales)
 #   3. Vérifier : tail -f /var/log/caddy/<jeu>.log
 
 # Options globales
 {
-  email jfzahnen@gmail.com
-  # admin off  # décommenter pour désactiver l'API admin sur :2019 si besoin
+	email jfzahnen@gmail.com
+	# Désactive l'API admin Caddy sur 127.0.0.1:2019 (hardening 2026-05-13).
+	# Conséquence : `caddy reload` ne fonctionne plus, utiliser
+	# `sudo systemctl restart caddy` à la place.
+	admin off
 }
 
-# ── WENDIO ───────────────────────────────────────────────────────────
+# ── Headers de sécurité partagés (snippet réutilisable par tous les jeux) ─────
+(security-headers) {
+	header {
+		# HSTS : force HTTPS pendant 6 mois (max-age en secondes)
+		Strict-Transport-Security "max-age=15552000; includeSubDomains"
+		# Anti-clickjacking (équivalent moderne : CSP frame-ancestors)
+		X-Frame-Options "SAMEORIGIN"
+		# Empêche MIME-sniffing par le navigateur
+		X-Content-Type-Options "nosniff"
+		# Limite ce qui est envoyé dans le Referer
+		Referrer-Policy "strict-origin-when-cross-origin"
+		# Désactive les APIs navigateur qu'on n'utilise pas
+		Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()"
+		# Cache le header "Server: Caddy"
+		-Server
+	}
+}
+
+# ── WENDIO ───────────────────────────────────────────────────────────────────
 wendio.jeuxlirlok.com {
-  reverse_proxy 127.0.0.1:5000
+	reverse_proxy 127.0.0.1:5000
 
-  log {
-    output file /var/log/caddy/wendio.log {
-      roll_size 10mb
-      roll_keep 5
-    }
-    format console
-  }
+	import security-headers
 
-  encode gzip zstd
+	# CSP spécifique Wendio : 'self' + Google Fonts + WebSocket Socket.io.
+	# 'unsafe-inline' nécessaire pour les <script> et <style> inline du HTML.
+	# (À migrer vers nonces si refactor un jour.)
+	header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; media-src 'self'; connect-src 'self' wss://wendio.jeuxlirlok.com; frame-ancestors 'self'; base-uri 'self'; form-action 'self';"
+
+	log {
+		output file /var/log/caddy/wendio.log {
+			roll_size 10mb
+			roll_keep 5
+		}
+		format console
+	}
+
+	encode gzip zstd
 }
 
-# ── Futur jeu 2 — décommenter et ajuster quand prêt ──────────────────
+# ── Futur jeu 2 — décommenter et ajuster quand prêt ──────────────────────────
 # <jeu2>.jeuxlirlok.com {
-#   reverse_proxy 127.0.0.1:5001
-#   log { output file /var/log/caddy/<jeu2>.log }
-#   encode gzip zstd
+# 	reverse_proxy 127.0.0.1:5001
+# 	import security-headers
+# 	header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' wss://<jeu2>.jeuxlirlok.com; frame-ancestors 'self';"
+# 	log { output file /var/log/caddy/<jeu2>.log }
+# 	encode gzip zstd
 # }
