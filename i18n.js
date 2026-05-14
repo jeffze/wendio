@@ -362,4 +362,4 @@ const i18n = (function () {
   return { getLang, setLang, t, applyTranslations, onLangChange };
 })();
 
-function t(key) { return i18n.t(key); }
+function t(key, vars) { return i18n.t(key, vars); }
