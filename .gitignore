@@ -2,4 +2,3 @@ node_modules/
 .env
 *.log
 Manual/
-feedback-data.json

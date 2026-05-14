@@ -54,7 +54,6 @@ Then open `http://localhost:3000` (redirects to `lobby.html`).
 | `imprimer.html` | Generates 4 random cards on an A4 page for printing |
 | `imprimer-trophees.html` | Page d'impression des cartes-trophées par clan, avec nom du gagnant optionnel + date (1 trophée par page A4, sélection multi-clans = N pages) |
 | `demo.html` | Mode démo : sélection de scénario avec config automatique |
-| `feedback.html` / `feedback-admin.html` | Formulaire de validation client (Sylvain) + vue interne ; pas i18n (one-shot pour client francophone) |
 | `data.js` | Shared game data: grid config, clans, Wendat vocabulary, card generation |
 | `i18n.js` | Toggle FR/EN injecté automatiquement en haut à droite de chaque page ; dictionnaire centralisé, persistance `localStorage['wendio-lang']`, hook `i18n.onLangChange(cb)` pour ré-render les textes composés (cf. section i18n) |
 | `server.js` | Node.js + Express + Socket.io multiplayer server (bind `HOST` env var, défaut `0.0.0.0` en dev, `127.0.0.1` en prod via systemd) |
@@ -254,7 +253,7 @@ Côté joueur, le son ne se déclenche qu'au **tap** d'une case ou de l'annonce-
 
 ## i18n FR/EN
 
-Toggle injecté automatiquement en haut à droite de chaque page via `i18n.js`. Persistance dans `localStorage['wendio-lang']`. Pages traduites : `lobby`, `meneur`, `joueur`, `imprimer`, `imprimer-trophees`, `demo`. Pages non traduites volontairement : `feedback.html` (one-shot pour Sylvain francophone), `accueil.html` (backup non lié), `feedback-admin.html` (vue interne).
+Toggle injecté automatiquement en haut à droite de chaque page via `i18n.js`. Persistance dans `localStorage['wendio-lang']`. Pages traduites : `lobby`, `meneur`, `joueur`, `imprimer`, `imprimer-trophees`, `demo`. Pages non traduites : `accueil.html` (backup non lié).
 
 ### API
 
@@ -289,12 +288,12 @@ Cible : VPS WHC Ubuntu 24.04 LTS **dédié aux jeux Sylvain** (séparé du VPS c
 | `Caddyfile` | Reverse proxy HTTPS auto (Let's Encrypt). Bloc `wendio.jeuxlirlok.com → 127.0.0.1:5000`, commentaire pour ajouter futurs jeux | Copié en `/etc/caddy/Caddyfile` par `install-wendio.sh` |
 | `wendio.service` | systemd unit : `User=darkvador`, `Environment=PORT=5000 HOST=127.0.0.1 NODE_ENV=production`, durcissement (`ProtectSystem=strict`, `ProtectHome=read-only`, `NoNewPrivileges`) | Copié en `/etc/systemd/system/` par `install-wendio.sh` |
 | `install-wendio.sh` | 1re installation : copie systemd unit + Caddyfile, activate au boot, démarre le service | **1× sur le VPS** après le 1er deploy |
-| `deploy.sh` | rsync code (exclut `node_modules`, `.git`, `feedback-data.json`, `Manual/`, `deploy/`) + `npm ci --omit=dev` + restart systemd + healthcheck HTTP. Variables : `VPS_HOST=100.84.108.49`, `VPS_PORT=2243` | **Depuis le poste local**, à chaque push |
+| `deploy.sh` | rsync code (exclut `node_modules`, `.git`, `Manual/`, `deploy/`) + `npm ci --omit=dev` + restart systemd + healthcheck HTTP. Variables : `VPS_HOST=100.84.108.49`, `VPS_PORT=2243` | **Depuis le poste local**, à chaque push |
 | `template-jeu.service` | Squelette systemd pour ajouter un futur jeu (placeholders `<JEU>`, `<PORT>`, etc.) | À copier-renommer-éditer puis déposer dans `/etc/systemd/system/<jeu>.service` |
 
 ### Note sécurité
 
-UFW ouvre 80/443 **avant** le 1er démarrage Caddy (sinon Let's Encrypt rate-limite). UFW ouvre aussi `2243/tcp` (port SSH custom WHC) et autorise `tailscale0` + `100.64.0.0/10` (sinon la session Tailscale tombe dès l'activation du firewall). Le service tourne sous `darkvador` (jamais root). `feedback-data.json` est gitignored et non synchronisé par `deploy.sh` (donnée runtime).
+UFW ouvre 80/443 **avant** le 1er démarrage Caddy (sinon Let's Encrypt rate-limite). UFW ouvre aussi `2243/tcp` (port SSH custom WHC) et autorise `tailscale0` + `100.64.0.0/10` (sinon la session Tailscale tombe dès l'activation du firewall). Le service tourne sous `darkvador` (jamais root).
 
 ### État du déploiement (2026-05-13)
 

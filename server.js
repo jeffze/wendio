@@ -3,51 +3,18 @@ const express  = require('express');
 const http     = require('http');
 const { Server } = require('socket.io');
 const path     = require('path');
-const fs       = require('fs');
 
 const app        = express();
 const httpServer = http.createServer(app);
 const io         = new Server(httpServer);
 
+// Cache le header `x-powered-by: Express` (fingerprinting framework)
+app.disable('x-powered-by');
+
 app.use(express.json({ limit: '100kb' }));
 
 // Sert tous les fichiers statiques (HTML, JS, CSS, audio…)
 app.use(express.static(path.join(__dirname)));
-
-// ── Commentaires client (formulaire de validation prez) ──────────────
-const FEEDBACK_FILE = path.join(__dirname, 'feedback-data.json');
-let feedbackList = [];
-try {
-  if (fs.existsSync(FEEDBACK_FILE)) {
-    feedbackList = JSON.parse(fs.readFileSync(FEEDBACK_FILE, 'utf8'));
-    console.log(`[feedback] ${feedbackList.length} entrée(s) chargée(s) depuis disque`);
-  }
-} catch (e) {
-  console.error('[feedback] erreur de chargement:', e.message);
-}
-
-app.post('/api/feedback', (req, res) => {
-  const body = req.body || {};
-  const entry = {
-    received_at: new Date().toISOString(),
-    name:        String(body.name || '').slice(0, 80),
-    device:      String(body.device || '').slice(0, 80),
-    sections:    Array.isArray(body.sections) ? body.sections.slice(0, 50) : [],
-    free_text:   String(body.free_text || '').slice(0, 5000),
-  };
-  feedbackList.push(entry);
-  try {
-    fs.writeFileSync(FEEDBACK_FILE, JSON.stringify(feedbackList, null, 2));
-  } catch (e) {
-    console.error('[feedback] erreur d\'écriture:', e.message);
-  }
-  console.log(`[feedback] reçu de "${entry.name || '(anonyme)'}" — ${feedbackList.length} total`);
-  res.json({ ok: true });
-});
-
-app.get('/api/feedback-list', (req, res) => {
-  res.json(feedbackList);
-});
 
 // ── Config grille (miroir de data.js) ────────────────────────────────
 const LIGNES = ['W', 'E', 'N', 'D', 'I', 'O'];
@@ -155,6 +122,10 @@ function carteHash(carte) {
 // Map : code → { maitre, clan, tirages, joueurs, cartes(Set), terminee }
 const parties = new Map();
 
+// Limite anti-DOS : empêche un attaquant de créer des milliers de parties
+// pour saturer la mémoire. ~60 KB par partie en moyenne.
+const MAX_PARTIES = 50;
+
 function genererCode() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   let code;
@@ -173,6 +144,11 @@ io.on('connection', socket => {
     const clan = payload && payload.clan;
     if (!CLANS_VALIDES.has(clan)) {
       socket.emit('erreur', 'Clan invalide.');
+      return;
+    }
+    if (parties.size >= MAX_PARTIES) {
+      socket.emit('erreur', `Trop de parties en cours (${MAX_PARTIES} max). Réessaie dans quelques minutes.`);
+      console.warn(`[creer] refus — ${parties.size}/${MAX_PARTIES} parties actives`);
       return;
     }
     codePartie = genererCode();
