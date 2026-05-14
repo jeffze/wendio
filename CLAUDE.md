@@ -312,13 +312,16 @@ UFW ouvre 80/443 **avant** le 1er démarrage Caddy (sinon Let's Encrypt rate-lim
 - `fail2ban.service` : actif, jail sshd par défaut (ban 1h après 5 tentatives ratées)
 
 **DNS** :
-- Domaine `jeuxlirlok.com` géré chez WHC (registrar + hébergement)
-- Nameservers migrés de `parking1.whc.ca` / `parking2.whc.ca` vers `ns1.whc.ca` / `ns2.whc.ca` le 2026-05-13 (propagation TLD 1-24h)
-- A record : `wendio.jeuxlirlok.com → 23.27.253.63` (TTL 300, créé dans DNS Zone Editor cPanel)
-- Cert Let's Encrypt : auto-provisionné par Caddy dès que DNS pointe sur le VPS
+- Domaine `jeuxlirlok.com` enregistré chez WHC (registrar), zone DNS gérée par **Cloudflare** depuis le 2026-05-14
+- Nameservers actuels : `drew.ns.cloudflare.com` + `kelly.ns.cloudflare.com` (uniques au compte CF de JF)
+- Historique : `parking1/2.whc.ca` → `ns1/2.whc.ca` (2026-05-13) → `drew/kelly.ns.cloudflare.com` (2026-05-14)
+- A record : `wendio.jeuxlirlok.com → 23.27.253.63` (TTL 300), **proxifié via CF**
+- Cert : 2 couches HTTPS — Cloudflare Universal SSL côté visiteur + Let's Encrypt en backend (Caddy)
 
-**⚠ Limitation connue — accès direct bloqué pour l'IP de JF** :
-Depuis le 2026-05-11, l'IP publique de JF (`207.96.200.53`, ISP COC Charlesbourg) ne peut pas joindre `23.27.253.63` directement (tous ports, tous protocoles — paquets droppés au hop 6 dans iWeb edge `184.107.194.135`). Diagnostic vérifié via check-host.net : **7/8 nœuds internet mondiaux atteignent le VPS sans souci**, seule l'IP de JF est bloquée. Ticket WHC ouvert. Workaround **permanent et propre** : passer par Tailscale (`100.84.108.49`). Le bootstrap initial (création darkvador + Tailscale) a été fait via **VPN Toronto** une seule fois. Tant que ce bug WHC n'est pas levé, conserver Tailscale comme moyen d'accès principal.
+**⚠ Limitation persistante — accès direct bloqué pour l'IP de JF** (depuis 2026-05-11) :
+L'IP publique de JF (`207.96.200.53`, ISP COC Charlesbourg) reste droppée par le réseau iWeb/WHC au hop 6 (`184.107.194.135`) pour `23.27.253.63` tous protocoles. Ticket WHC stagne. **Workaround permanent en place** :
+- **HTTP/HTTPS** : passe par Cloudflare anycast (`104.x` / `172.x`) que WHC ne bloque pas → accès admin restauré sans VPN depuis 2026-05-14
+- **SSH** : via Tailscale `100.84.108.49:2243` (filet de secours indépendant)
 
 **Étapes de bootstrap historiques (1× exécutées le 2026-05-13)** :
 1. SSH root via VPN Toronto sur `23.27.253.63:2243`
@@ -359,6 +362,70 @@ Convention multi-jeux : chaque jeu occupe un port loopback distinct (5001, 5002.
    sudo systemctl reload caddy
    ```
 6. **Vérifier** : `curl -I https://<jeu>.jeuxlirlok.com` (laisse 30-60s à Caddy pour le cert Let's Encrypt)
+
+### Cloudflare devant Caddy (livré 2026-05-14)
+
+Ajouté pour contourner le blocage WHC persistant de l'IP de JF. Bonus : DDoS protection, cache edge, analytics.
+
+**Architecture** :
+```
+Visiteur → CF anycast (104.x / 172.x) → 23.27.253.63:443 (Caddy + LE cert)
+                                       → 127.0.0.1:5000 (Wendio Node)
+```
+
+**Mode SSL/TLS Cloudflare** : **Full (strict)** — CF présente son cert Universal au visiteur et valide le cert Let's Encrypt de Caddy en backend. Double HTTPS bout-en-bout. `Always Use HTTPS` ON (CF fait aussi sa propre redirection HTTP→HTTPS au niveau edge, redondant avec Caddy mais OK).
+
+**Records DNS — proxy status** :
+
+| Record | Proxy | Pourquoi |
+|---|---|---|
+| `wendio` (A → `23.27.253.63`) | **Proxied ☁️ (orange)** | Le seul qui bénéficie de l'anycast CF + DDoS protection |
+| `jeuxlirlok.com` apex (A → `158.69.17.252`) | DNS only | Hébergement WHC shared de Sylvain — site vitrine |
+| `www` (CNAME) | DNS only | Idem apex |
+| `mail`, `webmail`, `cpanel`, `cpcalendars`, `cpcontacts`, `webdisk`, `whm`, `ftp` | **DNS only OBLIGATOIRE** | CF proxy ne supporte que HTTP/HTTPS. IMAP/SMTP/FTP/cPanel/WebDAV cassent si proxifiés |
+| `MX`, `SPF`, `DKIM`, `DMARC` (TXT) | DNS only (auto) | CF ne proxifie jamais ces types |
+
+⚠️ **Risque connu — bypass possible** : l'origine `23.27.253.63` reste accessible publiquement. Un attaquant qui la connaît peut bypass CF et taper Caddy en direct. Pour sceller (todo plus tard, pas urgent) : restreindre Caddy aux IPs Cloudflare via UFW + `trusted_proxies cloudflare` Caddyfile. Liste des IPs CF : `https://www.cloudflare.com/ips-v4/`.
+
+#### Ajouter un nouveau jeu — étape Cloudflare en plus
+
+Quand tu ajoutes un 2ᵉ jeu (voir section « Ajouter un nouveau jeu sur ce VPS » plus haut), au moment du DNS :
+
+1. **Dashboard Cloudflare** → site `jeuxlirlok.com` → **DNS → Records** → **Add record**
+2. Type `A`, Name `<jeu>`, IPv4 `23.27.253.63`, **Proxy status : Proxied (orange)**, TTL Auto
+3. Save. La propagation est instantanée côté CF (pas d'attente NS).
+4. Cert SSL : CF Universal SSL couvre `*.jeuxlirlok.com` automatiquement, valide en quelques minutes.
+
+### Troubleshoot DNS / cache — patterns observés
+
+Quand tu changes un record dans Cloudflare ou bascules un proxy status, et que le ping/navigateur retourne encore l'ancienne IP :
+
+**1. Confirmer que CF a bien la nouvelle valeur** (vérité externe via check-host.net) :
+```bash
+curl -s "https://check-host.net/check-http?host=https://wendio.jeuxlirlok.com&max_nodes=6" -H "Accept: application/json"
+# attendre 10s
+curl -s "https://check-host.net/check-result/<request_id>"
+```
+Si check-host retourne des IPs CF depuis tous les nœuds, le proxy CF fonctionne — c'est local qui cache.
+
+**2. Cache `1.1.1.1` est lent à invalider** sur ses propres zones (paradoxal). Tester avec un autre résolveur :
+```powershell
+Resolve-DnsName <domaine> -Server 8.8.8.8 -DnsOnly
+Resolve-DnsName <domaine> -Server 9.9.9.9 -DnsOnly
+```
+`8.8.8.8` ou `9.9.9.9` propagent souvent plus vite que `1.1.1.1` lui-même.
+
+**3. DNS Windows hérité du router DHCP** : `ipconfig /flushdns` ne suffit pas si le router pousse son DNS. Changer manuellement DNS Windows à `8.8.8.8` / `8.8.4.4` (Settings → Network → Edit DNS server → Manual IPv4).
+
+**4. Chrome marche en incognito mais pas en mode normal → HSTS sticky** dans le profil utilisateur. Fix :
+- `chrome://net-internals/#hsts` → « Delete domain security policies » → entrer `<domaine>`
+- `chrome://net-internals/#dns` → « Clear host cache »
+- `chrome://net-internals/#sockets` → « Flush socket pools »
+- Fermer **tous** les processus `chrome.exe` (Task Manager) et relancer
+
+Firefox utilise son propre store et n'a généralement pas ce problème (à utiliser pour valider que le serveur est OK pendant qu'on debug le cache Chrome).
+
+**5. Hosts override oublié** : vérifier `C:\Windows\System32\drivers\etc\hosts` pour des lignes manuelles qui pin une IP (héritage de tests précédents).
 
 ### Audit sécurité approfondi (livré 2026-05-13)
 
