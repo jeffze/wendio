@@ -511,15 +511,18 @@
       .carte-droite #qrcode canvas, .carte-droite #qrcode img {
         width: 80px !important; height: 80px !important;
       }
-      /* Étire la colonne sur toute la hauteur disponible et fait que
-         l'image prend l'espace restant après le QR fixe — sinon l'image
-         est rognée (support #7). */
-      .carte-droite { align-self: stretch; }
-      .carte-droite #carte-image {
-        flex: 1 1 0;
+      /* Étire la colonne sur toute la hauteur dispo et centre son
+         contenu verticalement. L'image garde sa taille naturelle
+         (height auto), max-height: 100% du CSS de base la borne pour
+         éviter le débordement (support #7). Le QR reste fixe. */
+      .carte-droite {
+        align-self: stretch;
+        justify-content: center;
         min-height: 0;
-        max-height: 100%;
+      }
+      .carte-droite #carte-image {
         margin-bottom: 0;
+        flex-shrink: 1;
       }
       .carte-droite #qrcode { flex-shrink: 0; }
 
