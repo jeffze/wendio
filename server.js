@@ -4,6 +4,10 @@ const express  = require('express');
 const http     = require('http');
 const { Server } = require('socket.io');
 const path     = require('path');
+const crypto   = require('crypto');
+
+const auth   = require('./auth');
+const email  = require('./email');
 
 const app        = express();
 const httpServer = http.createServer(app);
@@ -13,6 +17,7 @@ const io         = new Server(httpServer);
 app.disable('x-powered-by');
 
 app.use(express.json({ limit: '100kb' }));
+app.use(auth.attachUser);
 
 // Loader du widget Support — injecte dynamiquement le script avec la bonne SUPPORT_URL.
 // En dev : SUPPORT_URL=http://localhost:5099. En prod : https://support.jeuxlirlok.com.
@@ -27,6 +32,98 @@ app.get('/_widget-loader.js', (_req, res) => {
   const code = `(function(){var s=document.createElement('script');s.src=${JSON.stringify(SUPPORT_URL + '/widget.js')};s.dataset.gameId=${JSON.stringify(SUPPORT_GAME_ID)};s.dataset.supportUrl=${JSON.stringify(SUPPORT_URL)};s.defer=true;document.head.appendChild(s);})();`;
   res.send(code);
 });
+
+// ── Auth meneur (magic link) ─────────────────────────────────────────
+// Routes /login, /auth/* + middleware protégeant les pages meneur.
+
+const PROTECTED_PATHS = new Set(['/meneur.html', '/meneur-config.html']);
+
+app.get('/login', (req, res) => {
+  res.sendFile(path.join(__dirname, 'login.html'));
+});
+
+app.post('/auth/request', async (req, res) => {
+  const emailIn = auth.normEmail(req.body?.email);
+  if (!auth.isValidEmail(emailIn)) return res.status(400).json({ error: 'invalid_email' });
+
+  // Anti-énumération : on retourne toujours OK, mais on n'envoie l'email
+  // que si le compte existe.
+  const user = auth.getUser(emailIn);
+  if (!user) return res.json({ ok: true });
+
+  const token = auth.createMagicToken(emailIn, {
+    ip: req.ip,
+    userAgent: req.get('user-agent'),
+  });
+  const base = process.env.PUBLIC_URL || `${req.protocol}://${req.get('host')}`;
+  const next_ = encodeURIComponent(req.body?.next || '/lobby.html');
+  const link = `${base}/auth/verify?token=${encodeURIComponent(token)}&next=${next_}`;
+
+  email.sendMagicLink({ to: emailIn, link }).catch(err => console.error('[auth] email send:', err));
+  res.json({ ok: true });
+});
+
+app.get('/auth/verify', (req, res) => {
+  const token = String(req.query.token || '');
+  const next_ = String(req.query.next || '/lobby.html');
+  const row = auth.consumeMagicToken(token);
+  if (!row) {
+    return res.status(400).type('html').send(renderErrorPage(
+      'Lien invalide ou expiré',
+      'Demande un nouveau lien depuis la page de connexion.'
+    ));
+  }
+  const user = auth.getUser(row.email);
+  if (!user) {
+    return res.status(400).type('html').send(renderErrorPage(
+      'Accès refusé',
+      'Ce courriel n\'est pas reconnu comme meneur.'
+    ));
+  }
+  auth.touchLastLogin(user.id);
+  const session = auth.createSession(user.id, { ip: req.ip, userAgent: req.get('user-agent') });
+  res.setHeader('Set-Cookie', auth.serializeCookie(auth.SESSION_COOKIE, session.id, auth.cookieOptions()));
+  // Redirige vers next_ (toujours interne — pas d'open redirect)
+  const safeNext = next_.startsWith('/') && !next_.startsWith('//') ? next_ : '/lobby.html';
+  res.redirect(safeNext);
+});
+
+app.post('/auth/logout', (req, res) => {
+  auth.destroySession(req.sessionId);
+  res.setHeader('Set-Cookie', auth.serializeCookie(auth.SESSION_COOKIE, '', { ...auth.cookieOptions(), maxAge: 0 }));
+  res.json({ ok: true });
+});
+
+app.get('/auth/me', (req, res) => {
+  if (!req.user) return res.status(401).json({ error: 'auth_required' });
+  res.json({ id: req.user.id, email: req.user.email, name: req.user.name, role: req.user.role });
+});
+
+// Middleware de protection des pages meneur (avant express.static)
+app.use((req, res, next) => {
+  if (!PROTECTED_PATHS.has(req.path)) return next();
+  if (req.user) return next();
+  const next_ = encodeURIComponent(req.originalUrl);
+  res.redirect('/login?next=' + next_);
+});
+
+function renderErrorPage(title, body) {
+  function esc(s) { return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;' }[c])); }
+  return `<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(title)}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600&family=Inter:wght@400;500&display=swap">
+<style>
+body{margin:0;background:#1a1008;color:#f4e7d3;font-family:'Inter',-apple-system,Segoe UI,Roboto,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px}
+.card{background:#221710;border:1px solid rgba(244,231,211,.10);padding:36px 32px;border-radius:14px;max-width:420px;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.4)}
+.label{font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#8a5c2a;margin-bottom:14px}
+h1{margin:0 0 12px;font-family:'Cinzel',Georgia,serif;font-size:22px;font-weight:600;background:linear-gradient(135deg,#e8a85a 0%,#c8843a 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+p{margin:0 0 14px;color:#b89978;line-height:1.55}
+a{color:#e8a85a;text-decoration:none;font-weight:500}
+a:hover{color:#f39c12;text-decoration:underline}
+</style></head>
+<body><div class="card"><div class="label">WENDIO · Feu de conseil</div><h1>${esc(title)}</h1><p>${esc(body)}</p>
+<p><a href="/login">← Retour à la connexion</a></p></div></body></html>`;
+}
 
 // Sert tous les fichiers statiques (HTML, JS, CSS, audio…)
 app.use(express.static(path.join(__dirname)));

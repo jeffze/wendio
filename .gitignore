@@ -7,3 +7,6 @@ Manual/
 cartes-pales/
 cartes-test/
 cartes-orig/
+
+# DB auth meneur (sqlite local)
+data/

@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WENDIO — Connexion meneur</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', 'Segoe UI', sans-serif;
+      background: #1a1008;
+      background-image: radial-gradient(ellipse 100% 50% at 50% 0%, #2a1808 0%, #1a1008 65%);
+      color: #f4e7d3;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .card {
+      background: #2c1a0e;
+      border: 1px solid rgba(244,231,211,.10);
+      border-radius: 14px;
+      padding: 36px 32px 32px;
+      max-width: 420px;
+      width: 100%;
+      box-shadow: 0 4px 24px rgba(0,0,0,.5);
+      position: relative;
+    }
+    .card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 14px;
+      padding: 1px;
+      background: linear-gradient(135deg, rgba(211,84,0,.4), transparent 50%);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+              mask-composite: exclude;
+      pointer-events: none;
+    }
+    .label {
+      font-family: 'Cinzel', Georgia, serif;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: #8a5c2a;
+      margin-bottom: 6px;
+    }
+    h1 {
+      font-family: 'Cinzel', Georgia, serif;
+      font-size: 28px;
+      font-weight: 900;
+      letter-spacing: .12em;
+      background: linear-gradient(135deg, #d35400 0%, #f39c12 50%, #d35400 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 4px;
+    }
+    .sub {
+      font-family: 'Cinzel', Georgia, serif;
+      font-size: 14px;
+      color: #b89978;
+      letter-spacing: .04em;
+      margin-bottom: 24px;
+    }
+    p.intro { color: #b89978; line-height: 1.55; margin-bottom: 18px; font-size: 14px; }
+
+    label {
+      display: block;
+      margin: 18px 0 6px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #a08060;
+      text-transform: uppercase;
+      letter-spacing: .10em;
+    }
+    input {
+      width: 100%;
+      padding: 11px 12px;
+      border: 1px solid rgba(244,231,211,.12);
+      border-radius: 8px;
+      background: #38241a;
+      color: #f4e7d3;
+      font-family: inherit;
+      font-size: 15px;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    input::placeholder { color: #7a5a3a; }
+    input:focus {
+      outline: none;
+      border-color: #d35400;
+      box-shadow: 0 0 0 3px rgba(211, 84, 0, 0.20);
+    }
+    button {
+      width: 100%;
+      margin-top: 18px;
+      padding: 12px 18px;
+      border: none;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #f39c12 0%, #d35400 100%);
+      color: #1a0e02;
+      font-family: 'Cinzel', serif;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      cursor: pointer;
+      transition: transform .12s, box-shadow .2s, filter .2s;
+      text-transform: uppercase;
+    }
+    button:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 20px rgba(211,84,0,.4);
+      filter: brightness(1.05);
+    }
+    button:disabled { opacity: .55; cursor: not-allowed; filter: grayscale(.3); }
+
+    .msg {
+      margin-top: 16px;
+      padding: 11px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      border: 1px solid;
+      line-height: 1.5;
+    }
+    .msg.ok { background: rgba(107, 142, 58, 0.12); color: #a8c97a; border-color: rgba(107, 142, 58, 0.3); }
+    .msg.error { background: rgba(162, 56, 41, 0.12); color: #e08775; border-color: rgba(162, 56, 41, 0.3); }
+
+    .footer {
+      margin-top: 24px;
+      text-align: center;
+      color: #7a5a3a;
+      font-size: 12px;
+      line-height: 1.55;
+    }
+    .footer a { color: #a08060; text-decoration: none; }
+    .footer a:hover { color: #e8a85a; }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <div class="label">WENDIO · Feu de conseil</div>
+    <h1>WENDIO</h1>
+    <div class="sub">Connexion meneur</div>
+
+    <p class="intro">Entre ton courriel pour recevoir un lien de connexion par courriel. Pas de mot de passe à retenir.</p>
+
+    <form id="form-login" novalidate>
+      <label for="email">Courriel du meneur</label>
+      <input type="email" id="email" name="email" required autocomplete="email" placeholder="ex: sylvain@example.com">
+      <button type="submit" id="btn-submit">Envoyer le lien</button>
+    </form>
+
+    <div id="msg" class="msg" hidden></div>
+
+    <div class="footer">
+      Tu reçois un lien valable 15 minutes. Pas de compte ? Contacte JF pour qu'on t'en crée un.<br>
+      <a href="/">← Retour à l'accueil</a>
+    </div>
+  </main>
+
+  <script>
+    const form = document.getElementById('form-login');
+    const msg = document.getElementById('msg');
+    const btn = document.getElementById('btn-submit');
+    const next = new URLSearchParams(window.location.search).get('next') || '/lobby.html';
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value.trim();
+      if (!email) return;
+
+      btn.disabled = true;
+      btn.textContent = 'Envoi…';
+      msg.hidden = true;
+
+      try {
+        const res = await fetch('/auth/request', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, next }),
+        });
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          msg.textContent = data.error === 'invalid_email' ? 'Courriel invalide.' : 'Erreur, réessaie.';
+          msg.className = 'msg error';
+        } else {
+          msg.textContent = 'Si ton courriel est reconnu, le lien arrive dans une minute. Vérifie aussi tes pourriels la première fois.';
+          msg.className = 'msg ok';
+          form.querySelector('input').value = '';
+        }
+        msg.hidden = false;
+      } catch (err) {
+        msg.textContent = 'Réseau indisponible.';
+        msg.className = 'msg error';
+        msg.hidden = false;
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Envoyer le lien';
+      }
+    });
+  </script>
+</body>
+</html>

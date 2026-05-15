@@ -35,7 +35,7 @@ Then open `http://localhost:3000` (redirects to `lobby.html`).
 **`index.html`** — Cover splash (concept « Feu de conseil ») : la couverture client `couverture.png` encadrée et flottante sur fond chaud avec particules braises animées. Bouton « COMMENCER → » ou clic / tap / Entrée / Espace → `lobby.html`. L'ancienne landing animée 4 clans est sauvée dans `accueil.html` (non liée).
 
 **`lobby.html`** — Hub de navigation (atteint après la couverture) :
-- Meneur de Jeu (`meneur.html`)
+- Meneur de Jeu (`meneur-config.html` → page de config 3 étapes → `meneur.html?mode=…&tirage=…&clan=…`)
 - Cartes à imprimer (`imprimer.html`)
 - Trophées à imprimer (`imprimer-trophees.html`)
 - Carte numérique joueur (`joueur.html`)
@@ -46,6 +46,7 @@ Then open `http://localhost:3000` (redirects to `lobby.html`).
 | File | Role |
 |------|------|
 | `index.html` | Page de couverture client (splash « Feu de conseil ») |
+| `meneur-config.html` | Page intermédiaire entre lobby et meneur — force le choix Mode (Local/En ligne) + Tirage (Aléatoire/Physique) + Clan avant d'arriver sur meneur.html. Choix passés en query string. Mémorise les derniers choix en localStorage. Bypass possible via `?demo=` qui va direct à meneur.html. |
 | `accueil.html` | Backup : ancienne landing animée 4 clans (non liée mais accessible) |
 | `couverture.png` | Image officielle de couverture fournie par le client |
 | `lobby.html` | Hub de navigation après la couverture |
