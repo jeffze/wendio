@@ -38,7 +38,11 @@ function consumeMagicToken(token) {
   return row;
 }
 
-function getUser(email) {
+function getUser(email, tenantId) {
+  if (tenantId) {
+    return db.prepare(`SELECT * FROM meneurs WHERE email = ? AND tenant_id = ?`).get(email, tenantId);
+  }
+  // Fallback : sans tenant (compat avec les anciennes routes qui ne passaient pas le tenant)
   return db.prepare(`SELECT * FROM meneurs WHERE email = ?`).get(email);
 }
 
@@ -90,8 +94,17 @@ function parseCookies(header) {
 function attachUser(req, _res, next) {
   const cookies = parseCookies(req.headers.cookie);
   const sid = cookies[SESSION_COOKIE];
-  req.user = getSessionUser(sid);
-  req.sessionId = req.user ? sid : null;
+  const u = getSessionUser(sid);
+  // Isolation cross-tenant : un cookie d'un autre tenant ne donne pas accès
+  // (en pratique le navigateur ne devrait jamais l'envoyer car cookies scopés
+  // au sous-domaine, mais defense in depth si quelqu'un bricole les cookies).
+  if (u && req.tenant && u.tenant_id && u.tenant_id !== req.tenant.id) {
+    req.user = null;
+    req.sessionId = null;
+  } else {
+    req.user = u;
+    req.sessionId = u ? sid : null;
+  }
   next();
 }
 

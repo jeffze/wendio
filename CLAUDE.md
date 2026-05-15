@@ -267,7 +267,7 @@ Toggle injecté automatiquement en haut à droite de chaque page via `i18n.js`. 
 
 ### Conventions
 
-- Les **noms de clans** (Chevreuil, Loup, Ours, Tortue) restent en français — termes culturels Wendat
+- Les **noms de clans** sont traduits en EN depuis 2026-05-15 (commit 55bab45) : `clan.Chevreuil` → Deer, `clan.Loup` → Wolf, `clan.Ours` → Bear, `clan.Tortue` → Turtle. Les noms restent comme identifiants internes (events Socket.io, DB) ; seul l'affichage est traduit.
 - Les **mots Wendat** (Ohskënonton', etc.) restent inchangés
 - Les **phonétiques** dans `data.js` (NOMBRES) restent FR pour le moment ; l'UI autour est traduite
 - Les **labels de victoire** sont traduits via `clan.<Nom>.victoire` (les fonctions `clanLabel(nom)` côté meneur/joueur encapsulent le fallback sur `CLANS[nom].label`)
