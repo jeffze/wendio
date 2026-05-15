@@ -206,7 +206,26 @@
       margin-bottom: 8px;
       line-height: 1;
     }
-    .lien-rejoin  { font-size: .7rem; color: var(--dim); word-break: break-all; margin-bottom: 14px; font-family: monospace; }
+    .lien-rejoin-wrap { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+    .lien-rejoin  { font-size: .7rem; color: var(--dim); word-break: break-all; font-family: monospace; flex: 1; min-width: 0; }
+    .btn-copier {
+      background: var(--surface);
+      color: var(--muted);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 7px 12px;
+      font-size: .78rem;
+      font-weight: 600;
+      font-family: inherit;
+      letter-spacing: .03em;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background .15s, border-color .15s, color .15s, transform .12s;
+      white-space: nowrap;
+    }
+    .btn-copier:hover { background: var(--card); border-color: var(--gold); color: var(--gold-lt); transform: translateY(-1px); }
+    .btn-copier:active { transform: translateY(0); }
+    .btn-copier.copied { background: rgba(107,142,58,.15); border-color: #6b8e3a; color: #a8c97a; }
     .joueurs-titre { font-size: .72rem; color: var(--muted); margin-bottom: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
     .joueur-item  { display: flex; align-items: center; gap: 8px; font-size: .88rem; padding: 7px 0; border-bottom: 1px solid var(--border); }
     .joueur-item:last-child { border: none; }
@@ -643,7 +662,10 @@
         <div id="zone-code">
           <div class="code-label" data-i18n="meneur.code_label">Code de la partie</div>
           <div class="code-valeur" id="code-affiche">----</div>
-          <div class="lien-rejoin" id="lien-rejoin"></div>
+          <div class="lien-rejoin-wrap">
+            <div class="lien-rejoin" id="lien-rejoin"></div>
+            <button class="btn-copier" id="btn-copier-lien" type="button" onclick="copierLien()" data-i18n="meneur.btn_copier" data-i18n-attr="title:meneur.btn_copier_title" title="Copier le lien">📋 Copier</button>
+          </div>
         </div>
         <div class="joueurs-titre"><span data-i18n="meneur.joueurs_titre">Joueurs connect&#233;s :</span> <strong id="joueurs-count">0</strong></div>
         <div id="joueurs-items"></div>
@@ -882,6 +904,43 @@
   function creerPartie() {
     if (!socket || !clanChoisi) return;
     socket.emit('creer', { clan: clanChoisi });
+  }
+
+  // Bouton copier (à côté du lien à partager) — Clipboard API + feedback visuel
+  function copierLien() {
+    const lien = document.getElementById('lien-rejoin').textContent.trim();
+    if (!lien) return;
+    const btn = document.getElementById('btn-copier-lien');
+    const flashOk = () => {
+      const orig = btn.textContent;
+      btn.textContent = '✓ Copié';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = orig;
+        btn.classList.remove('copied');
+      }, 1800);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(lien).then(flashOk).catch(fallbackCopy);
+    } else {
+      fallbackCopy();
+    }
+    // Fallback : selection + execCommand (compat Safari iOS < 13.4, navigateurs anciens)
+    function fallbackCopy() {
+      try {
+        const ta = document.createElement('textarea');
+        ta.value = lien;
+        ta.style.position = 'fixed';
+        ta.style.left = '-9999px';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        flashOk();
+      } catch (e) {
+        alert('Impossible de copier — copie le lien à la main.');
+      }
+    }
   }
 
   function commencerPartie() {
