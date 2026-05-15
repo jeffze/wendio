@@ -511,7 +511,17 @@
       .carte-droite #qrcode canvas, .carte-droite #qrcode img {
         width: 80px !important; height: 80px !important;
       }
-      .carte-droite { align-self: center; }
+      /* Étire la colonne sur toute la hauteur disponible et fait que
+         l'image prend l'espace restant après le QR fixe — sinon l'image
+         est rognée (support #7). */
+      .carte-droite { align-self: stretch; }
+      .carte-droite #carte-image {
+        flex: 1 1 0;
+        min-height: 0;
+        max-height: 100%;
+        margin-bottom: 0;
+      }
+      .carte-droite #qrcode { flex-shrink: 0; }
 
       #carte-numero.visible {
         flex: 1;
