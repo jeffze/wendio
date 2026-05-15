@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WENDIO — Configuration de la partie</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:      #1a1008;
+      --surface: #2c1a0e;
+      --surface-2:#38200e;
+      --border:  #3e2510;
+      --border-hi:#5a3a1a;
+      --gold:    #c07808;
+      --gold-lt: #e8a828;
+      --ember:   #d35400;
+      --ember-lt:#f39c12;
+      --text:    #f4e7d3;
+      --muted:   #a08060;
+      --dim:     #5a3a1a;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', 'Segoe UI', sans-serif;
+      background: var(--bg);
+      background-image: radial-gradient(ellipse 100% 50% at 50% 0%, #2a1808 0%, var(--bg) 65%);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 28px 16px 48px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* ── Titre ── */
+    .header { text-align: center; margin-bottom: 32px; }
+    h1 {
+      font-family: 'Cinzel', Georgia, serif;
+      font-size: clamp(2rem, 6vw, 3rem);
+      font-weight: 900;
+      letter-spacing: .14em;
+      background: linear-gradient(135deg, #d35400 0%, #f39c12 50%, #d35400 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 6px;
+    }
+    .sub {
+      font-family: 'Cinzel', Georgia, serif;
+      font-size: .9rem;
+      color: var(--muted);
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    /* ── Conteneur ── */
+    .wrap {
+      width: 100%;
+      max-width: 640px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* ── Sections ── */
+    .section { }
+    .section h2 {
+      font-family: 'Cinzel', Georgia, serif;
+      font-size: .85rem;
+      font-weight: 600;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--gold-lt);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section h2::before {
+      content: attr(data-step);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      background: var(--surface);
+      border: 1px solid var(--border-hi);
+      color: var(--gold-lt);
+      font-size: .75rem;
+      font-family: 'Cinzel', serif;
+      font-weight: 700;
+    }
+
+    /* ── Boutons d'options ── */
+    .options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .options.clans { grid-template-columns: 1fr 1fr; }
+    @media (min-width: 540px) {
+      .options.clans { grid-template-columns: 1fr 1fr 1fr 1fr; }
+    }
+
+    .opt {
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 18px 16px;
+      cursor: pointer;
+      transition: border-color .15s, background .15s, transform .12s;
+      font-family: inherit;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      text-align: center;
+    }
+    .opt:hover { border-color: var(--border-hi); background: var(--surface-2); }
+    .opt.actif {
+      border-color: var(--ember);
+      background: linear-gradient(135deg, rgba(211,84,0,.18) 0%, rgba(243,156,18,.10) 100%);
+      box-shadow: 0 0 0 1px rgba(211,84,0,.3), 0 6px 18px rgba(211,84,0,.20);
+    }
+    .opt .icone { font-size: 1.8rem; line-height: 1; }
+    .opt .label {
+      font-family: 'Cinzel', serif;
+      font-weight: 600;
+      letter-spacing: .04em;
+      font-size: .98rem;
+      color: var(--text);
+    }
+    .opt .desc {
+      font-size: .76rem;
+      color: var(--muted);
+      font-style: italic;
+      line-height: 1.35;
+    }
+    .opt .wendat {
+      font-size: .72rem;
+      color: var(--gold-lt);
+      font-style: italic;
+      opacity: .85;
+    }
+
+    /* ── Actions ── */
+    .actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 16px;
+    }
+    .btn-retour {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: .9rem;
+      padding: 10px 14px;
+      border-radius: 8px;
+      transition: color .15s, background .15s;
+    }
+    .btn-retour:hover { color: var(--text); background: var(--surface); }
+
+    .btn-start {
+      background: linear-gradient(135deg, var(--ember-lt) 0%, var(--ember) 100%);
+      color: #1a0e02;
+      border: none;
+      padding: 14px 32px;
+      border-radius: 10px;
+      font-family: 'Cinzel', serif;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: .06em;
+      cursor: pointer;
+      transition: transform .12s, box-shadow .2s, filter .2s;
+      text-transform: uppercase;
+    }
+    .btn-start:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(211,84,0,.4);
+      filter: brightness(1.05);
+    }
+    .btn-start:disabled {
+      opacity: .35;
+      cursor: not-allowed;
+      filter: grayscale(.4);
+    }
+
+    /* ── Toggle langue (compatibilité i18n.js) ── */
+    .lang-toggle-placeholder { position: absolute; top: 16px; right: 16px; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <h1>WENDIO</h1>
+  <div class="sub" data-i18n="config.titre">Configuration de la partie</div>
+</div>
+
+<div class="wrap">
+
+  <div class="section">
+    <h2 data-step="1" data-i18n="config.mode">Mode de jeu</h2>
+    <div class="options">
+      <button class="opt" data-key="mode" data-value="local">
+        <span class="icone">📡</span>
+        <span class="label" data-i18n="config.local">Local</span>
+        <span class="desc" data-i18n="config.local_desc">Le meneur projette à l'écran, joueurs avec cartes papier</span>
+      </button>
+      <button class="opt" data-key="mode" data-value="online">
+        <span class="icone">🌐</span>
+        <span class="label" data-i18n="config.online">En ligne</span>
+        <span class="desc" data-i18n="config.online_desc">Joueurs connectés via QR code sur leur appareil</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2 data-step="2" data-i18n="config.tirage">Type de tirage</h2>
+    <div class="options">
+      <button class="opt" data-key="tirage" data-value="aleatoire">
+        <span class="icone">🎲</span>
+        <span class="label" data-i18n="config.aleatoire">Aléatoire</span>
+        <span class="desc" data-i18n="config.aleatoire_desc">Le serveur tire les numéros au hasard</span>
+      </button>
+      <button class="opt" data-key="tirage" data-value="physique">
+        <span class="icone">🃏</span>
+        <span class="label" data-i18n="config.physique">Physique</span>
+        <span class="desc" data-i18n="config.physique_desc">Le meneur clique sur les numéros tirés du deck</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2 data-step="3" data-i18n="config.clan">Clan imposé aux joueurs</h2>
+    <div class="options clans">
+      <button class="opt" data-key="clan" data-value="Chevreuil">
+        <span class="icone">🦌</span>
+        <span class="label">Chevreuil</span>
+        <span class="wendat">Ohskënonton'</span>
+        <span class="desc" data-i18n="clan.Chevreuil.victoire">Une ligne</span>
+      </button>
+      <button class="opt" data-key="clan" data-value="Loup">
+        <span class="icone">🐺</span>
+        <span class="label">Loup</span>
+        <span class="wendat">Yānariskwa'</span>
+        <span class="desc" data-i18n="clan.Loup.victoire">Les 4 coins</span>
+      </button>
+      <button class="opt" data-key="clan" data-value="Ours">
+        <span class="icone">🐻</span>
+        <span class="label">Ours</span>
+        <span class="wendat">Yānionyen'</span>
+        <span class="desc" data-i18n="clan.Ours.victoire">Carré protecteur</span>
+      </button>
+      <button class="opt" data-key="clan" data-value="Tortue">
+        <span class="icone">🐢</span>
+        <span class="label">Tortue</span>
+        <span class="wendat">Yāndia'wich</span>
+        <span class="desc" data-i18n="clan.Tortue.victoire">Carte pleine</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="actions">
+    <a href="lobby.html" class="btn-retour" data-i18n="config.retour">← Retour au menu</a>
+    <button class="btn-start" id="btn-start" disabled data-i18n="config.commencer">Commencer ▶</button>
+  </div>
+
+</div>
+
+<script>
+  const choices = { mode: null, tirage: null, clan: null };
+  const STORAGE_PREFIX = 'wendio-config-';
+
+  // Pré-remplir depuis URL params (retour pour modifier) ou localStorage (dernier setup)
+  const params = new URLSearchParams(window.location.search);
+  ['mode', 'tirage', 'clan'].forEach(k => {
+    const v = params.get(k) || localStorage.getItem(STORAGE_PREFIX + k);
+    if (v) selectOpt(k, v);
+  });
+
+  function selectOpt(key, value) {
+    choices[key] = value;
+    document.querySelectorAll('[data-key="' + key + '"]').forEach(b => {
+      b.classList.toggle('actif', b.dataset.value === value);
+    });
+    updateStartBtn();
+  }
+
+  function updateStartBtn() {
+    const btn = document.getElementById('btn-start');
+    btn.disabled = !(choices.mode && choices.tirage && choices.clan);
+  }
+
+  document.querySelectorAll('.opt').forEach(btn => {
+    btn.addEventListener('click', () => selectOpt(btn.dataset.key, btn.dataset.value));
+  });
+
+  document.getElementById('btn-start').addEventListener('click', () => {
+    if (!choices.mode || !choices.tirage || !choices.clan) return;
+    // Sauve pour la prochaine fois
+    ['mode', 'tirage', 'clan'].forEach(k => localStorage.setItem(STORAGE_PREFIX + k, choices[k]));
+    const qs = new URLSearchParams(choices).toString();
+    window.location.href = 'meneur.html?' + qs;
+  });
+</script>
+
+<script src="i18n.js"></script>
+<script src="/_widget-loader.js" defer></script>
+</body>
+</html>
