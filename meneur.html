@@ -1202,12 +1202,22 @@
     setModePhysique(tirage === 'physique');
     choisirClanMeneur(clan);
 
-    // Cache les sélecteurs maintenant inutiles
+    // Cache les sélecteurs maintenant inutiles (gain ~150-200px verticaux)
     document.getElementById('barre-connexion').style.display = 'none';
     document.getElementById('barre-tirage').style.display = 'none';
     document.querySelectorAll('.clan-choix-titre').forEach(el => el.style.display = 'none');
     const grid = document.getElementById('clan-choix-grid');
     if (grid) grid.style.display = 'none';
+    // L'objectif (« Une ligne », « Les 4 coins », etc.) est replié dans le
+    // tooltip du bandeau pour gagner de la place côté carte (support #7).
+    const objectif = document.getElementById('clan-objectif');
+    if (objectif) objectif.style.display = 'none';
+    // En mode local, plus rien d'utile dans #panneau-online → tout cacher
+    // (en online, on garde le btn « Créer la partie » et l'écran QR/joueurs).
+    if (mode === 'local') {
+      const panneau = document.getElementById('panneau-online');
+      if (panneau) panneau.style.display = 'none';
+    }
 
     insertCompactBandeau(mode, tirage, clan);
   })();
@@ -1220,6 +1230,9 @@
 
     const span1 = document.createElement('span');
     span1.textContent = (CLAN_ICONS[clan] || '') + ' ' + clan;
+    // Tooltip avec l'objectif de victoire (caché de la sidebar pour gagner de la place)
+    const obj = (typeof CLANS !== 'undefined' && CLANS[clan]) ? CLANS[clan].label : null;
+    if (obj) span1.title = 'Objectif : ' + obj;
     const sep1 = document.createElement('span');
     sep1.className = 'sep'; sep1.textContent = '·';
     const span2 = document.createElement('span');
