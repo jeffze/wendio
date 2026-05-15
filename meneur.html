@@ -474,6 +474,33 @@
     #btn-accueil:hover { color: var(--gold-lt); border-color: var(--gold); background: rgba(33,21,8,.95); }
     #btn-accueil svg { width: 18px; height: 18px; display: block; }
 
+    /* ── Bandeau compact de configuration (depuis meneur-config.html) ── */
+    .bandeau-config {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: .82rem;
+      color: var(--text);
+      padding: 8px 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin: 8px 0 4px;
+      letter-spacing: .02em;
+      flex-wrap: wrap;
+    }
+    .bandeau-config .sep { color: var(--dim); margin: 0 2px; }
+    .bandeau-config .edit {
+      margin-left: auto;
+      color: var(--gold-lt);
+      text-decoration: none;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: .95rem;
+      transition: background .15s, color .15s;
+    }
+    .bandeau-config .edit:hover { background: var(--card); color: var(--gold); }
+
     /* ── Paysage tablette ── */
     @media (orientation: landscape) and (min-height: 400px) {
       body {
@@ -1140,15 +1167,81 @@
     document.getElementById('compteur').textContent = t('meneur.compteur', { n: tirages.length });
   });
 
-  // ── Mode démo (paramètre URL ?demo=) ──────────────────────────────────
+  // ── Configuration URL (depuis meneur-config.html ou ?demo=) ──────────
   (function() {
-    const demo = new URLSearchParams(window.location.search).get('demo');
-    if (!demo) return;
+    const params = new URLSearchParams(window.location.search);
+    const demo = params.get('demo');
+
+    // Mode démo : bypasse la page config (comportement existant)
+    if (demo) {
+      document.getElementById('barre-connexion').style.display = 'none';
+      document.getElementById('barre-tirage').style.display    = 'none';
+      if (demo === 'physique') setModePhysique(true);
+      if (demo === 'online')   setMode('online');
+      return;
+    }
+
+    const mode   = params.get('mode');
+    const tirage = params.get('tirage');
+    const clan   = params.get('clan');
+
+    // Accès direct sans aucun paramètre → on envoie vers la page de config
+    if (!params.toString()) {
+      window.location.replace('meneur-config.html');
+      return;
+    }
+
+    // Paramètres incomplets : on envoie vers config (en pré-remplissant ce qu'on a)
+    if (!mode || !tirage || !clan) {
+      window.location.replace('meneur-config.html?' + params.toString());
+      return;
+    }
+
+    // Apply config
+    setMode(mode);
+    setModePhysique(tirage === 'physique');
+    choisirClanMeneur(clan);
+
+    // Cache les sélecteurs maintenant inutiles
     document.getElementById('barre-connexion').style.display = 'none';
-    document.getElementById('barre-tirage').style.display    = 'none';
-    if (demo === 'physique') setModePhysique(true);
-    if (demo === 'online')   setMode('online');
+    document.getElementById('barre-tirage').style.display = 'none';
+    document.querySelectorAll('.clan-choix-titre').forEach(el => el.style.display = 'none');
+    const grid = document.getElementById('clan-choix-grid');
+    if (grid) grid.style.display = 'none';
+
+    insertCompactBandeau(mode, tirage, clan);
   })();
+
+  function insertCompactBandeau(mode, tirage, clan) {
+    const CLAN_ICONS = { Chevreuil: '🦌', Loup: '🐺', Ours: '🐻', Tortue: '🐢' };
+
+    const bandeau = document.createElement('div');
+    bandeau.className = 'bandeau-config';
+
+    const span1 = document.createElement('span');
+    span1.textContent = (CLAN_ICONS[clan] || '') + ' ' + clan;
+    const sep1 = document.createElement('span');
+    sep1.className = 'sep'; sep1.textContent = '·';
+    const span2 = document.createElement('span');
+    span2.textContent = mode === 'online' ? '🌐 En ligne' : '📡 Local';
+    const sep2 = document.createElement('span');
+    sep2.className = 'sep'; sep2.textContent = '·';
+    const span3 = document.createElement('span');
+    span3.textContent = tirage === 'physique' ? '🃏 Physique' : '🎲 Aléatoire';
+
+    const edit = document.createElement('a');
+    edit.href = 'meneur-config.html?mode=' + encodeURIComponent(mode) +
+                '&tirage=' + encodeURIComponent(tirage) +
+                '&clan=' + encodeURIComponent(clan);
+    edit.className = 'edit';
+    edit.textContent = '✏️';
+    edit.title = 'Modifier la configuration';
+
+    bandeau.append(span1, sep1, span2, sep2, span3, edit);
+
+    const h1 = document.querySelector('#colonne-gauche h1');
+    if (h1 && h1.parentNode) h1.after(bandeau);
+  }
 
   // Plein écran
   function toggleFullscreen() {
