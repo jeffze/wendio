@@ -5,12 +5,13 @@
 
 (function () {
   const STYLE = `
-.wendio-auth-widget{position:fixed;top:12px;right:12px;z-index:1000;font:500 13px/1.3 'Inter','Segoe UI',sans-serif;display:flex;align-items:center;gap:10px;background:rgba(34,23,16,.78);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border:1px solid rgba(244,231,211,.10);border-radius:20px;padding:6px 10px 6px 14px;color:#b89978;box-shadow:0 4px 14px rgba(0,0,0,.25)}
+/* top: 12px right: 100px → laisse de la place au toggle FR/EN injecté par i18n.js (right: 12px, ~70px de large) */
+.wendio-auth-widget{position:fixed;top:12px;right:100px;z-index:1000;font:500 13px/1.3 'Inter','Segoe UI',sans-serif;display:flex;align-items:center;gap:10px;background:rgba(34,23,16,.78);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border:1px solid rgba(244,231,211,.10);border-radius:20px;padding:6px 10px 6px 14px;color:#b89978;box-shadow:0 4px 14px rgba(0,0,0,.25)}
 .wendio-auth-widget .email{color:#e8a85a;font-weight:600;letter-spacing:.02em;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .wendio-auth-widget a,.wendio-auth-widget button{background:transparent;border:none;color:#b89978;cursor:pointer;font:inherit;text-decoration:none;padding:4px 8px;border-radius:12px;transition:background .14s,color .14s}
 .wendio-auth-widget a:hover,.wendio-auth-widget button:hover{background:rgba(244,231,211,.06);color:#f4e7d3}
 .wendio-auth-widget.login a{color:#e8a85a;font-weight:600}
-@media (max-width:540px){.wendio-auth-widget{font-size:12px}.wendio-auth-widget .email{max-width:120px}}
+@media (max-width:540px){.wendio-auth-widget{right:80px;top:14px;font-size:12px}.wendio-auth-widget .email{max-width:120px}}
 @media print{.wendio-auth-widget{display:none!important}}
 `;
 
