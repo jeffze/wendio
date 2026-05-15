@@ -85,6 +85,16 @@ const TRANSLATIONS = {
   'config.commencer':          { fr: 'Commencer ▶',
                                  en: 'Start ▶' },
 
+  // ── Noms de clan (les mots WENDAT eux restent dans data.js, jamais traduits) ──
+  'clan.Chevreuil':            { fr: 'Chevreuil',
+                                 en: 'Deer' },
+  'clan.Loup':                 { fr: 'Loup',
+                                 en: 'Wolf' },
+  'clan.Ours':                 { fr: 'Ours',
+                                 en: 'Bear' },
+  'clan.Tortue':               { fr: 'Tortue',
+                                 en: 'Turtle' },
+
   'clan.Chevreuil.victoire':   { fr: 'Ligne complète (horizontale, verticale ou diagonale)',
                                  en: 'Full line (horizontal, vertical or diagonal)' },
   'clan.Loup.victoire':        { fr: 'Les 4 coins',

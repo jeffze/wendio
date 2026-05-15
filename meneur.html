@@ -770,9 +770,10 @@
       btn.dataset.nom   = nom;
       const icon   = document.createTextNode(clan.icon + ' ');
       const strong = document.createElement('strong');
-      strong.textContent = nom;
+      // data-i18n pour que le nom suive la langue dynamiquement
+      strong.setAttribute('data-i18n', 'clan.' + nom);
+      strong.textContent = (typeof i18n !== 'undefined' ? i18n.t('clan.' + nom) : nom) || nom;
       const small  = document.createElement('small');
-      // data-i18n pour que le label suive la langue dynamiquement
       small.setAttribute('data-i18n', 'clan.' + nom + '.victoire');
       small.textContent = clanLabel(nom);
       btn.append(icon, strong, document.createElement('br'), small);
@@ -826,7 +827,8 @@
       const lbl = document.createElement('span');
       lbl.append(t('meneur.clan_impose_prefix'));
       const strong = document.createElement('strong');
-      strong.textContent = clan;
+      strong.setAttribute('data-i18n', 'clan.' + clan);
+      strong.textContent = t('clan.' + clan) || clan;
       lbl.appendChild(strong);
       lbl.append(' — ' + clanLabel(clan));
       banner.appendChild(lbl);
@@ -861,7 +863,8 @@
       strong.textContent = nom;
       const muted  = document.createElement('span');
       muted.style.cssText = 'color:var(--muted);font-size:.8rem';
-      muted.textContent   = '\u00a0' + clan;
+      muted.setAttribute('data-i18n', 'clan.' + clan);
+      muted.textContent   = '\u00a0' + (t('clan.' + clan) || clan);
       item.append(icon, strong, muted);
       document.getElementById('joueurs-items').appendChild(item);
 
@@ -1208,7 +1211,8 @@
       const lbl = document.createElement('span');
       lbl.append(t('meneur.clan_impose_prefix'));
       const strong = document.createElement('strong');
-      strong.textContent = clan;
+      strong.setAttribute('data-i18n', 'clan.' + clan);
+      strong.textContent = t('clan.' + clan) || clan;
       lbl.appendChild(strong);
       lbl.append(' — ' + clanLabel(clan));
       banner.appendChild(lbl);
@@ -1288,7 +1292,14 @@
     bandeau.className = 'bandeau-config';
 
     const span1 = document.createElement('span');
-    span1.textContent = (CLAN_ICONS[clan] || '') + ' ' + clan;
+    const clanI18nKey = 'clan.' + clan;
+    const clanLabel = (typeof i18n !== 'undefined' ? i18n.t(clanI18nKey) : clan) || clan;
+    span1.textContent = (CLAN_ICONS[clan] || '') + ' ' + clanLabel;
+    // Permet ré-traduction au changement de langue
+    span1.dataset.clan = clan;
+    if (typeof i18n !== 'undefined' && i18n.onLangChange) {
+      i18n.onLangChange(() => { span1.textContent = (CLAN_ICONS[clan] || '') + ' ' + (i18n.t('clan.' + clan) || clan); });
+    }
     // Tooltip avec l'objectif de victoire (caché de la sidebar pour gagner de la place)
     const obj = (typeof CLANS !== 'undefined' && CLANS[clan]) ? CLANS[clan].label : null;
     if (obj) span1.title = 'Objectif : ' + obj;

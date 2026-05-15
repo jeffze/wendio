@@ -224,7 +224,8 @@
       btn.dataset.clan = nom;
       const icon  = document.createTextNode(clan.icon + ' ');
       const strong = document.createElement('strong');
-      strong.textContent = nom;
+      strong.setAttribute('data-i18n', 'clan.' + nom);
+      strong.textContent = (typeof i18n !== 'undefined' ? i18n.t('clan.' + nom) : nom) || nom;
       const wend = document.createElement('span');
       wend.className = 'wendat';
       wend.textContent = ' ' + clan.wendat;
@@ -306,7 +307,8 @@
 
     const clanNomEl = document.createElement('div');
     clanNomEl.className = 'trophee-clan-nom';
-    clanNomEl.textContent = clan.icon + ' ' + t('trophees.clan_prefix') + clanNom;
+    const clanLabelTrad = (typeof i18n !== 'undefined' ? i18n.t('clan.' + clanNom) : clanNom) || clanNom;
+    clanNomEl.textContent = clan.icon + ' ' + t('trophees.clan_prefix') + clanLabelTrad;
     clanBloc.appendChild(clanNomEl);
 
     const clanWendat = document.createElement('div');

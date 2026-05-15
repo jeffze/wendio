@@ -982,7 +982,9 @@
   function afficherBadgeClan(nom) {
     const clan  = CLANS[nom] || {};
     const badge = document.getElementById('badge-clan');
-    badge.textContent    = clan.icon + ' ' + nom;
+    const label = (typeof i18n !== 'undefined' ? i18n.t('clan.' + nom) : nom) || nom;
+    badge.textContent    = clan.icon + ' ' + label;
+    badge.setAttribute('data-clan', nom); // pour re-traduire au changement de langue
     badge.style.display  = 'inline-flex';
   }
 
@@ -1247,7 +1249,8 @@
     }
     const winClanEl = document.getElementById('win-clan');
     winClanEl.dataset.clan = clan;
-    winClanEl.textContent = clan + ' \u2014 ' + clanLabel(clan);
+    const clanNomTrad = (typeof i18n !== 'undefined' ? i18n.t('clan.' + clan) : clan) || clan;
+    winClanEl.textContent = clanNomTrad + ' \u2014 ' + clanLabel(clan);
     const trophee = document.getElementById('win-trophee');
     if (c.points) {
       trophee.src = 'cartes/clan-' + c.points + 'pt.jpg';
@@ -1277,9 +1280,16 @@
     if (objEl.dataset.clan) {
       objEl.textContent = objectifTexte(objEl.dataset.clan);
     }
+    const badge = document.getElementById('badge-clan');
+    if (badge && badge.getAttribute('data-clan')) {
+      const nom = badge.getAttribute('data-clan');
+      const c = CLANS[nom] || {};
+      badge.textContent = (c.icon || '') + ' ' + (i18n.t('clan.' + nom) || nom);
+    }
     const winClan = document.getElementById('win-clan');
     if (winClan.dataset.clan) {
-      winClan.textContent = winClan.dataset.clan + ' — ' + clanLabel(winClan.dataset.clan);
+      const nom = winClan.dataset.clan;
+      winClan.textContent = (i18n.t('clan.' + nom) || nom) + ' — ' + clanLabel(nom);
     }
     const winJoueur = document.getElementById('win-joueur');
     if (winJoueur.dataset.gagnant) {
