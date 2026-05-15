@@ -8,6 +8,7 @@ const crypto   = require('crypto');
 
 const auth   = require('./auth');
 const email  = require('./email');
+const tenantMw = require('./tenant');
 
 const app        = express();
 const httpServer = http.createServer(app);
@@ -17,7 +18,21 @@ const io         = new Server(httpServer);
 app.disable('x-powered-by');
 
 app.use(express.json({ limit: '100kb' }));
+app.use(tenantMw.attachTenant);
 app.use(auth.attachUser);
+
+// Garde : si on arrive sur un sous-domaine sans tenant correspondant
+// (autre que localhost/IP directe en dev), on affiche une page d'erreur
+// sympa au lieu de servir le contenu Wendat par défaut.
+app.use((req, res, next) => {
+  if (req.tenant) return next();
+  const h = (req.hostname || '').toLowerCase();
+  // Localhost / IP directe / pas de host → laisser passer (dev / accès interne)
+  if (!h || h === 'localhost' || /^[0-9]+(\.[0-9]+){3}$/.test(h)) return next();
+  // Sous-domaine reconnu mais sans tenant → page d'erreur
+  if (req.path === '/health') return next();
+  return res.status(404).type('html').send(tenantMw.renderTenantNotFound(req.hostname));
+});
 
 // Loader du widget Support — injecte dynamiquement le script avec la bonne SUPPORT_URL.
 // En dev : SUPPORT_URL=http://localhost:5099. En prod : https://support.jeuxlirlok.com.
@@ -45,10 +60,11 @@ app.get('/login', (req, res) => {
 app.post('/auth/request', async (req, res) => {
   const emailIn = auth.normEmail(req.body?.email);
   if (!auth.isValidEmail(emailIn)) return res.status(400).json({ error: 'invalid_email' });
+  if (!req.tenant) return res.status(404).json({ error: 'tenant_not_found' });
 
   // Anti-énumération : on retourne toujours OK, mais on n'envoie l'email
-  // que si le compte existe.
-  const user = auth.getUser(emailIn);
+  // que si le compte existe DANS CE TENANT (scope cross-nation isolation).
+  const user = auth.getUser(emailIn, req.tenant.id);
   if (!user) return res.json({ ok: true });
 
   const token = auth.createMagicToken(emailIn, {
@@ -73,11 +89,20 @@ app.get('/auth/verify', (req, res) => {
       'Demande un nouveau lien depuis la page de connexion.'
     ));
   }
-  const user = auth.getUser(row.email);
+  const user = auth.getUser(row.email, req.tenant ? req.tenant.id : null);
   if (!user) {
     return res.status(400).type('html').send(renderErrorPage(
       'Accès refusé',
-      'Ce courriel n\'est pas reconnu comme meneur.'
+      req.tenant
+        ? 'Ce courriel n\'est pas reconnu comme meneur dans cette communauté.'
+        : 'Ce courriel n\'est pas reconnu comme meneur.'
+    ));
+  }
+  // Vérifier que la session du user matche le tenant courant (defense in depth)
+  if (req.tenant && user.tenant_id !== req.tenant.id) {
+    return res.status(403).type('html').send(renderErrorPage(
+      'Accès refusé',
+      'Ton compte n\'est pas associé à cette communauté.'
     ));
   }
   auth.touchLastLogin(user.id);
@@ -96,7 +121,8 @@ app.post('/auth/logout', (req, res) => {
 
 app.get('/auth/me', (req, res) => {
   if (!req.user) return res.status(401).json({ error: 'auth_required' });
-  res.json({ id: req.user.id, email: req.user.email, name: req.user.name, role: req.user.role });
+  const tenant = req.tenant ? { id: req.tenant.id, slug: req.tenant.slug, nom_officiel: req.tenant.nom_officiel, langue_label: req.tenant.langue_label } : null;
+  res.json({ id: req.user.id, email: req.user.email, name: req.user.name, role: req.user.role, tenant });
 });
 
 // Middleware de protection des pages meneur (avant express.static)
