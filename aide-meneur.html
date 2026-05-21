@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WENDIO — Aide du meneur</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #1a1008;
+      color: #f4e7d3;
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    /* ── Layout ── */
+    .page {
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 32px 24px 96px;
+    }
+
+    .haut {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+    }
+    .haut .accueil {
+      color: #c8843a;
+      text-decoration: none;
+      font-size: .95rem;
+      padding: 8px 14px;
+      border: 1px solid #3e2510;
+      border-radius: 10px;
+      transition: background .2s, border-color .2s;
+    }
+    .haut .accueil:hover { background: #2c1a0e; border-color: #c8843a; }
+
+    /* ── Titre ── */
+    .titre-bloc { text-align: center; margin-bottom: 48px; }
+    .titre {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(2rem, 6vw, 3.2rem);
+      font-weight: 900;
+      letter-spacing: .12em;
+      line-height: 1.1;
+      background: linear-gradient(135deg, #d35400 0%, #f39c12 50%, #d35400 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 10px;
+    }
+    .sous-titre {
+      font-size: 1rem;
+      color: #a08060;
+      letter-spacing: .04em;
+    }
+
+    /* ── Table des matières ── */
+    .toc {
+      background: #221710;
+      border: 1px solid #3e2510;
+      border-radius: 14px;
+      padding: 20px 24px;
+      margin-bottom: 40px;
+    }
+    .toc h2 {
+      font-family: 'Cinzel', serif;
+      font-size: 1rem;
+      letter-spacing: .08em;
+      color: #c8843a;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .toc ol {
+      list-style: none;
+      counter-reset: toc;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 6px 24px;
+    }
+    .toc li {
+      counter-increment: toc;
+      padding: 4px 0;
+    }
+    .toc li::before {
+      content: counter(toc, decimal) ". ";
+      color: #c8843a;
+      font-weight: 600;
+      margin-right: 6px;
+    }
+    .toc a {
+      color: #f4e7d3;
+      text-decoration: none;
+      transition: color .15s;
+    }
+    .toc a:hover { color: #f39c12; }
+
+    /* ── Sections ── */
+    section {
+      margin-bottom: 56px;
+      scroll-margin-top: 24px;
+    }
+    section h2 {
+      font-family: 'Cinzel', serif;
+      font-size: 1.65rem;
+      font-weight: 700;
+      color: #f39c12;
+      margin-bottom: 18px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #3e2510;
+      letter-spacing: .04em;
+    }
+    section h2 .num {
+      display: inline-block;
+      width: 32px;
+      height: 32px;
+      line-height: 32px;
+      text-align: center;
+      background: #2c1a0e;
+      border: 1px solid #c8843a;
+      border-radius: 50%;
+      font-size: 1rem;
+      margin-right: 12px;
+      vertical-align: middle;
+      color: #c8843a;
+    }
+    section h3 {
+      font-family: 'Cinzel', serif;
+      font-size: 1.15rem;
+      color: #c8843a;
+      margin: 24px 0 10px;
+      letter-spacing: .03em;
+    }
+    section p { margin-bottom: 14px; color: #d8c5a8; }
+    section ul, section ol {
+      margin: 0 0 18px 24px;
+      color: #d8c5a8;
+    }
+    section li { margin-bottom: 6px; }
+    section strong { color: #f4e7d3; }
+    section em { color: #c8a070; font-style: italic; }
+    section kbd {
+      font-family: 'Consolas', monospace;
+      background: #2c1a0e;
+      border: 1px solid #4a3020;
+      border-radius: 4px;
+      padding: 1px 6px;
+      font-size: .85em;
+      color: #f4e7d3;
+    }
+
+    /* ── Encadrés ── */
+    .encadre {
+      background: #221710;
+      border-left: 3px solid #c8843a;
+      border-radius: 0 10px 10px 0;
+      padding: 14px 18px;
+      margin: 18px 0;
+    }
+    .encadre.info { border-left-color: #2980b9; }
+    .encadre.alerte { border-left-color: #d35400; }
+    .encadre.astuce { border-left-color: #27ae60; }
+    .encadre b {
+      display: block;
+      margin-bottom: 6px;
+      font-size: .85rem;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: #c8843a;
+    }
+    .encadre.info b { color: #5dade2; }
+    .encadre.alerte b { color: #e67e22; }
+    .encadre.astuce b { color: #2ecc71; }
+
+    /* ── Grille comparative (Local vs Online, Aléatoire vs Physique) ── */
+    .compare {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 18px 0;
+    }
+    @media (max-width: 600px) { .compare { grid-template-columns: 1fr; } }
+    .compare > div {
+      background: #221710;
+      border: 1px solid #3e2510;
+      border-radius: 12px;
+      padding: 16px 18px;
+    }
+    .compare h4 {
+      font-family: 'Cinzel', serif;
+      font-size: 1.05rem;
+      color: #f39c12;
+      margin-bottom: 8px;
+      letter-spacing: .03em;
+    }
+    .compare ul { margin-left: 18px; font-size: .92rem; }
+
+    /* ── Schémas des clans ── */
+    .clans-grille {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin: 24px 0;
+    }
+    .clan-carte {
+      background: #221710;
+      border: 2px solid #3e2510;
+      border-radius: 14px;
+      padding: 16px;
+      text-align: center;
+    }
+    .clan-carte h4 {
+      font-family: 'Cinzel', serif;
+      font-size: 1.15rem;
+      margin-bottom: 4px;
+      letter-spacing: .04em;
+    }
+    .clan-carte .wendat {
+      font-style: italic;
+      color: #c8a070;
+      font-size: .9rem;
+      margin-bottom: 12px;
+    }
+    .clan-carte svg {
+      display: block;
+      margin: 0 auto 12px;
+    }
+    .clan-carte .victoire {
+      font-size: .88rem;
+      color: #d8c5a8;
+      line-height: 1.4;
+    }
+    .clan-carte .points {
+      display: inline-block;
+      margin-top: 8px;
+      padding: 2px 10px;
+      background: #2c1a0e;
+      border-radius: 20px;
+      font-size: .82rem;
+      color: #c8843a;
+      letter-spacing: .04em;
+    }
+
+    .clan-carte.chevreuil { border-color: #6a4f2a; }
+    .clan-carte.chevreuil h4 { color: #d4a460; }
+    .clan-carte.loup      { border-color: #5a5a5a; }
+    .clan-carte.loup h4      { color: #b8b8b8; }
+    .clan-carte.ours      { border-color: #4a2818; }
+    .clan-carte.ours h4      { color: #c8704a; }
+    .clan-carte.tortue    { border-color: #2c5028; }
+    .clan-carte.tortue h4    { color: #82c060; }
+
+    /* ── Étapes numérotées ── */
+    .etapes {
+      counter-reset: step;
+      margin: 18px 0;
+    }
+    .etape {
+      counter-increment: step;
+      position: relative;
+      padding: 14px 18px 14px 56px;
+      margin-bottom: 12px;
+      background: #221710;
+      border-left: 3px solid #c8843a;
+      border-radius: 0 10px 10px 0;
+    }
+    .etape::before {
+      content: counter(step);
+      position: absolute;
+      left: 14px;
+      top: 14px;
+      width: 30px;
+      height: 30px;
+      line-height: 30px;
+      text-align: center;
+      background: #c8843a;
+      color: #1a1008;
+      border-radius: 50%;
+      font-weight: 700;
+      font-family: 'Cinzel', serif;
+    }
+    .etape h4 {
+      font-size: 1rem;
+      color: #f4e7d3;
+      margin-bottom: 4px;
+    }
+    .etape p { font-size: .92rem; margin-bottom: 0; color: #c8a070; }
+
+    /* ── Pied de page ── */
+    footer {
+      text-align: center;
+      margin-top: 64px;
+      padding-top: 24px;
+      border-top: 1px solid #3e2510;
+      color: #4a3020;
+      font-size: .82rem;
+      line-height: 1.8;
+    }
+    footer a { color: #c8843a; text-decoration: none; }
+    footer a:hover { color: #f39c12; }
+
+    @media print {
+      body { background: white; color: black; }
+      .titre { -webkit-text-fill-color: #c8843a; color: #c8843a; }
+      .toc, .encadre, .compare > div, .clan-carte, .etape {
+        background: white;
+        border: 1px solid #ccc;
+      }
+      a { color: black; text-decoration: none; }
+      .haut { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="page">
+
+  <div class="haut">
+    <a class="accueil" href="lobby.html" data-i18n="aide.retour">← Retour au lobby</a>
+    <a class="accueil" href="javascript:window.print()" data-i18n="aide.imprimer">🖨 Imprimer cette aide</a>
+  </div>
+
+  <div class="titre-bloc">
+    <div class="titre" data-i18n="aide.titre">Aide du meneur</div>
+    <div class="sous-titre" data-i18n="aide.sous_titre">Tout ce qu'il faut pour animer une partie de WENDIO</div>
+  </div>
+
+  <!-- Table des matières -->
+  <nav class="toc">
+    <h2 data-i18n="aide.toc.titre">Sommaire</h2>
+    <ol>
+      <li><a href="#role" data-i18n="aide.s1.titre">Le rôle du meneur</a></li>
+      <li><a href="#modes" data-i18n="aide.s2.titre">Mode local ou En ligne</a></li>
+      <li><a href="#tirage" data-i18n="aide.s3.titre">Tirage aléatoire ou physique</a></li>
+      <li><a href="#clans" data-i18n="aide.s4.titre">Les 4 clans et leurs victoires</a></li>
+      <li><a href="#etapes" data-i18n="aide.s5.titre">Lancer une partie en ligne</a></li>
+      <li><a href="#physique" data-i18n="aide.s6.titre">Le mode physique en détail</a></li>
+      <li><a href="#prez" data-i18n="aide.s7.titre">Trucs pour une bonne prez</a></li>
+      <li><a href="#depannage" data-i18n="aide.s8.titre">Dépannage rapide</a></li>
+    </ol>
+  </nav>
+
+  <!-- 1. Rôle -->
+  <section id="role">
+    <h2><span class="num">1</span><span data-i18n="aide.s1.titre">Le rôle du meneur</span></h2>
+    <p data-i18n="aide.s1.p1">
+      Le meneur est <strong>la personne qui anime la partie</strong>. C'est lui qui tire les numéros (ou en désigne un physiquement), qui prononce le mot wendat à voix haute pour le groupe, et qui décide quand la partie commence et se termine.
+    </p>
+    <p data-i18n="aide.s1.p2">
+      Dans WENDIO, le meneur joue un <strong>rôle pédagogique</strong> : il donne à entendre la langue wendat à chaque tirage. Sans lui, le jeu reste muet — c'est la voix du meneur (relayée par les enregistrements audio) qui transmet la prononciation.
+    </p>
+    <div class="encadre info">
+      <b data-i18n="aide.s1.info.titre">À retenir</b>
+      <span data-i18n="aide.s1.info.txt">Un seul meneur par partie. Si le meneur ferme son onglet en cours de partie, la partie se termine pour tous les joueurs. Choisis un appareil stable (PC ou tablette en charge) pour animer.</span>
+    </div>
+  </section>
+
+  <!-- 2. Modes -->
+  <section id="modes">
+    <h2><span class="num">2</span><span data-i18n="aide.s2.titre">Mode local ou En ligne</span></h2>
+    <p data-i18n="aide.s2.intro">
+      Avant de lancer la partie, tu choisis si les joueurs jouent sur leur propre appareil (en ligne) ou s'ils ont des cartes papier devant eux (local).
+    </p>
+    <div class="compare">
+      <div>
+        <h4 data-i18n="aide.s2.local.titre">🏠 Mode local</h4>
+        <p data-i18n="aide.s2.local.quand"><strong>Quand</strong> : cartes papier imprimées, salle de classe, fête de famille, kiosque. Les joueurs n'ont pas de téléphone.</p>
+        <ul>
+          <li data-i18n="aide.s2.local.l1">Tu tires les numéros sur ton écran</li>
+          <li data-i18n="aide.s2.local.l2">Tu prononces le mot wendat à voix haute (le son est joué automatiquement)</li>
+          <li data-i18n="aide.s2.local.l3">Les joueurs marquent leurs cartes papier eux-mêmes</li>
+          <li data-i18n="aide.s2.local.l4">Quand un joueur crie « WENDIO ! », tu vérifies sa carte à l'œil</li>
+        </ul>
+      </div>
+      <div>
+        <h4 data-i18n="aide.s2.online.titre">🌐 Mode en ligne</h4>
+        <p data-i18n="aide.s2.online.quand"><strong>Quand</strong> : chacun a son téléphone ou sa tablette. Pas besoin d'imprimer.</p>
+        <ul>
+          <li data-i18n="aide.s2.online.l1">Tu partages un code à 4 caractères ou un QR code</li>
+          <li data-i18n="aide.s2.online.l2">Chaque joueur reçoit sa propre carte aléatoire</li>
+          <li data-i18n="aide.s2.online.l3">Tu tires les numéros, ils s'affichent chez tout le monde</li>
+          <li data-i18n="aide.s2.online.l4">La victoire est <strong>vérifiée automatiquement</strong> côté serveur (anti-triche)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="encadre astuce">
+      <b data-i18n="aide.s2.astuce.titre">Mix possible</b>
+      <span data-i18n="aide.s2.astuce.txt">Tu peux faire une partie où certains joueurs ont une carte papier et d'autres une carte numérique — mais dans ce cas, choisis le mode <em>local</em> côté meneur (sinon les joueurs papier ne pourront pas déclarer victoire).</span>
+    </div>
+  </section>
+
+  <!-- 3. Tirage -->
+  <section id="tirage">
+    <h2><span class="num">3</span><span data-i18n="aide.s3.titre">Tirage aléatoire ou physique</span></h2>
+    <p data-i18n="aide.s3.intro">
+      Indépendamment du mode local/en ligne, tu choisis comment les numéros sont tirés.
+    </p>
+    <div class="compare">
+      <div>
+        <h4 data-i18n="aide.s3.alea.titre">🎲 Tirage aléatoire</h4>
+        <p data-i18n="aide.s3.alea.txt">L'ordinateur tire un numéro au hasard quand tu cliques sur <strong>« TIRER »</strong>. Rapide, parfait pour démarrer ou pour une démo solo.</p>
+      </div>
+      <div>
+        <h4 data-i18n="aide.s3.phys.titre">🎯 Tirage physique</h4>
+        <p data-i18n="aide.s3.phys.txt">Tu utilises un <strong>vrai boulier</strong> (ou tout autre outil de tirage matériel). Quand un numéro sort, tu cliques sur sa case dans la grille de suivi. C'est ce numéro qui devient le « numéro tiré » officiel.</p>
+      </div>
+    </div>
+    <div class="encadre info">
+      <b data-i18n="aide.s3.info.titre">Bon à savoir</b>
+      <span data-i18n="aide.s3.info.txt">En mode physique, le bouton « TIRER » disparaît. C'est toi (avec ton boulier) qui décide quel numéro est tiré. La grille de suivi devient interactive : chaque case non-tirée devient cliquable.</span>
+    </div>
+  </section>
+
+  <!-- 4. Clans -->
+  <section id="clans">
+    <h2><span class="num">4</span><span data-i18n="aide.s4.titre">Les 4 clans et leurs victoires</span></h2>
+    <p data-i18n="aide.s4.intro">
+      Chaque partie se joue avec <strong>un seul clan imposé par toi</strong>. Tous les joueurs ont la même condition de victoire. Plus le clan est rare (et exigeant), plus il rapporte de points.
+    </p>
+    <p data-i18n="aide.s4.coeur">
+      <strong>Les 4 cases centrales (le Cœur)</strong> sont toujours libres dans toutes les conditions. Elles affichent les icônes des clans 🦌🐺🐻🐢 — ce ne sont pas juste des cases gratuites, elles incarnent les clans au centre de la carte.
+    </p>
+
+    <div class="clans-grille">
+      <!-- Chevreuil -->
+      <div class="clan-carte chevreuil">
+        <h4>🦌 Chevreuil</h4>
+        <div class="wendat">Ohskënonton'</div>
+        <!-- 6x6 grid SVG : une ligne horizontale + coeurs centraux décoratifs -->
+        <svg width="120" height="120" viewBox="0 0 120 120" aria-label="Ligne horizontale">
+          <!-- Cases de fond -->
+          <g fill="#2c1a0e" stroke="#4a3020" stroke-width="1">
+            <!-- 6x6 = 36 cases, chacune 20x20 -->
+            <!-- Ligne 0 -->
+            <rect x="0" y="0" width="20" height="20"/><rect x="20" y="0" width="20" height="20"/><rect x="40" y="0" width="20" height="20"/><rect x="60" y="0" width="20" height="20"/><rect x="80" y="0" width="20" height="20"/><rect x="100" y="0" width="20" height="20"/>
+            <!-- Ligne 1 -->
+            <rect x="0" y="20" width="20" height="20"/><rect x="20" y="20" width="20" height="20"/><rect x="100" y="20" width="20" height="20"/>
+            <!-- Ligne 2 (ligne gagnante en surbrillance, traité plus bas) -->
+            <!-- Ligne 3 -->
+            <rect x="0" y="60" width="20" height="20"/><rect x="20" y="60" width="20" height="20"/><rect x="100" y="60" width="20" height="20"/>
+            <!-- Ligne 4 -->
+            <rect x="0" y="80" width="20" height="20"/><rect x="20" y="80" width="20" height="20"/><rect x="40" y="80" width="20" height="20"/><rect x="60" y="80" width="20" height="20"/><rect x="80" y="80" width="20" height="20"/><rect x="100" y="80" width="20" height="20"/>
+            <!-- Ligne 5 -->
+            <rect x="0" y="100" width="20" height="20"/><rect x="20" y="100" width="20" height="20"/><rect x="40" y="100" width="20" height="20"/><rect x="60" y="100" width="20" height="20"/><rect x="80" y="100" width="20" height="20"/><rect x="100" y="100" width="20" height="20"/>
+          </g>
+          <!-- Coeur central 2x2 -->
+          <g fill="#5a3a1a" stroke="#7a5a3a" stroke-width="1">
+            <rect x="40" y="40" width="20" height="20"/><rect x="60" y="40" width="20" height="20"/>
+            <rect x="40" y="60" width="20" height="20"/><rect x="60" y="60" width="20" height="20"/>
+          </g>
+          <!-- Ligne 2 et ligne 3 — ligne gagnante (h ligne 2) en doré -->
+          <g fill="#d4a460" stroke="#f39c12" stroke-width="1.5">
+            <rect x="0" y="40" width="20" height="20"/><rect x="20" y="40" width="20" height="20"/><rect x="80" y="40" width="20" height="20"/><rect x="100" y="40" width="20" height="20"/>
+          </g>
+          <!-- Cases coeur sur la ligne 2 restent visibles -->
+          <g fill="#5a3a1a" stroke="#7a5a3a" stroke-width="1">
+            <rect x="40" y="40" width="20" height="20"/><rect x="60" y="40" width="20" height="20"/>
+          </g>
+        </svg>
+        <div class="victoire" data-i18n="aide.s4.chevreuil.victoire">Une ligne complète : horizontale, verticale ou diagonale.</div>
+        <div class="points">1 pt</div>
+      </div>
+
+      <!-- Loup -->
+      <div class="clan-carte loup">
+        <h4>🐺 Loup</h4>
+        <div class="wendat">Yānariskwa'</div>
+        <svg width="120" height="120" viewBox="0 0 120 120" aria-label="Quatre coins">
+          <g fill="#2c1a0e" stroke="#4a3020" stroke-width="1">
+            <!-- toutes les cases en fond -->
+            <rect x="20" y="0" width="20" height="20"/><rect x="40" y="0" width="20" height="20"/><rect x="60" y="0" width="20" height="20"/><rect x="80" y="0" width="20" height="20"/>
+            <rect x="0" y="20" width="20" height="20"/><rect x="20" y="20" width="20" height="20"/><rect x="40" y="20" width="20" height="20"/><rect x="60" y="20" width="20" height="20"/><rect x="80" y="20" width="20" height="20"/><rect x="100" y="20" width="20" height="20"/>
+            <rect x="0" y="40" width="20" height="20"/><rect x="20" y="40" width="20" height="20"/><rect x="80" y="40" width="20" height="20"/><rect x="100" y="40" width="20" height="20"/>
+            <rect x="0" y="60" width="20" height="20"/><rect x="20" y="60" width="20" height="20"/><rect x="80" y="60" width="20" height="20"/><rect x="100" y="60" width="20" height="20"/>
+            <rect x="0" y="80" width="20" height="20"/><rect x="20" y="80" width="20" height="20"/><rect x="40" y="80" width="20" height="20"/><rect x="60" y="80" width="20" height="20"/><rect x="80" y="80" width="20" height="20"/><rect x="100" y="80" width="20" height="20"/>
+            <rect x="20" y="100" width="20" height="20"/><rect x="40" y="100" width="20" height="20"/><rect x="60" y="100" width="20" height="20"/><rect x="80" y="100" width="20" height="20"/>
+          </g>
+          <g fill="#5a3a1a" stroke="#7a5a3a" stroke-width="1">
+            <rect x="40" y="40" width="20" height="20"/><rect x="60" y="40" width="20" height="20"/>
+            <rect x="40" y="60" width="20" height="20"/><rect x="60" y="60" width="20" height="20"/>
+          </g>
+          <!-- 4 coins en surbrillance -->
+          <g fill="#b8b8b8" stroke="#e0e0e0" stroke-width="1.5">
+            <rect x="0" y="0" width="20" height="20"/><rect x="100" y="0" width="20" height="20"/>
+            <rect x="0" y="100" width="20" height="20"/><rect x="100" y="100" width="20" height="20"/>
+          </g>
+        </svg>
+        <div class="victoire" data-i18n="aide.s4.loup.victoire">Les 4 coins de la carte.</div>
+        <div class="points">2 pts</div>
+      </div>
+
+      <!-- Ours -->
+      <div class="clan-carte ours">
+        <h4>🐻 Ours</h4>
+        <div class="wendat">Yānionyen'</div>
+        <svg width="120" height="120" viewBox="0 0 120 120" aria-label="Anneau central">
+          <g fill="#2c1a0e" stroke="#4a3020" stroke-width="1">
+            <rect x="0" y="0" width="20" height="20"/><rect x="100" y="0" width="20" height="20"/>
+            <rect x="0" y="100" width="20" height="20"/><rect x="100" y="100" width="20" height="20"/>
+            <rect x="40" y="40" width="20" height="20"/><rect x="60" y="40" width="20" height="20"/>
+            <rect x="40" y="60" width="20" height="20"/><rect x="60" y="60" width="20" height="20"/>
+          </g>
+          <!-- Anneau 12 cases autour du centre (lignes 1-4, cols 1-4) -->
+          <g fill="#c8704a" stroke="#e0815a" stroke-width="1.5">
+            <!-- Ligne 1 : 4 cases (cols 1,2,3,4) -->
+            <rect x="20" y="20" width="20" height="20"/><rect x="40" y="20" width="20" height="20"/><rect x="60" y="20" width="20" height="20"/><rect x="80" y="20" width="20" height="20"/>
+            <!-- Ligne 2 : cols 1 et 4 -->
+            <rect x="20" y="40" width="20" height="20"/><rect x="80" y="40" width="20" height="20"/>
+            <!-- Ligne 3 : cols 1 et 4 -->
+            <rect x="20" y="60" width="20" height="20"/><rect x="80" y="60" width="20" height="20"/>
+            <!-- Ligne 4 : 4 cases -->
+            <rect x="20" y="80" width="20" height="20"/><rect x="40" y="80" width="20" height="20"/><rect x="60" y="80" width="20" height="20"/><rect x="80" y="80" width="20" height="20"/>
+          </g>
+          <!-- Reste en fond -->
+          <g fill="#2c1a0e" stroke="#4a3020" stroke-width="1">
+            <rect x="20" y="0" width="20" height="20"/><rect x="40" y="0" width="20" height="20"/><rect x="60" y="0" width="20" height="20"/><rect x="80" y="0" width="20" height="20"/>
+            <rect x="0" y="20" width="20" height="20"/><rect x="100" y="20" width="20" height="20"/>
+            <rect x="0" y="40" width="20" height="20"/><rect x="100" y="40" width="20" height="20"/>
+            <rect x="0" y="60" width="20" height="20"/><rect x="100" y="60" width="20" height="20"/>
+            <rect x="0" y="80" width="20" height="20"/><rect x="100" y="80" width="20" height="20"/>
+            <rect x="20" y="100" width="20" height="20"/><rect x="40" y="100" width="20" height="20"/><rect x="60" y="100" width="20" height="20"/><rect x="80" y="100" width="20" height="20"/>
+          </g>
+        </svg>
+        <div class="victoire" data-i18n="aide.s4.ours.victoire">L'anneau de 12 cases qui entoure le Cœur.</div>
+        <div class="points">3 pts</div>
+      </div>
+
+      <!-- Tortue -->
+      <div class="clan-carte tortue">
+        <h4>🐢 Tortue</h4>
+        <div class="wendat">Yāndia'wich</div>
+        <svg width="120" height="120" viewBox="0 0 120 120" aria-label="Carte pleine">
+          <!-- Toutes les cases numérotées (32) en vert -->
+          <g fill="#82c060" stroke="#a0d878" stroke-width="1.5">
+            <rect x="0" y="0" width="20" height="20"/><rect x="20" y="0" width="20" height="20"/><rect x="40" y="0" width="20" height="20"/><rect x="60" y="0" width="20" height="20"/><rect x="80" y="0" width="20" height="20"/><rect x="100" y="0" width="20" height="20"/>
+            <rect x="0" y="20" width="20" height="20"/><rect x="20" y="20" width="20" height="20"/><rect x="40" y="20" width="20" height="20"/><rect x="60" y="20" width="20" height="20"/><rect x="80" y="20" width="20" height="20"/><rect x="100" y="20" width="20" height="20"/>
+            <rect x="0" y="40" width="20" height="20"/><rect x="20" y="40" width="20" height="20"/><rect x="80" y="40" width="20" height="20"/><rect x="100" y="40" width="20" height="20"/>
+            <rect x="0" y="60" width="20" height="20"/><rect x="20" y="60" width="20" height="20"/><rect x="80" y="60" width="20" height="20"/><rect x="100" y="60" width="20" height="20"/>
+            <rect x="0" y="80" width="20" height="20"/><rect x="20" y="80" width="20" height="20"/><rect x="40" y="80" width="20" height="20"/><rect x="60" y="80" width="20" height="20"/><rect x="80" y="80" width="20" height="20"/><rect x="100" y="80" width="20" height="20"/>
+            <rect x="0" y="100" width="20" height="20"/><rect x="20" y="100" width="20" height="20"/><rect x="40" y="100" width="20" height="20"/><rect x="60" y="100" width="20" height="20"/><rect x="80" y="100" width="20" height="20"/><rect x="100" y="100" width="20" height="20"/>
+          </g>
+          <!-- Coeur central -->
+          <g fill="#5a3a1a" stroke="#7a5a3a" stroke-width="1">
+            <rect x="40" y="40" width="20" height="20"/><rect x="60" y="40" width="20" height="20"/>
+            <rect x="40" y="60" width="20" height="20"/><rect x="60" y="60" width="20" height="20"/>
+          </g>
+        </svg>
+        <div class="victoire" data-i18n="aide.s4.tortue.victoire">Les 32 cases numérotées de la carte.</div>
+        <div class="points">4 pts</div>
+      </div>
+    </div>
+
+    <div class="encadre astuce">
+      <b data-i18n="aide.s4.astuce.titre">Quel clan choisir ?</b>
+      <span data-i18n="aide.s4.astuce.txt">Pour une partie courte (5-10 min), choisis <strong>Chevreuil</strong> ou <strong>Loup</strong>. Pour une partie pédagogique longue qui fait entendre tous les numéros, choisis <strong>Tortue</strong>. <strong>Ours</strong> est un bon équilibre.</span>
+    </div>
+  </section>
+
+  <!-- 5. Lancer en ligne -->
+  <section id="etapes">
+    <h2><span class="num">5</span><span data-i18n="aide.s5.titre">Lancer une partie en ligne</span></h2>
+    <p data-i18n="aide.s5.intro">
+      Voici les étapes du point de vue du meneur, du moment où tu ouvres l'app jusqu'au couronnement du gagnant.
+    </p>
+
+    <div class="etapes">
+      <div class="etape">
+        <h4 data-i18n="aide.s5.e1.t">Ouvre la configuration meneur</h4>
+        <p data-i18n="aide.s5.e1.p">Depuis le lobby, clique sur <strong>« Meneur de Jeu »</strong>. Tu arrives sur la page de configuration : Mode, Tirage, Clan.</p>
+      </div>
+      <div class="etape">
+        <h4 data-i18n="aide.s5.e2.t">Choisis les 3 paramètres</h4>
+        <p data-i18n="aide.s5.e2.p">Mode <strong>En ligne</strong>, Tirage <strong>Aléatoire</strong> (sauf si tu as un boulier), et le <strong>clan imposé</strong> que tous les joueurs devront viser.</p>
+      </div>
+      <div class="etape">
+        <h4 data-i18n="aide.s5.e3.t">Crée la partie</h4>
+        <p data-i18n="aide.s5.e3.p">Clique sur <strong>« Créer la partie »</strong>. Tu reçois un <strong>code à 4 caractères</strong> (ex : <kbd>AB3K</kbd>) et un <strong>QR code</strong> à montrer au public.</p>
+      </div>
+      <div class="etape">
+        <h4 data-i18n="aide.s5.e4.t">Partage le code aux joueurs</h4>
+        <p data-i18n="aide.s5.e4.p">Affiche le QR code à l'écran (ou projette-le), ou utilise le bouton <strong>« Copier le lien »</strong> pour l'envoyer dans un groupe Messenger/SMS. Chaque joueur ouvre l'URL, choisit son nom, et apparaît dans ta liste.</p>
+      </div>
+      <div class="etape">
+        <h4 data-i18n="aide.s5.e5.t">Attends que tout le monde soit là</h4>
+        <p data-i18n="aide.s5.e5.p">Le compteur de joueurs s'incrémente à chaque arrivée. Vérifie que personne n'a été oublié — une fois la partie démarrée, plus aucun nouveau joueur ne peut rejoindre.</p>
+      </div>
+      <div class="etape">
+        <h4 data-i18n="aide.s5.e6.t">Démarre la partie</h4>
+        <p data-i18n="aide.s5.e6.p">Clique sur <strong>« ▶ Commencer la partie »</strong>. Le code et le QR disparaissent, les inscriptions sont closes. Tu vois maintenant le bouton <strong>TIRER</strong>.</p>
+      </div>
+      <div class="etape">
+        <h4 data-i18n="aide.s5.e7.t">Tire les numéros</h4>
+        <p data-i18n="aide.s5.e7.p">À chaque clic sur <strong>TIRER</strong>, un numéro est tiré au hasard et diffusé à tous les joueurs. Sa carte (chiffre + mot wendat + phonétique) s'affiche en grand sur ton écran. Le son joue automatiquement chez toi.</p>
+      </div>
+      <div class="etape">
+        <h4 data-i18n="aide.s5.e8.t">Couronnement</h4>
+        <p data-i18n="aide.s5.e8.p">Dès qu'un joueur déclare une victoire valide, la partie se termine pour tout le monde. Un overlay vert apparaît avec son nom et sa carte-trophée. Tu peux <strong>imprimer le trophée</strong> ou démarrer une <strong>nouvelle partie</strong>.</p>
+      </div>
+    </div>
+
+    <div class="encadre alerte">
+      <b data-i18n="aide.s5.alerte.titre">Ne ferme pas ton onglet meneur</b>
+      <span data-i18n="aide.s5.alerte.txt">Si tu fermes l'onglet ou si la connexion Internet tombe pendant la partie, tous les joueurs reçoivent un message « Partie terminée » et la partie est perdue. Garde ton appareil branché.</span>
+    </div>
+  </section>
+
+  <!-- 6. Physique -->
+  <section id="physique">
+    <h2><span class="num">6</span><span data-i18n="aide.s6.titre">Le mode physique en détail</span></h2>
+    <p data-i18n="aide.s6.p1">
+      En mode physique, c'est <strong>toi qui décides quel numéro est tiré</strong> (en général avec un boulier ou des jetons). L'app sert juste à afficher le mot wendat et à jouer le son.
+    </p>
+    <p data-i18n="aide.s6.p2">
+      Le bouton TIRER disparaît. À la place, la grille de suivi W-E-N-D-I-O en bas de l'écran devient interactive :
+    </p>
+    <ul>
+      <li data-i18n="aide.s6.l1"><strong>Clique sur une case non-tirée</strong> pour la déclarer comme nouveau tirage (elle s'affiche en grand + son joué + diffusé aux joueurs en ligne).</li>
+      <li data-i18n="aide.s6.l2"><strong>Clique sur une case déjà tirée</strong> pour rejouer son son (utile si quelqu'un a mal entendu).</li>
+    </ul>
+    <div class="encadre info">
+      <b data-i18n="aide.s6.info.titre">Combinaisons possibles</b>
+      <span data-i18n="aide.s6.info.txt">Tu peux jouer <em>Physique + Local</em> (jeu traditionnel : boulier + cartes papier, l'app sert juste pour le son), ou <em>Physique + En ligne</em> (boulier physique mais les joueurs sont sur leur téléphone — l'app diffuse aux cartes numériques).</span>
+    </div>
+  </section>
+
+  <!-- 7. Trucs prez -->
+  <section id="prez">
+    <h2><span class="num">7</span><span data-i18n="aide.s7.titre">Trucs pour une bonne prez</span></h2>
+
+    <h3 data-i18n="aide.s7.h_avant">Avant la partie</h3>
+    <ul>
+      <li data-i18n="aide.s7.avant.l1"><strong>Active le mode plein écran</strong> sur l'écran meneur (bouton ⛶ en haut). Évite que le menu du navigateur prenne de la place.</li>
+      <li data-i18n="aide.s7.avant.l2"><strong>Branche l'appareil</strong> — une partie peut durer 20-30 min en mode Tortue.</li>
+      <li data-i18n="aide.s7.avant.l3"><strong>Teste le son</strong> en cliquant un numéro en mode démo. Vérifie le volume des enceintes de la salle.</li>
+      <li data-i18n="aide.s7.avant.l4"><strong>Imprime les trophées</strong> à l'avance si tu veux les remettre physiquement à la fin (page « Trophées à imprimer » dans le lobby).</li>
+      <li data-i18n="aide.s7.avant.l5"><strong>Sur tablette en paysage</strong>, l'interface est optimisée pour cette orientation — bascule l'appareil avant de lancer.</li>
+    </ul>
+
+    <h3 data-i18n="aide.s7.h_pendant">Pendant la partie</h3>
+    <ul>
+      <li data-i18n="aide.s7.pendant.l1"><strong>Prononce le mot wendat</strong> à voix haute après chaque tirage — la phonétique est affichée en gros pour t'aider.</li>
+      <li data-i18n="aide.s7.pendant.l2"><strong>Laisse 5-10 secondes</strong> entre chaque tirage pour que les joueurs aient le temps de chercher sur leur carte.</li>
+      <li data-i18n="aide.s7.pendant.l3">Si un joueur a manqué un numéro, <strong>clique sur sa case</strong> dans la grille de suivi pour rejouer le son.</li>
+    </ul>
+
+    <h3 data-i18n="aide.s7.h_apres">Après la partie</h3>
+    <ul>
+      <li data-i18n="aide.s7.apres.l1">Imprime la <strong>carte-trophée</strong> du gagnant avec son nom et la date (depuis le lobby → « Trophées à imprimer »).</li>
+      <li data-i18n="aide.s7.apres.l2">Clique sur <strong>« Nouvelle partie »</strong> pour relancer immédiatement (les joueurs en ligne devront re-scanner le nouveau code).</li>
+    </ul>
+  </section>
+
+  <!-- 8. Dépannage -->
+  <section id="depannage">
+    <h2><span class="num">8</span><span data-i18n="aide.s8.titre">Dépannage rapide</span></h2>
+
+    <h3 data-i18n="aide.s8.h1">Un joueur s'est déconnecté en cours de partie</h3>
+    <p data-i18n="aide.s8.h1.txt">Pas de panique : la place du joueur est conservée pendant toute la partie. S'il revient sur la même URL avec le même appareil (et qu'il n'a pas fermé l'onglet), il retrouve automatiquement sa carte et tous les numéros déjà tirés.</p>
+
+    <h3 data-i18n="aide.s8.h2">Un joueur arrive en retard, après le démarrage</h3>
+    <p data-i18n="aide.s8.h2.txt">Impossible de rejoindre une partie déjà commencée (anti-triche : il pourrait choisir son nom en sachant déjà les numéros tirés). Solution : démarre une <strong>nouvelle partie</strong> et invite tout le monde à se réinscrire.</p>
+
+    <h3 data-i18n="aide.s8.h3">Le bouton TIRER reste désactivé</h3>
+    <p data-i18n="aide.s8.h3.txt">En mode en ligne, il s'active seulement après avoir cliqué « ▶ Commencer la partie ». En mode local, il s'active dès qu'un clan est choisi. Vérifie aussi qu'il y a au moins un joueur connecté en ligne.</p>
+
+    <h3 data-i18n="aide.s8.h4">Personne n'entend le son côté joueur</h3>
+    <p data-i18n="aide.s8.h4.txt">C'est <strong>par design</strong> : si chaque téléphone joue le son en même temps, c'est une cascade insupportable dans une salle. Les joueurs peuvent rejouer le son <em>en touchant une case</em> de leur carte (utile s'ils veulent réécouter). Le son joue chez toi (meneur) automatiquement.</p>
+
+    <h3 data-i18n="aide.s8.h5">Un joueur dit qu'il a gagné mais l'app refuse</h3>
+    <p data-i18n="aide.s8.h5.txt">La victoire est vérifiée serveur-side. Si l'app refuse, c'est que sa carte ne remplit pas la condition du clan. Vérifie : (1) il joue bien le bon clan ? (2) les numéros qu'il pense avoir cochés sont-ils vraiment tirés ? Les cases du Cœur comptent toujours comme libres.</p>
+
+    <h3 data-i18n="aide.s8.h6">L'onglet meneur a planté pendant la partie</h3>
+    <p data-i18n="aide.s8.h6.txt">Malheureusement, le meneur n'a pas de système de reconnexion (les joueurs en ont un). Si tu rafraîchis ton onglet ou si ton appareil plante, la partie est perdue. Redémarre une nouvelle partie.</p>
+
+    <div class="encadre astuce">
+      <b data-i18n="aide.s8.signaler.titre">Un autre problème ?</b>
+      <span data-i18n="aide.s8.signaler.txt">Utilise le bouton 💬 <strong>Signaler</strong> en bas à droite de chaque écran pour envoyer un rapport directement à JF — capture d'écran et description en 30 secondes.</span>
+    </div>
+  </section>
+
+  <footer>
+    <div><a href="lobby.html" data-i18n="aide.retour_long">← Retour au lobby Wendio</a></div>
+    <div style="margin-top: 10px;" data-i18n="aide.footer">Aide du meneur · WENDIO · Le Jeu des Clans</div>
+  </footer>
+
+</div>
+
+<script src="i18n.js"></script>
+<script src="/auth-widget.js" defer></script>
+<script src="/_widget-loader.js" defer></script>
+</body>
+</html>
