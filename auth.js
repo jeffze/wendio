@@ -119,6 +119,18 @@ function requireAuth(req, res, next) {
   res.redirect('/login?next=' + next_);
 }
 
+function requireAdmin(req, res, next) {
+  if (!req.user) return res.status(401).json({ error: 'auth_required' });
+  if (req.user.role !== 'admin') {
+    const accepts = req.get('Accept') || '';
+    if (accepts.includes('application/json')) {
+      return res.status(403).json({ error: 'admin_required' });
+    }
+    return res.status(403).type('html').send('<h1>403 — Accès admin requis</h1><p><a href="/lobby.html">← Retour</a></p>');
+  }
+  next();
+}
+
 function cookieOptions() {
   const prod = process.env.NODE_ENV === 'production';
   return {
@@ -153,6 +165,7 @@ module.exports = {
   destroySession,
   attachUser,
   requireAuth,
+  requireAdmin,
   cookieOptions,
   serializeCookie,
   parseCookies,

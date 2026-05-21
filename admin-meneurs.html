@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WENDIO — Gérer les meneurs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink-1: #1a1008;
+      --ink-2: #221710;
+      --ink-3: #2c1d12;
+      --ink-4: #38241a;
+      --border: rgba(244,231,211,.10);
+      --gold: #c8843a;
+      --gold-lt: #e8a85a;
+      --ember: #d35400;
+      --bone: #f4e7d3;
+      --bone-dim: #b89978;
+      --bone-mute: #7a5a3a;
+      --moss: #6db04a;
+      --brick: #c0392b;
+      --slate: #5a7fa3;
+    }
+
+    body {
+      font-family: 'Inter', 'Segoe UI', sans-serif;
+      background: var(--ink-1);
+      color: var(--bone);
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+
+    .page { max-width: 980px; margin: 0 auto; padding: 32px 24px 96px; }
+
+    .haut {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 16px; flex-wrap: wrap; margin-bottom: 28px;
+    }
+    .haut .retour {
+      color: var(--gold); text-decoration: none; font-size: .92rem;
+      padding: 8px 14px; border: 1px solid var(--border); border-radius: 10px;
+      transition: background .15s, border-color .15s;
+    }
+    .haut .retour:hover { background: var(--ink-2); border-color: var(--gold); }
+
+    /* ── Titre ── */
+    .titre-bloc { text-align: center; margin-bottom: 36px; }
+    .titre {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(1.8rem, 5vw, 2.6rem);
+      font-weight: 700;
+      letter-spacing: .08em;
+      background: linear-gradient(135deg, var(--ember) 0%, #f39c12 50%, var(--ember) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 6px;
+    }
+    .sous-titre { color: var(--bone-dim); font-size: .95rem; }
+    .tenant-tag {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 4px 12px;
+      background: var(--ink-2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      font-size: .8rem;
+      color: var(--gold-lt);
+      letter-spacing: .04em;
+    }
+
+    /* ── Formulaire d'ajout ── */
+    .ajouter {
+      background: var(--ink-2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 22px 24px;
+      margin-bottom: 32px;
+    }
+    .ajouter h2 {
+      font-family: 'Cinzel', serif;
+      font-size: 1.05rem;
+      font-weight: 500;
+      color: var(--gold);
+      margin-bottom: 14px;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+    .ajouter form {
+      display: grid;
+      grid-template-columns: 2fr 1.4fr auto;
+      gap: 10px;
+    }
+    @media (max-width: 600px) { .ajouter form { grid-template-columns: 1fr; } }
+
+    .ajouter input {
+      background: var(--ink-3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      color: var(--bone);
+      font: inherit;
+      transition: border-color .15s, background .15s;
+    }
+    .ajouter input:focus {
+      outline: none;
+      border-color: var(--gold);
+      background: var(--ink-4);
+    }
+    .ajouter input::placeholder { color: var(--bone-mute); }
+
+    .btn {
+      background: linear-gradient(135deg, var(--gold) 0%, var(--ember) 100%);
+      border: none;
+      color: var(--ink-1);
+      font-family: 'Cinzel', serif;
+      font-weight: 700;
+      letter-spacing: .06em;
+      padding: 10px 22px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: .92rem;
+      transition: filter .15s, transform .1s;
+      white-space: nowrap;
+    }
+    .btn:hover { filter: brightness(1.1); }
+    .btn:active { transform: scale(.98); }
+    .btn:disabled { opacity: .45; cursor: not-allowed; filter: grayscale(.4); }
+
+    .btn-mini {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--bone-dim);
+      padding: 5px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font: inherit;
+      font-size: .82rem;
+      transition: background .15s, border-color .15s, color .15s;
+    }
+    .btn-mini:hover { background: var(--ink-4); color: var(--bone); border-color: var(--gold); }
+    .btn-mini.danger:hover { background: rgba(192, 57, 43, .15); color: #ff8a78; border-color: var(--brick); }
+    .btn-mini:disabled { opacity: .3; cursor: not-allowed; }
+    .btn-mini.danger:disabled:hover { background: transparent; color: var(--bone-dim); border-color: var(--border); }
+
+    /* ── Liste ── */
+    .liste {
+      background: var(--ink-2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+    .liste h2 {
+      font-family: 'Cinzel', serif;
+      font-size: 1.05rem;
+      font-weight: 500;
+      color: var(--gold);
+      padding: 18px 24px 14px;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+    }
+    .liste h2 .count {
+      font-family: 'Inter', sans-serif;
+      font-size: .78rem;
+      color: var(--bone-mute);
+      letter-spacing: 0;
+      text-transform: none;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .92rem;
+    }
+    thead th {
+      background: var(--ink-3);
+      color: var(--bone-mute);
+      font-weight: 500;
+      text-align: left;
+      padding: 10px 20px;
+      font-size: .78rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background .15s;
+    }
+    tbody tr:hover { background: rgba(244,231,211,.025); }
+    tbody td { padding: 12px 20px; }
+    tbody td.email { color: var(--bone); font-weight: 500; }
+    tbody td.email .moi {
+      display: inline-block;
+      margin-left: 8px;
+      padding: 1px 8px;
+      background: var(--ink-4);
+      border-radius: 10px;
+      font-size: .72rem;
+      color: var(--gold-lt);
+      letter-spacing: .04em;
+    }
+    tbody td.name { color: var(--bone-dim); }
+    tbody td.role .pill {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: .78rem;
+      letter-spacing: .04em;
+      font-weight: 500;
+    }
+    tbody td.role .pill.admin { background: rgba(200, 132, 58, .18); color: var(--gold-lt); }
+    tbody td.role .pill.meneur { background: rgba(90, 127, 163, .18); color: #95b3d4; }
+    tbody td.lastlogin { color: var(--bone-mute); font-size: .85rem; }
+    tbody td.actions { text-align: right; white-space: nowrap; }
+    tbody td.actions .btn-mini + .btn-mini { margin-left: 6px; }
+
+    .empty {
+      text-align: center;
+      padding: 40px 24px;
+      color: var(--bone-mute);
+      font-style: italic;
+    }
+
+    /* ── Toasts ── */
+    #toast-zone {
+      position: fixed;
+      top: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: none;
+    }
+    .toast {
+      background: var(--ink-2);
+      border: 1px solid var(--gold);
+      border-radius: 10px;
+      padding: 12px 18px;
+      color: var(--bone);
+      box-shadow: 0 6px 24px rgba(0,0,0,.5);
+      font-size: .92rem;
+      max-width: 480px;
+      animation: slideIn .25s ease-out;
+      pointer-events: auto;
+    }
+    .toast.ok { border-color: var(--moss); }
+    .toast.err { border-color: var(--brick); }
+    @keyframes slideIn { from { opacity: 0; transform: translateY(-12px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* ── Modale confirm ── */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.65);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 24px;
+    }
+    .modal-overlay.actif { display: flex; }
+    .modal {
+      background: var(--ink-2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 28px;
+      max-width: 440px;
+      width: 100%;
+    }
+    .modal h3 {
+      font-family: 'Cinzel', serif;
+      font-size: 1.2rem;
+      color: var(--gold-lt);
+      margin-bottom: 12px;
+    }
+    .modal p { color: var(--bone-dim); margin-bottom: 20px; line-height: 1.6; }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+    .modal-actions .btn-mini { padding: 8px 16px; font-size: .9rem; }
+    .modal-actions .btn-confirm {
+      background: var(--brick);
+      border-color: var(--brick);
+      color: white;
+    }
+    .modal-actions .btn-confirm:hover {
+      background: #d04937;
+      color: white;
+      border-color: #d04937;
+    }
+  </style>
+</head>
+<body>
+
+<div id="toast-zone"></div>
+
+<div id="modal-confirm" class="modal-overlay">
+  <div class="modal" role="dialog" aria-modal="true">
+    <h3 id="modal-titre">Confirmation</h3>
+    <p id="modal-message">Êtes-vous sûr ?</p>
+    <div class="modal-actions">
+      <button class="btn-mini" id="modal-annuler" type="button">Annuler</button>
+      <button class="btn-mini btn-confirm" id="modal-ok" type="button">Confirmer</button>
+    </div>
+  </div>
+</div>
+
+<div class="page">
+
+  <div class="haut">
+    <a class="retour" href="lobby.html">← Retour au lobby</a>
+  </div>
+
+  <div class="titre-bloc">
+    <div class="titre">Gérer les meneurs</div>
+    <div class="sous-titre">Inviter, retirer ou promouvoir les meneurs de ta communauté</div>
+    <div class="tenant-tag" id="tenant-tag" hidden></div>
+  </div>
+
+  <div class="ajouter">
+    <h2>Inviter un nouveau meneur</h2>
+    <form id="form-ajouter">
+      <input type="email" id="in-email" placeholder="adresse@email.com" required maxlength="254" autocomplete="off" spellcheck="false">
+      <input type="text" id="in-name" placeholder="Nom (optionnel)" maxlength="80" autocomplete="off">
+      <button class="btn" type="submit" id="btn-ajouter">Ajouter</button>
+    </form>
+  </div>
+
+  <div class="liste">
+    <h2>Meneurs actuels <span class="count" id="count-meneurs"></span></h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Courriel</th>
+          <th>Nom</th>
+          <th>Rôle</th>
+          <th>Dernière connexion</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="tbody-meneurs">
+        <tr><td colspan="5" class="empty">Chargement…</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<script src="/auth-widget.js" defer></script>
+<script src="/_widget-loader.js" defer></script>
+
+<script>
+'use strict';
+
+const API = '/api/admin/meneurs';
+let currentUserId = null;
+
+// === Helpers DOM (XSS-safe) ===
+function el(tag, props, ...children) {
+  const e = document.createElement(tag);
+  for (const k in (props || {})) {
+    const v = props[k];
+    if (v == null || v === false) continue;
+    if (k.startsWith('on') && typeof v === 'function') e.addEventListener(k.slice(2).toLowerCase(), v);
+    else if (k === 'class') e.className = v;
+    else if (k === 'data') for (const d in v) e.dataset[d] = v[d];
+    else e.setAttribute(k, v);
+  }
+  for (const c of children.flat()) {
+    if (c == null || c === false) continue;
+    e.append(c instanceof Node ? c : document.createTextNode(String(c)));
+  }
+  return e;
+}
+
+function toast(msg, type) {
+  const zone = document.getElementById('toast-zone');
+  const t = el('div', { class: 'toast ' + (type || '') }, msg);
+  zone.append(t);
+  setTimeout(() => {
+    t.style.transition = 'opacity .3s';
+    t.style.opacity = '0';
+    setTimeout(() => t.remove(), 300);
+  }, 3200);
+}
+
+// Format ISO datetime → "il y a X jours" simple
+function formatLastLogin(iso) {
+  if (!iso) return 'jamais';
+  const d = new Date(iso.replace(' ', 'T') + 'Z');
+  const diffMs = Date.now() - d.getTime();
+  const days = Math.floor(diffMs / 86400000);
+  if (days < 0) return 'à l\'instant';
+  if (days === 0) return 'aujourd\'hui';
+  if (days === 1) return 'hier';
+  if (days < 30) return `il y a ${days} j`;
+  if (days < 365) return `il y a ${Math.floor(days/30)} mois`;
+  return `il y a ${Math.floor(days/365)} an${days >= 730 ? 's' : ''}`;
+}
+
+// === Modale confirm ===
+function confirmAction(titre, message, libelleOk) {
+  return new Promise((resolve) => {
+    const overlay = document.getElementById('modal-confirm');
+    document.getElementById('modal-titre').textContent = titre;
+    document.getElementById('modal-message').textContent = message;
+    const btnOk = document.getElementById('modal-ok');
+    btnOk.textContent = libelleOk || 'Confirmer';
+    const btnAnnuler = document.getElementById('modal-annuler');
+
+    function cleanup(result) {
+      overlay.classList.remove('actif');
+      btnOk.removeEventListener('click', onOk);
+      btnAnnuler.removeEventListener('click', onAnnuler);
+      overlay.removeEventListener('click', onOverlay);
+      resolve(result);
+    }
+    function onOk() { cleanup(true); }
+    function onAnnuler() { cleanup(false); }
+    function onOverlay(e) { if (e.target === overlay) cleanup(false); }
+
+    btnOk.addEventListener('click', onOk);
+    btnAnnuler.addEventListener('click', onAnnuler);
+    overlay.addEventListener('click', onOverlay);
+    overlay.classList.add('actif');
+    btnOk.focus();
+  });
+}
+
+// === Messages d'erreur API → français ===
+const ERROR_MESSAGES = {
+  invalid_email: 'Adresse courriel invalide.',
+  email_already_in_tenant: 'Ce courriel est déjà dans ta liste de meneurs.',
+  email_already_exists: 'Ce courriel est déjà utilisé ailleurs sur la plateforme.',
+  no_tenant_for_user: 'Ton compte n\'est associé à aucune communauté.',
+  cannot_delete_self: 'Tu ne peux pas te retirer toi-même.',
+  cannot_demote_self: 'Tu ne peux pas te retrograder toi-même.',
+  cannot_delete_last_admin: 'Impossible — il faut au moins un administrateur.',
+  cannot_demote_last_admin: 'Impossible — il faut au moins un administrateur.',
+  not_found: 'Meneur introuvable.',
+  invalid_role: 'Rôle invalide.',
+  invalid_id: 'Identifiant invalide.',
+  admin_required: 'Accès admin requis.',
+  auth_required: 'Tu dois te connecter.',
+};
+
+function errorMessage(code) {
+  return ERROR_MESSAGES[code] || ('Erreur : ' + code);
+}
+
+// === API calls ===
+async function apiCall(method, url, body) {
+  const opts = { method, credentials: 'same-origin', headers: { 'Accept': 'application/json' } };
+  if (body) {
+    opts.headers['Content-Type'] = 'application/json';
+    opts.body = JSON.stringify(body);
+  }
+  const r = await fetch(url, opts);
+  let data = null;
+  try { data = await r.json(); } catch (e) { /* pas de JSON */ }
+  if (!r.ok) {
+    const err = new Error(data?.error || 'http_' + r.status);
+    err.code = data?.error || 'http_' + r.status;
+    throw err;
+  }
+  return data;
+}
+
+// === Rendu de la liste ===
+function renderListe(meneurs) {
+  const tbody = document.getElementById('tbody-meneurs');
+  document.getElementById('count-meneurs').textContent = `(${meneurs.length})`;
+
+  while (tbody.firstChild) tbody.removeChild(tbody.firstChild);
+
+  if (meneurs.length === 0) {
+    tbody.append(el('tr', {}, el('td', { colspan: '5', class: 'empty' }, 'Aucun meneur pour l\'instant.')));
+    return;
+  }
+
+  const nbAdmins = meneurs.filter(m => m.role === 'admin').length;
+
+  for (const m of meneurs) {
+    const isMoi = m.id === currentUserId;
+    const isLastAdmin = m.role === 'admin' && nbAdmins <= 1;
+
+    const tdEmail = el('td', { class: 'email' }, m.email);
+    if (isMoi) tdEmail.append(el('span', { class: 'moi' }, 'toi'));
+
+    const pillClass = 'pill ' + m.role;
+    const tdRole = el('td', { class: 'role' },
+      el('span', { class: pillClass }, m.role === 'admin' ? 'Admin' : 'Meneur'));
+
+    const actions = el('td', { class: 'actions' });
+
+    // Bouton promote / demote
+    if (m.role === 'meneur') {
+      actions.append(el('button', {
+        class: 'btn-mini',
+        type: 'button',
+        title: 'Donner le rôle admin (peut gérer les meneurs)',
+        onclick: () => changerRole(m, 'admin'),
+      }, '↑ Admin'));
+    } else if (!isMoi && !isLastAdmin) {
+      actions.append(el('button', {
+        class: 'btn-mini',
+        type: 'button',
+        title: 'Retirer le rôle admin',
+        onclick: () => changerRole(m, 'meneur'),
+      }, '↓ Meneur'));
+    }
+
+    // Bouton retirer
+    const btnRetirer = el('button', {
+      class: 'btn-mini danger',
+      type: 'button',
+      title: isMoi ? 'Tu ne peux pas te retirer toi-même' :
+             isLastAdmin ? 'Il faut au moins un admin' : 'Retirer ce meneur',
+      onclick: () => retirer(m),
+    }, 'Retirer');
+    if (isMoi || isLastAdmin) btnRetirer.disabled = true;
+    actions.append(btnRetirer);
+
+    tbody.append(el('tr', {},
+      tdEmail,
+      el('td', { class: 'name' }, m.name || '—'),
+      tdRole,
+      el('td', { class: 'lastlogin' }, formatLastLogin(m.last_login_at)),
+      actions,
+    ));
+  }
+}
+
+// === Actions ===
+async function chargerListe() {
+  try {
+    const data = await apiCall('GET', API);
+    currentUserId = data.currentUserId;
+    renderListe(data.meneurs);
+  } catch (e) {
+    const tbody = document.getElementById('tbody-meneurs');
+    while (tbody.firstChild) tbody.removeChild(tbody.firstChild);
+    tbody.append(el('tr', {}, el('td', { colspan: '5', class: 'empty' }, errorMessage(e.code))));
+    toast(errorMessage(e.code), 'err');
+  }
+}
+
+async function ajouter(e) {
+  e.preventDefault();
+  const btn = document.getElementById('btn-ajouter');
+  const inEmail = document.getElementById('in-email');
+  const inName = document.getElementById('in-name');
+  const email = inEmail.value.trim();
+  const name = inName.value.trim();
+  if (!email) return;
+
+  btn.disabled = true;
+  btn.textContent = 'Ajout…';
+  try {
+    await apiCall('POST', API, { email, name: name || null });
+    inEmail.value = '';
+    inName.value = '';
+    toast(`✓ ${email} ajouté. Il peut maintenant se connecter avec son courriel.`, 'ok');
+    await chargerListe();
+    inEmail.focus();
+  } catch (e) {
+    toast(errorMessage(e.code), 'err');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Ajouter';
+  }
+}
+
+async function changerRole(meneur, nouveauRole) {
+  const action = nouveauRole === 'admin' ? 'promouvoir admin' : 'retrograder en meneur';
+  const ok = await confirmAction(
+    'Changer le rôle',
+    `Veux-tu ${action} « ${meneur.email} » ?`,
+    'Oui, changer'
+  );
+  if (!ok) return;
+  try {
+    await apiCall('PATCH', `${API}/${meneur.id}/role`, { role: nouveauRole });
+    toast(`✓ Rôle de ${meneur.email} mis à jour.`, 'ok');
+    await chargerListe();
+  } catch (e) {
+    toast(errorMessage(e.code), 'err');
+  }
+}
+
+async function retirer(meneur) {
+  const ok = await confirmAction(
+    'Retirer ce meneur',
+    `« ${meneur.email} » ne pourra plus se connecter. Cette action est immédiate (ses sessions actives seront aussi fermées).`,
+    'Oui, retirer'
+  );
+  if (!ok) return;
+  try {
+    await apiCall('DELETE', `${API}/${meneur.id}`);
+    toast(`✓ ${meneur.email} retiré.`, 'ok');
+    await chargerListe();
+  } catch (e) {
+    toast(errorMessage(e.code), 'err');
+  }
+}
+
+// === Init ===
+document.getElementById('form-ajouter').addEventListener('submit', ajouter);
+
+// Charger le tenant depuis /auth/me
+fetch('/auth/me', { credentials: 'same-origin' })
+  .then(r => r.ok ? r.json() : null)
+  .then(u => {
+    if (u && u.tenant) {
+      const tag = document.getElementById('tenant-tag');
+      tag.textContent = `Communauté : ${u.tenant.nom_officiel}`;
+      tag.hidden = false;
+    }
+  })
+  .catch(() => {});
+
+chargerListe();
+</script>
+
+</body>
+</html>

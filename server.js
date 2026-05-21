@@ -51,7 +51,8 @@ app.get('/_widget-loader.js', (_req, res) => {
 // ── Auth meneur (magic link) ─────────────────────────────────────────
 // Routes /login, /auth/* + middleware protégeant les pages meneur.
 
-const PROTECTED_PATHS = new Set(['/meneur.html', '/meneur-config.html']);
+const PROTECTED_PATHS = new Set(['/meneur.html', '/meneur-config.html', '/admin-meneurs.html']);
+const ADMIN_ONLY_PATHS = new Set(['/admin-meneurs.html']);
 
 app.get('/login', (req, res) => {
   res.sendFile(path.join(__dirname, 'login.html'));
@@ -128,10 +129,21 @@ app.get('/auth/me', (req, res) => {
 // Middleware de protection des pages meneur (avant express.static)
 app.use((req, res, next) => {
   if (!PROTECTED_PATHS.has(req.path)) return next();
-  if (req.user) return next();
-  const next_ = encodeURIComponent(req.originalUrl);
-  res.redirect('/login?next=' + next_);
+  if (!req.user) {
+    const next_ = encodeURIComponent(req.originalUrl);
+    return res.redirect('/login?next=' + next_);
+  }
+  if (ADMIN_ONLY_PATHS.has(req.path) && req.user.role !== 'admin') {
+    return res.status(403).type('html').send(renderErrorPage(
+      'Accès admin requis',
+      'Seuls les administrateurs peuvent gérer les meneurs.'
+    ));
+  }
+  next();
 });
+
+// Routes admin (JSON API)
+app.use('/api/admin/meneurs', auth.requireAuth, auth.requireAdmin, require('./routes/admin-meneurs'));
 
 function renderErrorPage(title, body) {
   function esc(s) { return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;' }[c])); }

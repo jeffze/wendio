@@ -226,6 +226,15 @@
       <div class="fleche">→</div>
     </a>
 
+    <a class="nav-carte" href="admin-meneurs.html" id="nav-admin" style="--couleur: #b39444; display:none;">
+      <div class="icone">👥</div>
+      <div class="label" data-i18n="lobby.admin.label">Gérer les meneurs</div>
+      <div class="description" data-i18n="lobby.admin.desc">
+        Inviter de nouveaux meneurs, retirer un accès, promouvoir un administrateur. Réservé aux admins.
+      </div>
+      <div class="fleche">→</div>
+    </a>
+
   </div>
 
   <footer>
@@ -239,6 +248,16 @@
   if (!document.documentElement.requestFullscreen) {
     document.getElementById('conseil-fs').classList.add('cache');
   }
+  // Montrer la tuile « Gérer les meneurs » uniquement aux admins
+  fetch('/auth/me', { credentials: 'same-origin' })
+    .then(r => r.ok ? r.json() : null)
+    .then(u => {
+      if (u && u.role === 'admin') {
+        const t = document.getElementById('nav-admin');
+        if (t) t.style.display = 'flex';
+      }
+    })
+    .catch(() => {});
 </script>
 <script src="/auth-widget.js" defer></script>
 <script src="/_widget-loader.js" defer></script>
