@@ -50,10 +50,10 @@ function tirerClan() {
 }
 function jouerSon(numero) {
     // On suppose que vos fichiers sont nommés "1.wav", "2.wav", etc.
-    const audio = new Audio(`Sound/${numero}.wav`);
-    
+    const audio = new Audio(`sound/${numero}.wav`);
+
     audio.play().catch(error => {
-        console.error("Erreur de lecture : Vérifiez que le fichier existe dans /Sound", error);
+        console.error("Erreur de lecture : Vérifiez que le fichier existe dans /sound", error);
     });
 }
 
