@@ -547,6 +547,26 @@
     #btn-accueil:hover { color: var(--accent); border-color: var(--accent); background: rgba(255,255,255,.95); }
     #btn-accueil svg { width: 18px; height: 18px; display: block; }
 
+    #btn-aide {
+      position: fixed;
+      top: 10px; right: 96px;
+      z-index: 300;
+      background: rgba(255,255,255,.75);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      width: 34px; height: 34px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      color: var(--muted);
+      text-decoration: none;
+      font-family: 'Cinzel', serif;
+      font-weight: 700;
+      font-size: 1.1rem;
+      transition: color .2s, border-color .2s, background .2s;
+      backdrop-filter: blur(4px);
+    }
+    #btn-aide:hover { color: var(--accent); border-color: var(--accent); background: rgba(255,255,255,.95); }
+
     /* ── Toast autre gagnant ── */
     #toast-gagnant {
       position: fixed; top: 16px; left: 50%;
@@ -579,11 +599,13 @@
 <body>
 
 
-<a id="btn-accueil" href="lobby.html" data-i18n-attr="title:joueur.tooltip.accueil" title="Accueil">
+<a id="btn-accueil" href="/" data-i18n-attr="title:joueur.tooltip.accueil" title="Accueil">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
     <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
   </svg>
 </a>
+
+<a id="btn-aide" href="aide-joueur.html" target="_blank" rel="noopener" data-i18n-attr="title:joueur.tooltip.aide" title="Aide du joueur">?</a>
 
 <button id="btn-fullscreen" data-i18n-attr="title:joueur.tooltip.fullscreen" title="Plein &#233;cran" onclick="toggleFullscreen()">
   <svg class="icon-expand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

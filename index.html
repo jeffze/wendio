@@ -97,26 +97,27 @@
       pointer-events: none;
     }
 
-    /* ── CTA ───────────────────────────────────────────────────── */
+    /* ── CTAs (2 boutons cote-a-cote) ───────────────────────────── */
     .cta-wrap {
-      display: flex; flex-direction: column; align-items: center; gap: .55rem;
+      display: flex; flex-direction: column; align-items: center; gap: .9rem;
       animation: ctaIn .9s ease both 1.5s;
+    }
+    .cta-row {
+      display: flex; gap: 1rem; flex-wrap: wrap;
+      justify-content: center; align-items: center;
     }
 
     .btn {
       font-family: 'Cinzel', serif;
-      font-size: clamp(.95rem, 2.2vw, 1.05rem);
+      font-size: clamp(.88rem, 2vw, 1rem);
       font-weight: 700;
-      letter-spacing: .42em;
+      letter-spacing: .35em;
       text-transform: uppercase;
-      color: #1a0e02;
-      background: linear-gradient(135deg, var(--amber-lt) 0%, var(--amber) 100%);
       text-decoration: none;
-      padding: 1.05rem 3.2rem 1.05rem 3.6rem;
-      display: inline-flex; align-items: center; gap: .7rem;
+      padding: .95rem 2.4rem;
+      display: inline-flex; align-items: center; gap: .6rem;
       clip-path: polygon(10px 0%, calc(100% - 10px) 0%, 100% 10px, 100% calc(100% - 10px), calc(100% - 10px) 100%, 10px 100%, 0% calc(100% - 10px), 0% 10px);
-      box-shadow: 0 4px 28px rgba(200,132,58,.40);
-      transition: transform .2s, box-shadow .3s, background .3s;
+      transition: transform .2s, box-shadow .3s, background .3s, color .2s;
       cursor: pointer;
       border: none;
       position: relative;
@@ -126,18 +127,36 @@
       content: '';
       position: absolute; inset: 0;
       background: linear-gradient(135deg, rgba(255,255,255,.18), transparent 55%);
+      pointer-events: none;
     }
-    .btn:hover {
+    .btn:active { transform: translateY(0); }
+    .btn .arrow { font-size: 1.15em; transition: transform .25s; }
+    .btn:hover .arrow { transform: translateX(4px); }
+
+    /* Joueur = primaire (ember plein, gros, attire l'oeil) */
+    .btn-joueur {
+      color: #1a0e02;
+      background: linear-gradient(135deg, var(--amber-lt) 0%, var(--amber) 100%);
+      box-shadow: 0 4px 28px rgba(200,132,58,.40);
+    }
+    .btn-joueur:hover {
       background: linear-gradient(135deg, #ffd080 0%, var(--amber-lt) 100%);
       transform: translateY(-2px);
       box-shadow: 0 8px 40px rgba(200,132,58,.6);
     }
-    .btn:active { transform: translateY(0); }
-    .btn .arrow {
-      font-size: 1.15em;
-      transition: transform .25s;
+
+    /* Meneur = secondaire (outline, moins criard mais visible) */
+    .btn-meneur {
+      color: var(--amber-lt);
+      background: transparent;
+      box-shadow: inset 0 0 0 1.5px var(--amber);
     }
-    .btn:hover .arrow { transform: translateX(4px); }
+    .btn-meneur:hover {
+      color: #1a0e02;
+      background: linear-gradient(135deg, rgba(232,168,90,.18) 0%, rgba(200,132,58,.18) 100%);
+      transform: translateY(-2px);
+      box-shadow: inset 0 0 0 1.5px var(--amber-lt), 0 4px 20px rgba(200,132,58,.35);
+    }
 
     .subtitle {
       font-size: .78rem;
@@ -147,6 +166,11 @@
       font-weight: 400;
       font-style: italic;
       opacity: .85;
+    }
+
+    @media (max-width: 480px) {
+      .cta-row { flex-direction: column; gap: .7rem; }
+      .btn { width: 100%; max-width: 280px; justify-content: center; }
     }
 
     /* ── Animations ────────────────────────────────────────────── */
@@ -177,7 +201,7 @@
     }
   </style>
 </head>
-<body onclick="entrer()">
+<body>
 
   <!-- Fond : feu de conseil + braises -->
   <div class="bg-canvas">
@@ -192,18 +216,19 @@
     </div>
 
     <div class="cta-wrap">
-      <button class="btn" onclick="event.stopPropagation(); entrer();">
-        Commencer <span class="arrow">→</span>
-      </button>
-      <div class="subtitle">Le Jeu des Clans</div>
+      <div class="cta-row">
+        <a class="btn btn-joueur" href="joueur.html" data-i18n="index.cta.joueur">Je joue <span class="arrow">→</span></a>
+        <a class="btn btn-meneur" href="lobby.html" data-i18n="index.cta.meneur">Je suis meneur <span class="arrow">→</span></a>
+      </div>
+      <div class="subtitle" data-i18n="index.subtitle">Le Jeu des Clans</div>
     </div>
 
   </div>
 
   <script>
-    function entrer() { window.location.href = 'lobby.html'; }
+    // Pressed Enter on landing -> defaults to "Je joue" (parcours le plus frequent)
     document.addEventListener('keydown', e => {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); entrer(); }
+      if (e.key === 'Enter') { e.preventDefault(); window.location.href = 'joueur.html'; }
     });
 
     /* ── Braises flottantes ───────────────────────────────────── */

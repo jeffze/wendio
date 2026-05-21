@@ -19,6 +19,11 @@
 // markup statique en HTML et ne traduire que les parties textuelles.
 
 const TRANSLATIONS = {
+  // ── Index (cover) ──────────────────────────────────────────────────
+  'index.cta.joueur':          { fr: 'Je joue',           en: "I'm playing" },
+  'index.cta.meneur':          { fr: 'Je suis meneur',    en: "I'm the host" },
+  'index.subtitle':            { fr: 'Le Jeu des Clans',  en: 'The Game of Clans' },
+
   // ── Lobby ──────────────────────────────────────────────────────────
   'lobby.subtitle':            { fr: 'Le Jeu des Clans',
                                  en: 'The Game of Clans' },
@@ -189,6 +194,7 @@ const TRANSLATIONS = {
   // ── Joueur ─────────────────────────────────────────────────────────
   'joueur.tooltip.accueil':    { fr: 'Accueil', en: 'Home' },
   'joueur.tooltip.fullscreen': { fr: 'Plein écran', en: 'Fullscreen' },
+  'joueur.tooltip.aide':       { fr: 'Aide du joueur', en: 'Player Guide' },
   'joueur.rejoindre.titre':    { fr: 'Rejoindre la partie',
                                  en: 'Join the game' },
   'joueur.rejoindre.info_clan':{ fr: 'Le clan est imposé par le meneur — il sera affiché dès que vous rejoignez.',
@@ -471,6 +477,83 @@ const TRANSLATIONS = {
   'aide.s8.signaler.titre':    { fr: 'Un autre problème ?',         en: 'Another problem?' },
   'aide.s8.signaler.txt':      { fr: "Utilise le bouton 💬 Signaler en bas à droite de chaque écran pour envoyer un rapport directement à JF — capture d'écran et description en 30 secondes.",
                                  en: 'Use the 💬 Report button at the bottom right of each screen to send a report directly to JF — screenshot and description in 30 seconds.' },
+
+  // ── Aide du joueur ─────────────────────────────────────────────────
+  'aidej.retour_jouer':        { fr: '← Retourner au jeu',         en: '← Back to the game' },
+  'aidej.imprimer':            { fr: '🖨 Imprimer',                en: '🖨 Print' },
+  'aidej.titre':               { fr: 'Aide du joueur',             en: 'Player Guide' },
+  'aidej.sous_titre':          { fr: 'Comment jouer à WENDIO selon ton type de partie',
+                                 en: 'How to play WENDIO depending on your game type' },
+  'aidej.footer':              { fr: 'Aide du joueur · WENDIO · Le Jeu des Clans',
+                                 en: 'Player Guide · WENDIO · The Game of Clans' },
+  'aidej.footer_lien':         { fr: '← Retourner au jeu',         en: '← Back to the game' },
+
+  'aidej.mode_online.titre':   { fr: '🌐 Partie en ligne',         en: '🌐 Online game' },
+  'aidej.mode_online.txt':     { fr: "Tu as reçu un code à 4 lettres ou un QR code du meneur. Tu joues avec une carte numérique sur ton téléphone ou ta tablette.",
+                                 en: 'You received a 4-letter code or a QR code from the host. You play with a digital card on your phone or tablet.' },
+  'aidej.mode_online.lien':    { fr: 'Voir comment →',             en: 'See how →' },
+  'aidej.mode_papier.titre':   { fr: '📄 Carte papier imprimée',    en: '📄 Printed paper card' },
+  'aidej.mode_papier.txt':     { fr: "Le meneur t'a remis une carte papier ou tu en as imprimé une. Tu marques tes cases au crayon ou avec un grain de maïs.",
+                                 en: 'The host gave you a paper card or you printed one. You mark cells with a pencil or a corn kernel.' },
+  'aidej.mode_papier.lien':    { fr: 'Imprimer ma carte →',        en: 'Print my card →' },
+  'aidej.mode_mobile.titre':   { fr: '📱 Carte numérique solo',    en: '📱 Solo digital card' },
+  'aidej.mode_mobile.txt':     { fr: "Tu veux jouer sur ton appareil sans partie organisée (pratique, entraînement, ou juste pour découvrir le jeu).",
+                                 en: 'You want to play on your device without an organized game (practice, training, or just to discover the game).' },
+  'aidej.mode_mobile.lien':    { fr: 'Ouvrir ma carte →',          en: 'Open my card →' },
+
+  'aidej.s1.titre':            { fr: 'Rejoindre une partie en ligne', en: 'Join an online game' },
+  'aidej.s1.l1':               { fr: "Scanne le QR code projeté par le meneur, ou tape le code à 4 lettres dans la page « Carte numérique ».",
+                                 en: "Scan the QR code shown by the host, or type the 4-letter code in the « Digital card » page." },
+  'aidej.s1.l2':               { fr: "Choisis ton nom (visible par le meneur et les autres joueurs). Il doit être unique dans la partie.",
+                                 en: 'Choose your name (visible to the host and other players). It must be unique in the game.' },
+  'aidej.s1.l3':               { fr: "Attends que le meneur démarre la partie. Tu ne peux pas rejoindre une partie déjà commencée.",
+                                 en: "Wait for the host to start the game. You can't join a game already started." },
+  'aidej.s1.l4':               { fr: "Quand un numéro est tiré, sa carte (chiffre + mot wendat + phonétique) s'affiche sur ton écran.",
+                                 en: 'When a number is drawn, its card (number + Wendat word + phonetic) shows on your screen.' },
+  'aidej.s1.l5':               { fr: "Touche les cases tirées de ta carte pour les marquer. Tu peux toucher l'annonce pour réécouter le son.",
+                                 en: 'Touch the drawn cells on your card to mark them. Touch the announcement to replay the sound.' },
+  'aidej.s1.l6':               { fr: "Quand tu remplis la condition de victoire de ton clan, le bouton « WENDIO ! » apparaît — clique-le pour réclamer la victoire.",
+                                 en: "When you meet your clan's victory condition, the « WENDIO! » button appears — click it to claim the win." },
+  'aidej.s1.info.titre':       { fr: 'Téléphone en veille ?',      en: 'Phone went to sleep?' },
+  'aidej.s1.info.txt':         { fr: "Pas de panique : si tu rouvres la même URL avec le même téléphone, tu retrouves ta carte et tous les numéros déjà tirés. Garde juste l'onglet ouvert.",
+                                 en: "Don't worry: if you reopen the same URL with the same phone, you get back your card and all drawn numbers. Just keep the tab open." },
+
+  'aidej.s2.titre':            { fr: 'Jouer avec une carte papier', en: 'Play with a paper card' },
+  'aidej.s2.p1':               { fr: "Le meneur annonce un numéro à la fois. Repère-le sur ta carte et marque-le (crayon, jeton, grain de maïs).",
+                                 en: 'The host announces one number at a time. Find it on your card and mark it (pencil, token, corn kernel).' },
+  'aidej.s2.p2':               { fr: 'Chaque colonne de la carte correspond à une lettre du mot WENDIO :',
+                                 en: 'Each column of the card matches a letter of the word WENDIO:' },
+  'aidej.s2.l1':               { fr: 'W : numéros 1 à 12',          en: 'W: numbers 1 to 12' },
+  'aidej.s2.l2':               { fr: 'E : numéros 13 à 24',         en: 'E: numbers 13 to 24' },
+  'aidej.s2.l3':               { fr: 'N : numéros 25 à 36 (+ 2 cases Cœur centrales)',
+                                 en: 'N: numbers 25 to 36 (+ 2 central Heart cells)' },
+  'aidej.s2.l4':               { fr: 'D : numéros 37 à 48 (+ 2 cases Cœur centrales)',
+                                 en: 'D: numbers 37 to 48 (+ 2 central Heart cells)' },
+  'aidej.s2.l5':               { fr: 'I : numéros 49 à 60',         en: 'I: numbers 49 to 60' },
+  'aidej.s2.l6':               { fr: 'O : numéros 61 à 72',         en: 'O: numbers 61 to 72' },
+  'aidej.s2.p3':               { fr: "Les 4 cases centrales (le Cœur) sont toujours libres — elles comptent comme déjà marquées dans toutes les conditions de victoire.",
+                                 en: 'The 4 central cells (the Heart) are always free — they count as already marked in every victory condition.' },
+  'aidej.s2.p4':               { fr: "Dès que tu remplis la condition de ton clan, crie « WENDIO ! » et le meneur vérifie ta carte.",
+                                 en: "As soon as you meet your clan's condition, shout « WENDIO! » and the host verifies your card." },
+
+  'aidej.s3.titre':            { fr: 'Les 4 clans et leurs victoires', en: 'The 4 clans and their victory conditions' },
+  'aidej.s3.intro':            { fr: 'Le meneur choisit un clan pour toute la partie. Tous les joueurs visent la même condition de victoire :',
+                                 en: 'The host picks one clan for the whole game. All players aim for the same victory condition:' },
+  'aidej.s3.chevreuil':        { fr: "🦌 Chevreuil (Ohskënonton') — une ligne complète (horizontale, verticale ou diagonale). Le plus rapide à gagner.",
+                                 en: "🦌 Deer (Ohskënonton') — one complete line (horizontal, vertical or diagonal). The quickest to win." },
+  'aidej.s3.loup':             { fr: "🐺 Loup (Yānariskwa') — les 4 coins de la carte.",
+                                 en: "🐺 Wolf (Yānariskwa') — the 4 corners of the card." },
+  'aidej.s3.ours':             { fr: "🐻 Ours (Yānionyen') — l'anneau de 12 cases qui entoure le Cœur.",
+                                 en: "🐻 Bear (Yānionyen') — the 12-cell ring around the Heart." },
+  'aidej.s3.tortue':           { fr: "🐢 Tortue (Yāndia'wich) — toutes les 32 cases numérotées. Le plus long et le plus prestigieux.",
+                                 en: "🐢 Turtle (Yāndia'wich) — all 32 numbered cells. The longest and most prestigious." },
+  'aidej.s3.astuce.titre':     { fr: 'Une seule victoire par partie', en: 'Only one winner per game' },
+  'aidej.s3.astuce.txt':       { fr: "Dès qu'un joueur déclare une victoire valide, la partie est terminée pour tout le monde. Pas de classement multiple — le premier emporte tout.",
+                                 en: 'As soon as a player declares a valid win, the game ends for everyone. No multiple ranking — the first takes all.' },
+
+  'aidej.s4.titre':            { fr: 'Un bug ou une question ?',   en: 'A bug or a question?' },
+  'aidej.s4.txt':              { fr: "Si tu remarques quelque chose qui ne marche pas (carte qui ne s'affiche pas, son qui ne joue pas, joueur fantôme dans la liste...), utilise le bouton 💬 Signaler en bas à droite de ta carte. Une capture d'écran et une courte description suffisent — l'équipe technique reçoit tout ça en direct.",
+                                 en: "If you notice something not working (card not showing, sound not playing, phantom player in the list...), use the 💬 Report button at the bottom right of your card. A screenshot and a short description are enough — the tech team gets it all live." },
 };
 
 const i18n = (function () {

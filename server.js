@@ -91,7 +91,7 @@ app.get('/_widget-loader.js', (_req, res) => {
 // ── Auth meneur (magic link) ─────────────────────────────────────────
 // Routes /login, /auth/* + middleware protégeant les pages meneur.
 
-const PROTECTED_PATHS = new Set(['/meneur.html', '/meneur-config.html', '/admin-meneurs.html']);
+const PROTECTED_PATHS = new Set(['/lobby.html', '/meneur.html', '/meneur-config.html', '/admin-meneurs.html']);
 const ADMIN_ONLY_PATHS = new Set(['/admin-meneurs.html']);
 
 app.get('/login', (_req, res) => {

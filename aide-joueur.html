@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WENDIO — Aide du joueur</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #1a1008;
+      color: #f4e7d3;
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    .page { max-width: 740px; margin: 0 auto; padding: 24px 20px 72px; }
+
+    .haut {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px; flex-wrap: wrap; margin-bottom: 24px;
+    }
+    .haut a {
+      color: #c8843a; text-decoration: none; font-size: .9rem;
+      padding: 7px 12px; border: 1px solid #3e2510; border-radius: 10px;
+      transition: background .15s, border-color .15s;
+    }
+    .haut a:hover { background: #2c1a0e; border-color: #c8843a; }
+
+    /* ── Titre ── */
+    .titre-bloc { text-align: center; margin-bottom: 36px; }
+    .titre {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(1.8rem, 6vw, 2.8rem);
+      font-weight: 900;
+      letter-spacing: .12em;
+      line-height: 1.1;
+      background: linear-gradient(135deg, #d35400 0%, #f39c12 50%, #d35400 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 8px;
+    }
+    .sous-titre {
+      font-size: .95rem;
+      color: #a08060;
+      letter-spacing: .04em;
+    }
+
+    /* ── Modes (3 cartes) ── */
+    .modes {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+      margin-bottom: 36px;
+    }
+    .mode {
+      background: #221710;
+      border: 1px solid #3e2510;
+      border-left: 3px solid #c8843a;
+      border-radius: 12px;
+      padding: 16px 18px;
+    }
+    .mode h3 {
+      font-family: 'Cinzel', serif;
+      font-size: 1.05rem;
+      color: #f39c12;
+      margin-bottom: 6px;
+      letter-spacing: .03em;
+    }
+    .mode p {
+      font-size: .9rem;
+      color: #c8a070;
+      line-height: 1.5;
+    }
+    .mode a {
+      display: inline-block;
+      margin-top: 10px;
+      color: #e8a85a;
+      text-decoration: none;
+      font-size: .88rem;
+      font-weight: 500;
+      border-bottom: 1px dotted #c8843a;
+    }
+    .mode a:hover { color: #f39c12; }
+
+    /* ── Sections ── */
+    section {
+      margin-bottom: 40px;
+      scroll-margin-top: 24px;
+    }
+    section h2 {
+      font-family: 'Cinzel', serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #f39c12;
+      margin-bottom: 14px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #3e2510;
+      letter-spacing: .03em;
+    }
+    section p { margin-bottom: 12px; color: #d8c5a8; }
+    section ul, section ol {
+      margin: 0 0 14px 22px;
+      color: #d8c5a8;
+    }
+    section li { margin-bottom: 5px; }
+    section strong { color: #f4e7d3; }
+    section kbd {
+      font-family: 'Consolas', monospace;
+      background: #2c1a0e;
+      border: 1px solid #4a3020;
+      border-radius: 4px;
+      padding: 1px 6px;
+      font-size: .85em;
+      color: #f4e7d3;
+    }
+
+    .encadre {
+      background: #221710;
+      border-left: 3px solid #c8843a;
+      border-radius: 0 10px 10px 0;
+      padding: 12px 16px;
+      margin: 14px 0;
+    }
+    .encadre.astuce { border-left-color: #27ae60; }
+    .encadre.info { border-left-color: #2980b9; }
+    .encadre b {
+      display: block;
+      margin-bottom: 5px;
+      font-size: .82rem;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: #c8843a;
+    }
+    .encadre.astuce b { color: #2ecc71; }
+    .encadre.info b { color: #5dade2; }
+
+    footer {
+      text-align: center;
+      margin-top: 48px;
+      padding-top: 18px;
+      border-top: 1px solid #3e2510;
+      color: #4a3020;
+      font-size: .82rem;
+    }
+    footer a { color: #c8843a; text-decoration: none; }
+
+    @media print {
+      body { background: white; color: black; }
+      .titre { -webkit-text-fill-color: #c8843a; color: #c8843a; }
+      .mode, .encadre { background: white; border: 1px solid #ccc; }
+      a { color: black; text-decoration: none; }
+      .haut { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="page">
+
+  <div class="haut">
+    <a href="joueur.html" data-i18n="aidej.retour_jouer">← Retourner au jeu</a>
+    <a href="javascript:window.print()" data-i18n="aidej.imprimer">🖨 Imprimer</a>
+  </div>
+
+  <div class="titre-bloc">
+    <div class="titre" data-i18n="aidej.titre">Aide du joueur</div>
+    <div class="sous-titre" data-i18n="aidej.sous_titre">Comment jouer à WENDIO selon ton type de partie</div>
+  </div>
+
+  <!-- Les 3 façons de jouer -->
+  <div class="modes">
+    <div class="mode">
+      <h3 data-i18n="aidej.mode_online.titre">🌐 Partie en ligne</h3>
+      <p data-i18n="aidej.mode_online.txt">Tu as reçu un <strong>code à 4 lettres</strong> ou un <strong>QR code</strong> du meneur. Tu joues avec une carte numérique sur ton téléphone ou ta tablette.</p>
+      <a href="#partie-en-ligne" data-i18n="aidej.mode_online.lien">Voir comment →</a>
+    </div>
+    <div class="mode">
+      <h3 data-i18n="aidej.mode_papier.titre">📄 Carte papier imprimée</h3>
+      <p data-i18n="aidej.mode_papier.txt">Le meneur t'a remis une <strong>carte papier</strong> ou tu en as imprimé une. Tu marques tes cases au crayon ou avec un grain de maïs.</p>
+      <a href="imprimer.html" data-i18n="aidej.mode_papier.lien">Imprimer ma carte →</a>
+    </div>
+    <div class="mode">
+      <h3 data-i18n="aidej.mode_mobile.titre">📱 Carte numérique solo</h3>
+      <p data-i18n="aidej.mode_mobile.txt">Tu veux jouer sur ton appareil sans partie organisée (pratique, entraînement, ou juste pour découvrir le jeu).</p>
+      <a href="joueur.html" data-i18n="aidej.mode_mobile.lien">Ouvrir ma carte →</a>
+    </div>
+  </div>
+
+  <!-- 1. Partie en ligne -->
+  <section id="partie-en-ligne">
+    <h2 data-i18n="aidej.s1.titre">Rejoindre une partie en ligne</h2>
+    <ol>
+      <li data-i18n="aidej.s1.l1"><strong>Scanne le QR code</strong> projeté par le meneur, ou tape le code à 4 lettres dans la page « Carte numérique ».</li>
+      <li data-i18n="aidej.s1.l2"><strong>Choisis ton nom</strong> (visible par le meneur et les autres joueurs). Il doit être unique dans la partie.</li>
+      <li data-i18n="aidej.s1.l3">Attends que le meneur démarre la partie. <strong>Tu ne peux pas rejoindre une partie déjà commencée</strong>.</li>
+      <li data-i18n="aidej.s1.l4">Quand un numéro est tiré, sa carte (chiffre + mot wendat + phonétique) s'affiche sur ton écran.</li>
+      <li data-i18n="aidej.s1.l5"><strong>Touche les cases tirées de ta carte</strong> pour les marquer. Tu peux toucher l'annonce pour réécouter le son.</li>
+      <li data-i18n="aidej.s1.l6">Quand tu remplis la condition de victoire de ton clan, le bouton « WENDIO ! » apparaît — clique-le pour réclamer la victoire.</li>
+    </ol>
+    <div class="encadre info">
+      <b data-i18n="aidej.s1.info.titre">Téléphone en veille ?</b>
+      <span data-i18n="aidej.s1.info.txt">Pas de panique : si tu rouvres la même URL avec le même téléphone, tu retrouves ta carte et tous les numéros déjà tirés. Garde juste l'onglet ouvert.</span>
+    </div>
+  </section>
+
+  <!-- 2. Carte papier -->
+  <section id="papier">
+    <h2 data-i18n="aidej.s2.titre">Jouer avec une carte papier</h2>
+    <p data-i18n="aidej.s2.p1">Le meneur annonce un numéro à la fois. <strong>Repère-le sur ta carte</strong> et marque-le (crayon, jeton, grain de maïs).</p>
+    <p data-i18n="aidej.s2.p2">Chaque colonne de la carte correspond à une lettre du mot WENDIO :</p>
+    <ul>
+      <li data-i18n="aidej.s2.l1"><kbd>W</kbd> : numéros 1 à 12</li>
+      <li data-i18n="aidej.s2.l2"><kbd>E</kbd> : numéros 13 à 24</li>
+      <li data-i18n="aidej.s2.l3"><kbd>N</kbd> : numéros 25 à 36 (+ 2 cases Cœur centrales)</li>
+      <li data-i18n="aidej.s2.l4"><kbd>D</kbd> : numéros 37 à 48 (+ 2 cases Cœur centrales)</li>
+      <li data-i18n="aidej.s2.l5"><kbd>I</kbd> : numéros 49 à 60</li>
+      <li data-i18n="aidej.s2.l6"><kbd>O</kbd> : numéros 61 à 72</li>
+    </ul>
+    <p data-i18n="aidej.s2.p3">Les <strong>4 cases centrales (le Cœur)</strong> sont toujours libres — elles comptent comme déjà marquées dans toutes les conditions de victoire.</p>
+    <p data-i18n="aidej.s2.p4">Dès que tu remplis la condition de ton clan, <strong>crie « WENDIO ! »</strong> et le meneur vérifie ta carte.</p>
+  </section>
+
+  <!-- 3. Clans -->
+  <section id="clans">
+    <h2 data-i18n="aidej.s3.titre">Les 4 clans et leurs victoires</h2>
+    <p data-i18n="aidej.s3.intro">Le meneur choisit un clan pour toute la partie. Tous les joueurs visent la <strong>même condition de victoire</strong> :</p>
+    <ul>
+      <li data-i18n="aidej.s3.chevreuil"><strong>🦌 Chevreuil (Ohskënonton')</strong> — une ligne complète (horizontale, verticale ou diagonale). <em>Le plus rapide à gagner.</em></li>
+      <li data-i18n="aidej.s3.loup"><strong>🐺 Loup (Yānariskwa')</strong> — les 4 coins de la carte.</li>
+      <li data-i18n="aidej.s3.ours"><strong>🐻 Ours (Yānionyen')</strong> — l'anneau de 12 cases qui entoure le Cœur.</li>
+      <li data-i18n="aidej.s3.tortue"><strong>🐢 Tortue (Yāndia'wich)</strong> — toutes les 32 cases numérotées. <em>Le plus long et le plus prestigieux.</em></li>
+    </ul>
+    <div class="encadre astuce">
+      <b data-i18n="aidej.s3.astuce.titre">Une seule victoire par partie</b>
+      <span data-i18n="aidej.s3.astuce.txt">Dès qu'un joueur déclare une victoire valide, la partie est terminée pour tout le monde. Pas de classement multiple — le premier emporte tout.</span>
+    </div>
+  </section>
+
+  <!-- 4. Signaler -->
+  <section id="signaler">
+    <h2 data-i18n="aidej.s4.titre">Un bug ou une question ?</h2>
+    <p data-i18n="aidej.s4.txt">Si tu remarques quelque chose qui ne marche pas (carte qui ne s'affiche pas, son qui ne joue pas, joueur fantôme dans la liste...), utilise le <strong>bouton 💬 Signaler</strong> en bas à droite de ta carte. Une capture d'écran et une courte description suffisent — l'équipe technique reçoit tout ça en direct.</p>
+  </section>
+
+  <footer>
+    <div><a href="joueur.html" data-i18n="aidej.footer_lien">← Retourner au jeu</a></div>
+    <div style="margin-top: 8px;" data-i18n="aidej.footer">Aide du joueur · WENDIO · Le Jeu des Clans</div>
+  </footer>
+
+</div>
+
+<script src="i18n.js"></script>
+<script src="/_widget-loader.js" defer></script>
+</body>
+</html>
