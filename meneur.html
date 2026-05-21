@@ -598,9 +598,13 @@
         min-height: 0;
         display: flex;
         flex-direction: column;
-        justify-content: center;
+        /* Pas de justify-content:center : on laisse .carte-interieur prendre
+           toute la hauteur via flex:1, sinon le max-height:100% des enfants
+           reference une hauteur "auto" qui collapse et laisse l'image
+           deborder (support #1 : QR audio clippe en bas de la colonne). */
       }
       #carte-numero.visible .carte-interieur {
+        flex: 1;
         min-height: 0;
         max-height: 100%;
         overflow: hidden;
