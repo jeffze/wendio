@@ -123,7 +123,10 @@ app.post('/auth/logout', (req, res) => {
 app.get('/auth/me', (req, res) => {
   if (!req.user) return res.status(401).json({ error: 'auth_required' });
   const tenant = req.tenant ? { id: req.tenant.id, slug: req.tenant.slug, nom_officiel: req.tenant.nom_officiel, langue_label: req.tenant.langue_label } : null;
-  res.json({ id: req.user.id, email: req.user.email, name: req.user.name, role: req.user.role, tenant });
+  res.json({
+    id: req.user.id, email: req.user.email, name: req.user.name, role: req.user.role, tenant,
+    support_url: SUPPORT_URL || null,
+  });
 });
 
 // Middleware de protection des pages meneur (avant express.static)

@@ -235,6 +235,15 @@
       <div class="fleche">→</div>
     </a>
 
+    <a class="nav-carte" href="#" id="nav-support" style="--couleur: #d35400; display:none;" target="_blank" rel="noopener">
+      <div class="icone">🛟</div>
+      <div class="label" data-i18n="lobby.support.label">Tableau de bord Support</div>
+      <div class="description" data-i18n="lobby.support.desc">
+        Tickets, erreurs et historique des versions. Connexion magic link séparée avec le même courriel.
+      </div>
+      <div class="fleche">↗</div>
+    </a>
+
   </div>
 
   <footer>
@@ -248,13 +257,17 @@
   if (!document.documentElement.requestFullscreen) {
     document.getElementById('conseil-fs').classList.add('cache');
   }
-  // Montrer la tuile « Gérer les meneurs » uniquement aux admins
+  // Montrer les tuiles admin (gestion meneurs + Support) uniquement aux admins
   fetch('/auth/me', { credentials: 'same-origin' })
     .then(r => r.ok ? r.json() : null)
     .then(u => {
-      if (u && u.role === 'admin') {
-        const t = document.getElementById('nav-admin');
-        if (t) t.style.display = 'flex';
+      if (!u || u.role !== 'admin') return;
+      const navAdmin = document.getElementById('nav-admin');
+      if (navAdmin) navAdmin.style.display = 'flex';
+      const navSupport = document.getElementById('nav-support');
+      if (navSupport && u.support_url) {
+        navSupport.href = u.support_url;
+        navSupport.style.display = 'flex';
       }
     })
     .catch(() => {});
