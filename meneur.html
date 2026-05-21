@@ -589,7 +589,14 @@
       }
       .carte-droite #carte-image {
         margin-bottom: 0;
-        flex-shrink: 1;
+        flex: 0 1 auto;
+        min-height: 0;
+        /* Plafond explicite = hauteur dispo - QR (80px) - gap flex (12px).
+           Sans ca, le navigateur prend la hauteur naturelle de l'image comme
+           flex-basis et ne shrinke pas correctement, le QR audio finit clippe
+           par overflow:hidden de .carte-interieur (support #1). */
+        max-height: calc(100% - 92px);
+        object-fit: contain;
       }
       .carte-droite #qrcode { flex-shrink: 0; }
 
@@ -716,7 +723,7 @@
   <div id="carte-numero">
     <div class="carte-interieur">
       <div class="carte-droite">
-        <img id="carte-image" alt="Carte du numéro" style="display:none; width:100%; max-width:300px; height:auto; border-radius:12px; box-shadow:0 4px 16px rgba(0,0,0,.4); cursor:pointer; margin-bottom:12px;" onclick="rejouerSon()">
+        <img id="carte-image" alt="Carte du numéro" style="display:none; width:100%; max-width:300px; border-radius:12px; box-shadow:0 4px 16px rgba(0,0,0,.4); cursor:pointer;" onclick="rejouerSon()">
         <div id="qrcode"></div>
       </div>
     </div>
