@@ -8,21 +8,28 @@
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --primary: #2c1a0e;
-      --accent:  #b86808;
-      --accent-lt: #e09030;
-      --bg:      #ede0c8;
-      --surface: #ffffff;
-      --vert:    #1e9050;
-      --vert-lt: #28c86a;
-      --muted:   #7a5030;
-      --border:  #d4b888;
+      /* Palette « Feu de conseil » alignee sur lobby/meneur (dark warm).
+         On garde les noms de variables historiques pour minimiser le diff. */
+      --primary:   #f4e7d3;  /* texte principal (bone) */
+      --accent:    #c8843a;  /* gold */
+      --accent-lt: #e8a85a;  /* gold clair / ember light */
+      --bg:        #1a1008;  /* fond principal (ink-1) */
+      --surface:   #221710;  /* panneaux / cartes (ink-2) */
+      --surface-2: #2c1d12;  /* surfaces secondaires (ink-3, boutons clan, hover) */
+      --surface-3: #38241a;  /* hover / focus (ink-4) */
+      --vert:      #4a8a3a;  /* succes (moss fonce) */
+      --vert-lt:   #82c060;  /* grain de mais / accent vert clair */
+      --muted:     #b89978;  /* texte secondaire (bone-dim) */
+      --border:    rgba(244,231,211,.10);  /* bordures subtiles sur fond sombre */
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: 'Inter', 'Segoe UI', sans-serif;
       background: var(--bg);
-      background-image: radial-gradient(ellipse 120% 50% at 50% 0%, #e4d0a8 0%, #ede0c8 55%);
+      background-image:
+        radial-gradient(ellipse 120% 60% at 50% 0%, rgba(200,132,58,.16) 0%, transparent 55%),
+        radial-gradient(ellipse 80% 60% at 50% 100%, rgba(40,20,8,.55) 0%, transparent 60%),
+        linear-gradient(180deg, var(--bg) 0%, #2c1a0e 60%, var(--bg) 100%);
       color: var(--primary);
       min-height: 100vh;
       display: flex;
@@ -102,7 +109,7 @@
     /* Clan grid */
     .clan-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 12px; }
     .btn-clan {
-      background: #fdf7ee;
+      background: var(--surface-2);
       border: 2px solid var(--border);
       border-radius: 10px;
       padding: 10px 8px;
@@ -115,12 +122,12 @@
       font-family: inherit;
       color: var(--primary);
     }
-    .btn-clan:hover { border-color: var(--accent); background: #fef3e2; }
+    .btn-clan:hover { border-color: var(--accent); background: var(--surface-3); }
     .btn-clan.actif {
       background: linear-gradient(135deg, var(--accent), var(--accent-lt));
-      color: white;
+      color: #1a1008;
       border-color: transparent;
-      box-shadow: 0 3px 12px rgba(184,104,8,.28);
+      box-shadow: 0 3px 14px rgba(200,132,58,.45);
     }
     .objectif { font-size: .83rem; font-style: italic; color: var(--muted); min-height: 18px; margin-bottom: 14px; font-weight: 500; }
 
@@ -160,17 +167,21 @@
     }
     .btn-principal.vert {
       background: linear-gradient(135deg, var(--vert), var(--vert-lt));
-      color: white;
-      box-shadow: 0 4px 16px rgba(30,144,80,.32);
+      color: #0d1a08;
+      font-weight: 800;
+      box-shadow: 0 4px 18px rgba(74,138,58,.40);
     }
-    .btn-principal.vert:hover  { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(30,144,80,.42); }
-    .btn-principal.vert:disabled { opacity: .38; cursor: default; transform: none; box-shadow: none; }
+    .btn-principal.vert:hover  { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(74,138,58,.55); filter: brightness(1.08); }
+    .btn-principal.vert:disabled { opacity: .38; cursor: default; transform: none; box-shadow: none; filter: none; }
+    /* Bouton primaire « Jouer » en mode local — meme style ember que l'index page */
     .btn-principal.brun {
-      background: var(--primary);
-      color: white;
+      background: linear-gradient(135deg, var(--accent-lt) 0%, var(--accent) 100%);
+      color: #1a1008;
+      font-weight: 800;
+      box-shadow: 0 4px 18px rgba(200,132,58,.45);
     }
-    .btn-principal.brun:hover { opacity: .84; transform: translateY(-1px); }
-    .btn-principal.brun:disabled { opacity: .38; cursor: default; transform: none; }
+    .btn-principal.brun:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(200,132,58,.6); filter: brightness(1.08); }
+    .btn-principal.brun:disabled { opacity: .38; cursor: default; transform: none; box-shadow: none; filter: none; }
 
     .msg-erreur { color: #c0392b; font-size: .83rem; margin-top: 8px; display: none; font-weight: 500; }
     .msg-erreur.visible { display: block; }
@@ -184,6 +195,40 @@
       gap: 10px;
     }
     #vue-jeu.visible { display: flex; }
+
+    /* Bandeau compact : rappel du mode/clan + edit (style aligne meneur) */
+    #bandeau-config-joueur {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      font-size: .82rem;
+      color: var(--muted);
+      background: rgba(244,231,211,.04);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 6px 6px 6px 14px;
+      max-width: 560px;
+      width: 100%;
+      box-shadow: 0 1px 6px rgba(0,0,0,.25);
+    }
+    #bandeau-config-joueur .bandeau-part {
+      flex: 1;
+      color: var(--primary);
+      letter-spacing: .02em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    #bandeau-config-joueur .edit {
+      color: var(--muted);
+      text-decoration: none;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: .9rem;
+      transition: background .15s, color .15s;
+      flex-shrink: 0;
+    }
+    #bandeau-config-joueur .edit:hover { background: var(--surface-2); color: var(--accent-lt); }
 
     /* Barre d'info (en jeu) */
     #jeu-sidebar {
@@ -270,7 +315,8 @@
       letter-spacing: .04em;
     }
     .cell {
-      background: white;
+      background: var(--surface);
+      color: var(--primary);
       aspect-ratio: 1/1;
       display: flex;
       justify-content: center;
@@ -283,12 +329,12 @@
       position: relative;
       transition: all .12s;
       user-select: none;
-      box-shadow: 0 1px 3px rgba(0,0,0,.1);
+      box-shadow: 0 1px 3px rgba(0,0,0,.35);
       border: 2px solid transparent;
     }
-    .cell:hover { transform: scale(.94); border-color: rgba(184,104,8,.35); }
+    .cell:hover { transform: scale(.94); border-color: rgba(200,132,58,.55); }
     .cell:active { transform: scale(.86); }
-    .cell.cible { border-color: var(--accent-lt); background: #fffbf2; box-shadow: 0 0 0 1px var(--accent-lt), 0 2px 8px rgba(224,144,48,.2); }
+    .cell.cible { border-color: var(--accent-lt); background: var(--surface-3); box-shadow: 0 0 0 1px var(--accent-lt), 0 2px 10px rgba(232,168,90,.28); }
     .cell.marque::after {
       content: '';
       position: absolute;
@@ -296,10 +342,10 @@
       width: 1rem; height: 1rem;
       background: url('grain-mais.svg') center/contain no-repeat;
       z-index: 2;
-      filter: drop-shadow(0 1px 2px rgba(0,0,0,.35));
+      filter: drop-shadow(0 1px 2px rgba(0,0,0,.45));
     }
-    .cell.auto-marque { background: #fff8e8; border-color: rgba(224,144,48,.28); }
-    .cell.coeur { background: #b88840; font-size: 0; cursor: default; border-color: transparent; padding: 2px; overflow: hidden; }
+    .cell.auto-marque { background: var(--surface-2); border-color: rgba(232,168,90,.32); }
+    .cell.coeur { background: #5a3a1a; font-size: 0; cursor: default; border-color: transparent; padding: 2px; overflow: hidden; }
     .cell.coeur:hover { transform: none; border-color: transparent; }
     .cell.coeur:active { transform: none; }
     /* Images animaux dans les cases cœur */
@@ -431,7 +477,7 @@
       padding: 10px 8px;
       border: 2px solid var(--border);
       border-radius: 10px;
-      background: #fdf7ee;
+      background: var(--surface-2);
       cursor: pointer;
       font-weight: 700;
       font-size: .88rem;
@@ -441,12 +487,12 @@
       font-family: inherit;
       color: var(--primary);
     }
-    .btn-clan-join:hover { border-color: var(--accent); background: #fef3e2; }
+    .btn-clan-join:hover { border-color: var(--accent); background: var(--surface-3); }
     .btn-clan-join.actif {
       background: linear-gradient(135deg, var(--accent), var(--accent-lt));
-      color: white;
+      color: #1a1008;
       border-color: transparent;
-      box-shadow: 0 3px 12px rgba(184,104,8,.3);
+      box-shadow: 0 3px 14px rgba(200,132,58,.45);
     }
 
     /* ── Victoire overlay ── */
@@ -511,7 +557,7 @@
       position: fixed;
       top: 10px; right: 12px;
       z-index: 300;
-      background: rgba(255,255,255,.75);
+      background: rgba(33,21,8,.75);
       border: 1px solid var(--border);
       border-radius: 8px;
       padding: 6px;
@@ -522,7 +568,7 @@
       transition: color .2s, border-color .2s, background .2s;
       backdrop-filter: blur(4px);
     }
-    #btn-fullscreen:hover { color: var(--accent); border-color: var(--accent); background: rgba(255,255,255,.95); }
+    #btn-fullscreen:hover { color: var(--accent-lt); border-color: var(--accent); background: rgba(33,21,8,.95); }
     #btn-fullscreen svg { width: 18px; height: 18px; display: block; }
     #btn-fullscreen .icon-compress { display: none; }
     #btn-fullscreen.actif .icon-expand   { display: none; }
@@ -532,7 +578,7 @@
       position: fixed;
       top: 10px; right: 54px;
       z-index: 300;
-      background: rgba(255,255,255,.75);
+      background: rgba(33,21,8,.75);
       border: 1px solid var(--border);
       border-radius: 8px;
       padding: 6px;
@@ -544,14 +590,14 @@
       transition: color .2s, border-color .2s, background .2s;
       backdrop-filter: blur(4px);
     }
-    #btn-accueil:hover { color: var(--accent); border-color: var(--accent); background: rgba(255,255,255,.95); }
+    #btn-accueil:hover { color: var(--accent-lt); border-color: var(--accent); background: rgba(33,21,8,.95); }
     #btn-accueil svg { width: 18px; height: 18px; display: block; }
 
     #btn-aide {
       position: fixed;
       top: 10px; right: 96px;
       z-index: 300;
-      background: rgba(255,255,255,.75);
+      background: rgba(33,21,8,.75);
       border: 1px solid var(--border);
       border-radius: 8px;
       width: 34px; height: 34px;
@@ -565,7 +611,7 @@
       transition: color .2s, border-color .2s, background .2s;
       backdrop-filter: blur(4px);
     }
-    #btn-aide:hover { color: var(--accent); border-color: var(--accent); background: rgba(255,255,255,.95); }
+    #btn-aide:hover { color: var(--accent-lt); border-color: var(--accent); background: rgba(33,21,8,.95); }
 
     /* ── Toast autre gagnant ── */
     #toast-gagnant {
@@ -691,6 +737,9 @@
 <!-- ── VUE JEU ── -->
 <div id="vue-jeu">
 
+  <!-- Bandeau compact en haut du jeu : rappel du mode/clan + edit -->
+  <div id="bandeau-config-joueur" style="display:none;"></div>
+
   <div id="jeu-sidebar">
     <div id="jeu-info">
       <span class="info-badge clan"   id="badge-clan"   style="display:none;"></span>
@@ -794,15 +843,102 @@
     });
 
     const params = new URLSearchParams(window.location.search);
-    const code   = params.get('code');
-    if (code) {
-      setMode('online');
-      activerModeOnline(code.toUpperCase());
-    }
+
+    // Mode demo : bypass total (ancien flux preserve)
     if (params.get('demo') === 'local') {
       modeDemo = true;
       document.getElementById('barre-mode').style.display = 'none';
+      return;
     }
+
+    const mode = params.get('mode');
+    const clan = params.get('clan');
+    const code = (params.get('code') || '').toUpperCase();
+    const nom  = (params.get('nom')  || '').trim();
+
+    // Nouveau flux : auto-launch depuis joueur-config.html via params
+    if (mode === 'local' && clan && CLANS[clan]) {
+      setMode('local');
+      setClan(clan);
+      majBandeauConfig({ mode: 'local', clan });
+      commencerLocal();
+      return;
+    }
+    if (mode === 'online' && code.length === 4 && nom) {
+      setMode('online');
+      activerModeOnline(code);
+      // Pre-remplit le nom et auto-rejoint quand le socket est pret
+      nomJoueur = nom;
+      const inNom = document.getElementById('input-nom');
+      if (inNom) inNom.value = nom;
+      majBandeauConfig({ mode: 'online', code, nom });
+      // attente socket : on declenche rejoindrePartie quand chargerSocket finit
+      attendreSocketEtRejoindre();
+      return;
+    }
+
+    // QR meneur historique : seulement le code -> redirige vers config pour saisir le nom
+    if (code.length === 4) {
+      window.location.replace('joueur-config.html?code=' + encodeURIComponent(code));
+      return;
+    }
+
+    // Aucun param valide -> redirige vers la page de config
+    window.location.replace('joueur-config.html');
+  }
+
+  // Attend que le socket existe, puis emet 'rejoindre' une seule fois
+  function attendreSocketEtRejoindre() {
+    let tries = 0;
+    const itv = setInterval(() => {
+      tries++;
+      if (socket) {
+        clearInterval(itv);
+        // Le handler 'connect' (connecterSocket) ne suffit pas car nomJoueur
+        // est set mais clanActuel ne l'est pas encore (clan vient du serveur).
+        // On emet directement le rejoindre une fois socket pret.
+        if (socket.connected) {
+          socket.emit('rejoindre', { code: codePartie, nom: nomJoueur, sessionToken });
+        } else {
+          socket.once('connect', () => {
+            socket.emit('rejoindre', { code: codePartie, nom: nomJoueur, sessionToken });
+          });
+        }
+      } else if (tries > 50) {
+        clearInterval(itv);
+      }
+    }, 100);
+  }
+
+  // Met a jour le petit bandeau compact en haut de #vue-jeu
+  function majBandeauConfig({ mode, clan, code, nom }) {
+    const el = document.getElementById('bandeau-config-joueur');
+    if (!el) return;
+    el.replaceChildren();
+    if (mode === 'local') {
+      const clanLbl = (CLANS[clan] && (i18n.t('clan.' + clan) || clan)) || clan;
+      el.append(
+        creerBandeauPart('🦌'.replace(/./, CLANS[clan].icon || '🎲'), clanLbl + ' · ' + (i18n.t('jconfig.mode.local') || 'Solo'))
+      );
+    } else if (mode === 'online') {
+      el.append(
+        creerBandeauPart('🌐', (i18n.t('jconfig.mode.online') || 'En ligne') + ' · ' + code + ' · ' + nom)
+      );
+    }
+    // Bouton edit -> retour config
+    const btn = document.createElement('a');
+    btn.className = 'edit';
+    btn.href = 'joueur-config.html';
+    btn.title = i18n.t('jconfig.modifier') || 'Modifier';
+    btn.textContent = '✏️';
+    el.append(btn);
+    el.style.display = 'flex';
+  }
+  function creerBandeauPart(icone, label) {
+    const span = document.createElement('span');
+    span.className = 'bandeau-part';
+    span.textContent = icone + ' ' + label;
+    return span;
   }
 
   // ── Toggle local / en ligne ──────────────────────────────────────────
@@ -1010,41 +1146,13 @@
     badge.style.display  = 'inline-flex';
   }
 
-  // ── Nouvelle carte / retour setup ────────────────────────────────────
+  // ── Nouvelle carte / retour config ───────────────────────────────────
   function nouvellePartie() {
+    // Nouveau flux : la setup vit dans joueur-config.html, donc on cleanup
+    // l'etat et on redirige plutot que de basculer en arriere.
     if (socket) { try { socket.disconnect(); } catch (e) {} }
     clearSelections();
-    clanActuel          = null;
-    carteActuelle       = null;
-    selectionnees       = new Set();
-    tiresOnline         = [];
-    modeOnline          = false;
-    socket              = null;
-    codePartie          = null;
-    nomJoueur           = null;
-    dernierNumeroClique = null;
-    partieTerminee      = false;
-    document.body.classList.remove('partie-terminee');
-
-    document.querySelectorAll('.btn-clan').forEach(b => b.classList.remove('actif'));
-    const objEl = document.getElementById('objectif');
-    delete objEl.dataset.clan;
-    objEl.setAttribute('data-i18n', 'joueur.objectif_default');
-    objEl.textContent = t('joueur.objectif_default');
-    document.getElementById('btn-jouer').disabled      = true;
-    document.getElementById('input-code').value        = '';
-    document.getElementById('btn-entrer-code').disabled = true;
-    document.getElementById('msg-erreur-code').classList.remove('visible');
-
-    document.getElementById('annonce').classList.remove('visible');
-    document.getElementById('btn-wendio').classList.remove('visible');
-    document.getElementById('win-overlay').classList.remove('visible');
-    document.getElementById('badge-clan').style.display   = 'none';
-    document.getElementById('badge-online').style.display = 'none';
-    document.getElementById('grille').replaceChildren();
-
-    setMode('local');
-    basculerVersSetup();
+    window.location.href = 'joueur-config.html';
   }
 
   // ── Carte info numéro ────────────────────────────────────────────────
@@ -1290,7 +1398,7 @@
     if (socket) { try { socket.disconnect(); } catch (e) {} }
     clearSelections();
     try { sessionStorage.removeItem('wendio-token'); } catch (e) {}
-    window.location.href = 'lobby.html';
+    window.location.href = '/';
   }
 
   demarrer();

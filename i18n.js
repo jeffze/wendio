@@ -19,6 +19,24 @@
 // markup statique en HTML et ne traduire que les parties textuelles.
 
 const TRANSLATIONS = {
+  // ── joueur-config.html (page de config joueur, calquee sur meneur-config) ──
+  'jconfig.titre':             { fr: 'Comment tu joues ?',           en: 'How are you playing?' },
+  'jconfig.mode':              { fr: 'Quel type de partie ?',        en: 'What type of game?' },
+  'jconfig.mode.online':       { fr: 'En ligne',                     en: 'Online' },
+  'jconfig.mode.online_desc':  { fr: 'Avec un code partagé par le meneur',
+                                 en: 'With a code shared by the host' },
+  'jconfig.mode.local':        { fr: 'Solo / pratique',              en: 'Solo / practice' },
+  'jconfig.mode.local_desc':   { fr: 'Une carte juste pour toi, sans meneur',
+                                 en: 'A card just for you, no host' },
+  'jconfig.rejoindre':         { fr: 'Rejoindre la partie',          en: 'Join the game' },
+  'jconfig.code':              { fr: 'Code à 4 lettres (du meneur)', en: '4-letter code (from the host)' },
+  'jconfig.nom':               { fr: 'Ton nom (visible des autres)', en: 'Your name (visible to others)' },
+  'jconfig.nom.placeholder':   { fr: 'Ton nom',                      en: 'Your name' },
+  'jconfig.clan':              { fr: 'Choisis ton clan',             en: 'Choose your clan' },
+  'jconfig.retour':            { fr: '← Accueil',                    en: '← Home' },
+  'jconfig.jouer':             { fr: 'Jouer ▶',                      en: 'Play ▶' },
+  'jconfig.modifier':          { fr: 'Modifier',                     en: 'Edit' },
+
   // ── Index (cover) ──────────────────────────────────────────────────
   'index.cta.joueur':          { fr: 'Je joue',           en: "I'm playing" },
   'index.cta.meneur':          { fr: 'Je suis meneur',    en: "I'm the host" },

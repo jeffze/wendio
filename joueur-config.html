@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WENDIO — Comment tu joues ?</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:      #1a1008;
+      --surface: #2c1a0e;
+      --surface-2:#38200e;
+      --border:  #3e2510;
+      --border-hi:#5a3a1a;
+      --gold:    #c07808;
+      --gold-lt: #e8a828;
+      --ember:   #d35400;
+      --ember-lt:#f39c12;
+      --text:    #f4e7d3;
+      --muted:   #a08060;
+      --dim:     #5a3a1a;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', 'Segoe UI', sans-serif;
+      background: var(--bg);
+      background-image: radial-gradient(ellipse 100% 50% at 50% 0%, #2a1808 0%, var(--bg) 65%);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 28px 16px 48px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* ── Titre ── */
+    .header { text-align: center; margin-bottom: 32px; }
+    h1 {
+      font-family: 'Cinzel', Georgia, serif;
+      font-size: clamp(2rem, 6vw, 3rem);
+      font-weight: 900;
+      letter-spacing: .14em;
+      background: linear-gradient(135deg, #d35400 0%, #f39c12 50%, #d35400 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 6px;
+    }
+    .sub {
+      font-family: 'Cinzel', Georgia, serif;
+      font-size: .9rem;
+      color: var(--muted);
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    /* ── Conteneur ── */
+    .wrap {
+      width: 100%;
+      max-width: 640px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* ── Sections ── */
+    .section { }
+    .section h2 {
+      font-family: 'Cinzel', Georgia, serif;
+      font-size: .85rem;
+      font-weight: 600;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--gold-lt);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section h2::before {
+      content: attr(data-step);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      background: var(--surface);
+      border: 1px solid var(--border-hi);
+      color: var(--gold-lt);
+      font-size: .75rem;
+      font-family: 'Cinzel', serif;
+      font-weight: 700;
+    }
+
+    /* Sections conditionnelles */
+    .section[hidden] { display: none; }
+
+    /* ── Boutons d'options (mode + clan) ── */
+    .options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .options.clans { grid-template-columns: 1fr 1fr; }
+    @media (min-width: 540px) {
+      .options.clans { grid-template-columns: 1fr 1fr 1fr 1fr; }
+    }
+
+    .opt {
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 18px 16px;
+      cursor: pointer;
+      transition: border-color .15s, background .15s, transform .12s;
+      font-family: inherit;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      text-align: center;
+    }
+    .opt:hover { border-color: var(--border-hi); background: var(--surface-2); }
+    .opt.actif {
+      border-color: var(--ember);
+      background: linear-gradient(135deg, rgba(211,84,0,.18) 0%, rgba(243,156,18,.10) 100%);
+      box-shadow: 0 0 0 1px rgba(211,84,0,.3), 0 6px 18px rgba(211,84,0,.20);
+    }
+    .opt .icone { font-size: 1.8rem; line-height: 1; }
+    .opt .label {
+      font-family: 'Cinzel', serif;
+      font-weight: 600;
+      letter-spacing: .04em;
+      font-size: .98rem;
+      color: var(--text);
+    }
+    .opt .desc {
+      font-size: .76rem;
+      color: var(--muted);
+      font-style: italic;
+      line-height: 1.35;
+    }
+    .opt .wendat {
+      font-size: .72rem;
+      color: var(--gold-lt);
+      font-style: italic;
+      opacity: .85;
+    }
+
+    /* ── Form online (code + nom) ── */
+    .form-online {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .form-online label {
+      display: block;
+      font-size: .78rem;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .form-online input {
+      width: 100%;
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      color: var(--text);
+      font: inherit;
+      transition: border-color .15s, background .15s;
+    }
+    .form-online input:focus {
+      outline: none;
+      border-color: var(--ember);
+      background: #1f1308;
+    }
+    .form-online input::placeholder { color: var(--dim); }
+    .form-online input#in-code {
+      font-family: 'Cinzel', serif;
+      font-size: 1.6rem;
+      font-weight: 900;
+      letter-spacing: .25em;
+      text-transform: uppercase;
+      text-align: center;
+    }
+
+    /* ── Actions ── */
+    .actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 16px;
+    }
+    .btn-retour {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: .9rem;
+      padding: 10px 14px;
+      border-radius: 8px;
+      transition: color .15s, background .15s;
+    }
+    .btn-retour:hover { color: var(--text); background: var(--surface); }
+
+    .btn-start {
+      background: linear-gradient(135deg, var(--ember-lt) 0%, var(--ember) 100%);
+      color: #1a0e02;
+      border: none;
+      padding: 14px 32px;
+      border-radius: 10px;
+      font-family: 'Cinzel', serif;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: .06em;
+      cursor: pointer;
+      transition: transform .12s, box-shadow .2s, filter .2s;
+      text-transform: uppercase;
+    }
+    .btn-start:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(211,84,0,.4);
+      filter: brightness(1.05);
+    }
+    .btn-start:disabled {
+      opacity: .35;
+      cursor: not-allowed;
+      filter: grayscale(.4);
+    }
+
+    .lang-toggle-placeholder { position: absolute; top: 16px; right: 16px; }
+
+    /* ── Bouton aide ── */
+    #btn-aide {
+      position: fixed;
+      top: 16px; left: 16px;
+      z-index: 50;
+      background: rgba(33,21,8,.6);
+      border: 1px solid #3e2510;
+      border-radius: 8px;
+      width: 34px; height: 34px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      color: #a08060;
+      text-decoration: none;
+      font-family: 'Cinzel', serif;
+      font-weight: 700;
+      font-size: 1.1rem;
+      transition: color .2s, border-color .2s, background .2s;
+    }
+    #btn-aide:hover { color: #f39c12; border-color: #c8843a; background: rgba(33,21,8,.85); }
+  </style>
+</head>
+<body>
+
+<a id="btn-aide" href="aide-joueur.html" target="_blank" rel="noopener" data-i18n-attr="title:joueur.tooltip.aide" title="Aide du joueur">?</a>
+
+<div class="header">
+  <h1>WENDIO</h1>
+  <div class="sub" data-i18n="jconfig.titre">Comment tu joues ?</div>
+</div>
+
+<div class="wrap">
+
+  <!-- Etape 1 : Mode -->
+  <div class="section">
+    <h2 data-step="1" data-i18n="jconfig.mode">Quel type de partie ?</h2>
+    <div class="options">
+      <button class="opt" data-key="mode" data-value="online">
+        <span class="icone">🌐</span>
+        <span class="label" data-i18n="jconfig.mode.online">En ligne</span>
+        <span class="desc" data-i18n="jconfig.mode.online_desc">Avec un code partagé par le meneur</span>
+      </button>
+      <button class="opt" data-key="mode" data-value="local">
+        <span class="icone">📱</span>
+        <span class="label" data-i18n="jconfig.mode.local">Solo / pratique</span>
+        <span class="desc" data-i18n="jconfig.mode.local_desc">Une carte juste pour toi, sans meneur</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Etape 2 ONLINE : code + nom -->
+  <div class="section" id="section-online" hidden>
+    <h2 data-step="2" data-i18n="jconfig.rejoindre">Rejoindre la partie</h2>
+    <div class="form-online">
+      <div>
+        <label for="in-code" data-i18n="jconfig.code">Code à 4 lettres (du meneur)</label>
+        <input id="in-code" maxlength="4" autocomplete="off" inputmode="text" spellcheck="false" placeholder="AB3K">
+      </div>
+      <div>
+        <label for="in-nom" data-i18n="jconfig.nom">Ton nom (visible des autres)</label>
+        <input id="in-nom" type="text" maxlength="20" autocomplete="off" data-i18n-attr="placeholder:jconfig.nom.placeholder" placeholder="Ton nom">
+      </div>
+    </div>
+  </div>
+
+  <!-- Etape 2 LOCAL : clan -->
+  <div class="section" id="section-local" hidden>
+    <h2 data-step="2" data-i18n="jconfig.clan">Choisis ton clan</h2>
+    <div class="options clans">
+      <button class="opt" data-key="clan" data-value="Chevreuil">
+        <span class="icone">🦌</span>
+        <span class="label" data-i18n="clan.Chevreuil">Chevreuil</span>
+        <span class="wendat">Ohskënonton'</span>
+        <span class="desc" data-i18n="clan.Chevreuil.victoire">Une ligne</span>
+      </button>
+      <button class="opt" data-key="clan" data-value="Loup">
+        <span class="icone">🐺</span>
+        <span class="label" data-i18n="clan.Loup">Loup</span>
+        <span class="wendat">Yānariskwa'</span>
+        <span class="desc" data-i18n="clan.Loup.victoire">Les 4 coins</span>
+      </button>
+      <button class="opt" data-key="clan" data-value="Ours">
+        <span class="icone">🐻</span>
+        <span class="label" data-i18n="clan.Ours">Ours</span>
+        <span class="wendat">Yānionyen'</span>
+        <span class="desc" data-i18n="clan.Ours.victoire">Carré protecteur</span>
+      </button>
+      <button class="opt" data-key="clan" data-value="Tortue">
+        <span class="icone">🐢</span>
+        <span class="label" data-i18n="clan.Tortue">Tortue</span>
+        <span class="wendat">Yāndia'wich</span>
+        <span class="desc" data-i18n="clan.Tortue.victoire">Carte pleine</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="actions">
+    <a href="/" class="btn-retour" data-i18n="jconfig.retour">← Accueil</a>
+    <button class="btn-start" id="btn-start" disabled data-i18n="jconfig.jouer">Jouer ▶</button>
+  </div>
+
+</div>
+
+<script>
+  const STORAGE_PREFIX = 'wendio-joueur-config-';
+  const state = { mode: null, clan: null, code: null, nom: null };
+
+  const sectionOnline = document.getElementById('section-online');
+  const sectionLocal  = document.getElementById('section-local');
+  const inCode = document.getElementById('in-code');
+  const inNom  = document.getElementById('in-nom');
+  const btnStart = document.getElementById('btn-start');
+
+  // ─ Pre-remplissage depuis URL params (QR meneur) ou localStorage ─
+  const params = new URLSearchParams(window.location.search);
+  const urlCode = (params.get('code') || '').toUpperCase().slice(0, 4);
+  if (urlCode) {
+    // Le QR du meneur contient seulement le code → on force le mode online
+    selectMode('online');
+    inCode.value = urlCode;
+  } else {
+    // Sinon on prefil depuis le dernier setup
+    const lastMode = localStorage.getItem(STORAGE_PREFIX + 'mode');
+    if (lastMode) selectMode(lastMode);
+    const lastClan = localStorage.getItem(STORAGE_PREFIX + 'clan');
+    if (lastClan && lastMode === 'local') selectClan(lastClan);
+    const lastNom = localStorage.getItem(STORAGE_PREFIX + 'nom');
+    if (lastNom) inNom.value = lastNom;
+  }
+
+  function selectMode(mode) {
+    state.mode = mode;
+    document.querySelectorAll('[data-key="mode"]').forEach(b => {
+      b.classList.toggle('actif', b.dataset.value === mode);
+    });
+    sectionOnline.hidden = (mode !== 'online');
+    sectionLocal.hidden  = (mode !== 'local');
+    if (mode === 'online') setTimeout(() => inCode.focus(), 50);
+    updateBtn();
+  }
+
+  function selectClan(clan) {
+    state.clan = clan;
+    document.querySelectorAll('[data-key="clan"]').forEach(b => {
+      b.classList.toggle('actif', b.dataset.value === clan);
+    });
+    updateBtn();
+  }
+
+  function updateBtn() {
+    if (state.mode === 'online') {
+      state.code = (inCode.value || '').trim().toUpperCase();
+      state.nom  = (inNom.value  || '').trim();
+      btnStart.disabled = !(state.code.length === 4 && state.nom.length > 0);
+    } else if (state.mode === 'local') {
+      btnStart.disabled = !state.clan;
+    } else {
+      btnStart.disabled = true;
+    }
+  }
+
+  document.querySelectorAll('[data-key="mode"]').forEach(b => {
+    b.addEventListener('click', () => selectMode(b.dataset.value));
+  });
+  document.querySelectorAll('[data-key="clan"]').forEach(b => {
+    b.addEventListener('click', () => selectClan(b.dataset.value));
+  });
+  inCode.addEventListener('input', () => {
+    inCode.value = inCode.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 4);
+    updateBtn();
+  });
+  inNom.addEventListener('input', updateBtn);
+
+  // Enter sur un champ active le bouton
+  [inCode, inNom].forEach(el => {
+    el.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !btnStart.disabled) {
+        e.preventDefault();
+        btnStart.click();
+      }
+    });
+  });
+
+  btnStart.addEventListener('click', () => {
+    if (btnStart.disabled) return;
+    const qs = new URLSearchParams();
+    qs.set('mode', state.mode);
+    if (state.mode === 'online') {
+      qs.set('code', state.code);
+      qs.set('nom', state.nom);
+      localStorage.setItem(STORAGE_PREFIX + 'mode', 'online');
+      localStorage.setItem(STORAGE_PREFIX + 'nom', state.nom);
+    } else {
+      qs.set('clan', state.clan);
+      localStorage.setItem(STORAGE_PREFIX + 'mode', 'local');
+      localStorage.setItem(STORAGE_PREFIX + 'clan', state.clan);
+    }
+    window.location.href = 'joueur.html?' + qs.toString();
+  });
+</script>
+
+<script src="i18n.js"></script>
+<script src="/auth-widget.js" defer></script>
+<script src="/_widget-loader.js" defer></script>
+</body>
+</html>

@@ -32,8 +32,8 @@ const ROOT_DIR = __dirname;
 const VERSIONED_FILES = [
   'i18n.js', 'data.js', 'auth-widget.js', 'qrcode.min.js',
   'index.html', 'lobby.html', 'meneur.html', 'meneur-config.html',
-  'joueur.html', 'imprimer.html', 'imprimer-trophees.html', 'demo.html',
-  'login.html', 'aide-meneur.html', 'admin-meneurs.html', 'accueil.html',
+  'joueur.html', 'joueur-config.html', 'imprimer.html', 'imprimer-trophees.html', 'demo.html',
+  'login.html', 'aide-meneur.html', 'aide-joueur.html', 'admin-meneurs.html', 'accueil.html',
 ];
 let ASSET_VERSION = 'dev';
 try {

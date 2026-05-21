@@ -840,7 +840,7 @@
 
     socket.on('partie-creee', ({ code, clan }) => {
       codePartie = code;
-      const lien = window.location.origin + '/joueur.html?code=' + code;
+      const lien = window.location.origin + '/joueur-config.html?code=' + code;
       document.getElementById('code-affiche').textContent = code;
       document.getElementById('lien-rejoin').textContent  = lien;
       document.getElementById('online-creation').style.display = 'none';
