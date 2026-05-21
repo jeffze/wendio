@@ -4,6 +4,7 @@ const express  = require('express');
 const http     = require('http');
 const { Server } = require('socket.io');
 const path     = require('path');
+const fs       = require('fs');
 const crypto   = require('crypto');
 
 const auth   = require('./auth');
@@ -20,6 +21,45 @@ app.disable('x-powered-by');
 app.use(express.json({ limit: '100kb' }));
 app.use(tenantMw.attachTenant);
 app.use(auth.attachUser);
+
+// ── Cache-busting auto ───────────────────────────────────────────────
+// Hash SHA1 des assets locaux au boot. Si un fichier change entre deux
+// deploys, le hash change → les URLs de scripts/styles dans le HTML
+// passent de ?v=abc à ?v=def, le navigateur recharge sans intervention
+// (plus besoin de Ctrl+Shift+R apres un deploy).
+// Pattern identique a celui de Support — cf. project-support-bugtracker.
+const ROOT_DIR = __dirname;
+const VERSIONED_FILES = [
+  'i18n.js', 'data.js', 'auth-widget.js', 'qrcode.min.js',
+  'index.html', 'lobby.html', 'meneur.html', 'meneur-config.html',
+  'joueur.html', 'imprimer.html', 'imprimer-trophees.html', 'demo.html',
+  'login.html', 'aide-meneur.html', 'admin-meneurs.html', 'accueil.html',
+];
+let ASSET_VERSION = 'dev';
+try {
+  const content = VERSIONED_FILES
+    .map(f => { try { return fs.readFileSync(path.join(ROOT_DIR, f), 'utf8'); } catch (_) { return ''; } })
+    .join('|');
+  ASSET_VERSION = crypto.createHash('sha1').update(content).digest('hex').slice(0, 10);
+} catch (_e) {
+  ASSET_VERSION = String(Date.now()).slice(-10);
+}
+console.log(`[wendio] asset version: ${ASSET_VERSION}`);
+
+// Injecte ?v=HASH sur les <script src> et <link href> qui pointent vers
+// un fichier local (.js ou .css), absolu ou relatif. Skip les externes
+// (https://, //, data:) et ceux qui ont deja un ?... ou #...
+function injectAssetVersion(html) {
+  return html.replace(
+    /((?:src|href)=["'])((?!https?:|\/\/|data:|#)[^"'?#]+\.(?:js|css))(["'])/g,
+    (_m, prefix, url, suffix) => `${prefix}${url}?v=${ASSET_VERSION}${suffix}`
+  );
+}
+
+function serveHtmlWithVersion(filename) {
+  const raw = fs.readFileSync(path.join(ROOT_DIR, filename), 'utf8');
+  return injectAssetVersion(raw);
+}
 
 // Garde : si on arrive sur un sous-domaine sans tenant correspondant
 // (autre que localhost/IP directe en dev), on affiche une page d'erreur
@@ -54,8 +94,9 @@ app.get('/_widget-loader.js', (_req, res) => {
 const PROTECTED_PATHS = new Set(['/meneur.html', '/meneur-config.html', '/admin-meneurs.html']);
 const ADMIN_ONLY_PATHS = new Set(['/admin-meneurs.html']);
 
-app.get('/login', (req, res) => {
-  res.sendFile(path.join(__dirname, 'login.html'));
+app.get('/login', (_req, res) => {
+  res.setHeader('Cache-Control', 'no-cache, must-revalidate');
+  res.type('html').send(serveHtmlWithVersion('login.html'));
 });
 
 app.post('/auth/request', async (req, res) => {
@@ -166,7 +207,26 @@ a:hover{color:#f39c12;text-decoration:underline}
 <p><a href="/login">← Retour à la connexion</a></p></div></body></html>`;
 }
 
-// Sert tous les fichiers statiques (HTML, JS, CSS, audio…)
+// Intercepte les requetes HTML avant express.static pour injecter
+// le ?v=HASH sur les <script>/<link> locaux. Le no-cache force le
+// navigateur a re-valider la page elle-meme a chaque visite (cheap :
+// ETag/Last-Modified donnent 304 si rien n'a change).
+app.get(/\.html$|^\/$/, (req, res, next) => {
+  const file = req.path === '/' ? 'index.html' : req.path.slice(1);
+  const full = path.join(ROOT_DIR, file);
+  // Securite : empeche path traversal
+  if (!full.startsWith(ROOT_DIR + path.sep) && full !== ROOT_DIR) return next();
+  if (!fs.existsSync(full)) return next();
+  try {
+    res.setHeader('Cache-Control', 'no-cache, must-revalidate');
+    res.type('html').send(injectAssetVersion(fs.readFileSync(full, 'utf8')));
+  } catch (_e) {
+    next();
+  }
+});
+
+// Sert tous les fichiers statiques (JS, CSS, audio, images, et les HTML
+// non interceptes par la regex ci-dessus en fallback).
 app.use(express.static(path.join(__dirname)));
 
 // ── Config grille (miroir de data.js) ────────────────────────────────
