@@ -27,7 +27,10 @@ if [[ ! -f "$ENV_FILE" ]]; then
 fi
 
 # Garde-fou : refuser si .env contient des cles qui ecraseraient le systemd unit
-FORBIDDEN_KEYS="PORT HOST NODE_ENV PUBLIC_URL SUPPORT_URL SUPPORT_API_KEY RESEND_API_KEY EMAIL_FROM EMAIL_FROM_NAME"
+# (PORT/HOST/NODE_ENV viennent du main unit, SUPPORT_* viennent de support.conf
+# drop-in). Les autres vars sensibles — RESEND_API_KEY, EMAIL_*, PUBLIC_URL,
+# ADMIN_EMAILS, DB_PATH — ne sont definies nulle part ailleurs, donc OK ici.
+FORBIDDEN_KEYS="PORT HOST NODE_ENV SUPPORT_URL SUPPORT_API_KEY SUPPORT_GAME_ID"
 for key in $FORBIDDEN_KEYS; do
   if grep -qE "^${key}=" "$ENV_FILE"; then
     echo "ERREUR : '$key' est defini dans $ENV_FILE et ecraserait le systemd unit." >&2
@@ -35,6 +38,11 @@ for key in $FORBIDDEN_KEYS; do
     exit 1
   fi
 done
+
+# Le .env contient RESEND_API_KEY (secret) → chmod 600 obligatoire
+chown darkvador:darkvador "$ENV_FILE"
+chmod 600 "$ENV_FILE"
+echo "[OK] permissions $ENV_FILE : $(stat -c '%a %U:%G' "$ENV_FILE")"
 
 # Cree le drop-in (idempotent)
 mkdir -p "$DROPIN_DIR"
