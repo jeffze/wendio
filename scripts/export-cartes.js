@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const sharp = require('sharp');
 
-const SRC = path.resolve(__dirname, '..', '..', 'Carte Wendio');
+const SRC = path.resolve(__dirname, '..', '..', '_sources', 'Wendio', 'Carte');
 const DST = path.resolve(__dirname, '..', 'cartes');
 const QUALITY = 85;
 
