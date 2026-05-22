@@ -837,7 +837,7 @@
             title="Tirer un numéro" aria-label="Tirer un numéro">&#127922;</button>
     <button class="btn-arreter" id="btn-arreter" onclick="arreterPartie()"
             data-i18n-attr="title:meneur.btn_arreter,aria-label:meneur.btn_arreter"
-            title="Terminer la partie" aria-label="Terminer la partie">&#9209;&#65039;</button>
+            title="Terminer la partie" aria-label="Terminer la partie">&#128721;</button>
   </div>
 
   <!-- Carte numero tire (DEPLACE en HAUT plus haut dans le DOM via l'edit
@@ -1120,11 +1120,11 @@
     partieTerminee = true;
     document.getElementById('btn-tirer').disabled = true;
 
-    // L'icone « ⏹ Terminer » se transforme en « ↻ Nouvelle partie »
-    // (couleur verte pour signaler que c'est l'action positive a faire ensuite).
+    // L'icone « 🛑 Terminer » se transforme en « 🔄 Nouvelle partie »
+    // (vert + icone differente du reset 38px gris ↻ pour eviter confusion).
     const btn = document.getElementById('btn-arreter');
     btn.removeAttribute('data-i18n');
-    btn.textContent = '↻';
+    btn.textContent = '🔄';
     btn.title = t('meneur.btn_nouvelle_partie') || 'Nouvelle partie';
     btn.setAttribute('aria-label', btn.title);
     btn.onclick = () => nouvellePartieMeneur({ skipTerminer: true });
