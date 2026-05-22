@@ -242,6 +242,47 @@ Les chiffres dans les deux grilles utilisent la police **Cinzel** (même que le 
 - `meneur.html` `.suivi-cell` : `font-size: 1rem`, Cinzel — 12 colonnes par ligne (plage 1–12 par lettre)
 - `joueur.html` `.cell` : `font-size: 1.35rem`, Cinzel — 6 colonnes, `aspect-ratio: 1/1`
 
+## Multi-tenant (Premières Nations multiples)
+
+Depuis 2026-05-15 (phase 1), Wendio supporte plusieurs Premières Nations sur la même instance, isolées par `tenant_id` en DB. Le routing tenant se fait via le hostname de la requête :
+- **Hostname complet** dans `tenants.hostnames` (CSV) → match exact (utilisé pour rétrocompat `wendio.jeuxlirlok.com`)
+- **Premier segment** du hostname comme `slug` (`wendat.wendio.app` → `wendat`)
+
+### Tables
+
+| Table | Champs clés |
+|---|---|
+| `tenants` | id, slug (unique), nom_officiel, langue_label, hostnames (CSV), branding_json, subscription_status/until, active |
+| `meneurs` | id, email (unique), name, role (admin/meneur), **tenant_id** |
+| `magic_tokens`, `sessions` | inchangés (scope tenant garanti par scope hostname du cookie) |
+
+### Onboarder une nouvelle nation
+
+1. **DNS** : ajouter A record `<slug>.<domain>` → `23.27.253.63` proxied Cloudflare (ou domaine canonique futur)
+2. **Caddyfile** : bloc reverse_proxy vers `127.0.0.1:5000` pour ce sous-domaine (ou bloc wildcard quand on aura `wendio.app`)
+3. **SQL tenant** :
+   ```sql
+   INSERT INTO tenants (slug, nom_officiel, langue_label, hostnames, contact_email)
+   VALUES ('cree', 'Nation Crie de XXX', 'Cree', 'cree.wendio.app', 'contact@…');
+   ```
+4. **SQL meneur initial** :
+   ```sql
+   INSERT INTO meneurs (email, role, tenant_id)
+   VALUES ('admin@nation-cree.example', 'admin', 2);
+   ```
+5. La personne admin reçoit son magic link via `cree.wendio.app/login` → connectée pour 30 jours
+
+### Sécurité multi-tenant
+
+- Cookies de session scopés par sous-domaine (navigateur, par défaut) — un cookie `wendat.wendio.app` n'est pas envoyé à `cree.wendio.app`
+- `attachUser` middleware invalide la session si `user.tenant_id !== req.tenant.id` (defense in depth)
+- `/auth/verify` rejette les magic links cross-tenant
+- `/auth/request` retourne 404 si pas de tenant correspondant au hostname
+
+### Dev local
+
+Pour tester un autre tenant en local sans DNS, utiliser le header `X-Tenant-Slug: cree` (non-prod uniquement).
+
 ## Versions futures
 
 L'architecture est prévue pour supporter plusieurs thèmes (animaux, couleurs, etc.) au-delà des chiffres. Le vocabulaire est centralisé dans `data.js` — chaque thème futur aura son propre fichier de données interchangeable.
