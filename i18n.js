@@ -233,6 +233,7 @@ const TRANSLATIONS = {
   'joueur.setup_online.btn':   { fr: 'Rejoindre →', en: 'Join →' },
   'joueur.badge_online':       { fr: '🌐 En ligne', en: '🌐 Online' },
   'joueur.btn_nouvelle_carte': { fr: '↩ Nouvelle carte', en: '↩ New card' },
+  'joueur.btn_quitter':        { fr: '🚪 Quitter', en: '🚪 Leave' },
   'joueur.annonce.label':      { fr: 'Case sélectionnée', en: 'Selected cell' },
   'joueur.btn_wendio':         { fr: '🌽 WENDIO !', en: '🌽 WENDIO!' },
   'joueur.win.titre':          { fr: '🌽 WENDIO ! 🌽', en: '🌽 WENDIO! 🌽' },
