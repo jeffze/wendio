@@ -617,6 +617,80 @@
     }
     .bandeau-config .edit:hover { background: var(--card); color: var(--gold); }
 
+    /* ── Bouton « QR carte mobile » + popup QR (support #16)
+       Visible UNIQUEMENT en mode physique (le meneur veut offrir une carte
+       numerique aux joueurs qui scannent — equivalent mobile des cartes papier). */
+    .btn-qr-mobile {
+      display: none;
+      align-items: center; justify-content: center;
+      gap: 6px;
+      padding: 7px 12px;
+      margin: 4px 0 6px;
+      background: var(--surface);
+      color: var(--gold-lt);
+      border: 1px dashed var(--gold);
+      border-radius: 8px;
+      font-size: .82rem;
+      cursor: pointer;
+      transition: background .15s, color .15s, border-style .15s;
+    }
+    body.mode-physique .btn-qr-mobile { display: inline-flex; }
+    .btn-qr-mobile:hover { background: var(--card); color: var(--gold); border-style: solid; }
+
+    #popup-qr-mobile {
+      position: fixed; inset: 0;
+      display: none;
+      align-items: center; justify-content: center;
+      background: rgba(0,0,0,.85);
+      backdrop-filter: blur(8px);
+      z-index: 10000;
+      padding: 32px;
+    }
+    #popup-qr-mobile.visible { display: flex; }
+    #popup-qr-mobile .qr-card {
+      background: var(--text);
+      color: var(--bg);
+      padding: 28px 32px 24px;
+      border-radius: 18px;
+      box-shadow: 0 24px 80px rgba(0,0,0,.7), 0 0 60px rgba(200,132,58,.18);
+      text-align: center;
+      max-width: min(92vw, 420px);
+      animation: pop-zoom .28s cubic-bezier(.22,.8,.4,1);
+    }
+    #popup-qr-mobile h3 {
+      margin: 0 0 8px;
+      font-family: 'Cinzel', serif;
+      font-size: 1.25rem;
+      color: var(--bg);
+    }
+    #popup-qr-mobile p {
+      margin: 0 0 16px;
+      font-size: .9rem;
+      color: #444;
+      line-height: 1.35;
+    }
+    #popup-qr-mobile .qr-holder {
+      background: white;
+      padding: 14px;
+      border-radius: 10px;
+      display: inline-block;
+    }
+    #popup-qr-mobile .close {
+      position: absolute;
+      top: 18px; right: 18px;
+      width: 42px; height: 42px;
+      border: 1px solid rgba(244,231,211,.25);
+      border-radius: 50%;
+      background: rgba(33,21,8,.7);
+      color: var(--text);
+      font-size: 22px;
+      line-height: 1;
+      cursor: pointer;
+      transition: background .15s, transform .12s, border-color .15s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    #popup-qr-mobile .close:hover { background: rgba(33,21,8,.95); border-color: var(--gold); transform: scale(1.08); }
+
     /* ── Paysage tablette ── */
     /* Seuil min-height 320 (au lieu de 400) pour que tablettes/iframes
        en paysage etroit (390-400 px) declenchent aussi le layout sidebar
@@ -752,6 +826,17 @@
   <div class="progress"></div>
 </div>
 
+<!-- Popup QR carte mobile (support #16) — mode physique uniquement,
+     pour les joueurs qui veulent une carte sur leur cellulaire au lieu d'un papier -->
+<div id="popup-qr-mobile">
+  <button class="close" type="button" onclick="fermerPopupQrMobile()" aria-label="Fermer">✕</button>
+  <div class="qr-card">
+    <h3 data-i18n="meneur.qr_mobile.titre">📱 Carte mobile</h3>
+    <p data-i18n="meneur.qr_mobile.consigne">Scanne avec ton téléphone pour obtenir une carte aléatoire</p>
+    <div class="qr-holder" id="qr-mobile-holder"></div>
+  </div>
+</div>
+
 <div id="win-overlay">
   <div class="win-card">
     <h2 data-i18n="meneur.win_titre">&#127805; WENDIO ! &#127805;</h2>
@@ -766,6 +851,14 @@
 <div id="colonne-gauche">
 
   <h1 data-i18n="meneur.title">WENDIO &#8212; Meneur</h1>
+
+  <!-- Bouton « QR carte mobile » (support #16) — visible UNIQUEMENT en mode
+       physique via CSS. Ouvre une popup avec un QR pointant sur
+       joueur.html?mode=local&clan=<clanChoisi>. Chaque scan = carte aleatoire. -->
+  <button type="button" class="btn-qr-mobile" id="btn-qr-mobile" onclick="ouvrirPopupQrMobile()"
+          data-i18n="meneur.btn_qr_mobile"
+          data-i18n-attr="title:meneur.btn_qr_mobile_title"
+          title="Afficher un QR pour qu'un joueur scanne et obtienne une carte mobile">📱 QR carte mobile</button>
 
   <!-- status-online retire (redondant avec le bandeau-config en haut qui
        affiche deja « 🌐 En ligne ». Element conserve dans le DOM cache
@@ -1233,10 +1326,31 @@
   }
   // ESC ferme aussi le popup
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && document.getElementById('popup-carte').classList.contains('visible')) {
-      fermerPopupCarte();
+    if (e.key === 'Escape') {
+      const popCarte = document.getElementById('popup-carte');
+      const popQr    = document.getElementById('popup-qr-mobile');
+      if (popCarte && popCarte.classList.contains('visible')) fermerPopupCarte();
+      if (popQr    && popQr.classList.contains('visible'))    fermerPopupQrMobile();
     }
   });
+
+  // ── Popup QR « carte mobile » (support #16) — mode physique uniquement ──
+  function ouvrirPopupQrMobile() {
+    if (!clanChoisi) return;
+    const url = window.location.origin + '/joueur.html?mode=local&clan=' + encodeURIComponent(clanChoisi);
+    const holder = document.getElementById('qr-mobile-holder');
+    holder.replaceChildren();
+    if (typeof QRCode !== 'undefined') {
+      // eslint-disable-next-line no-undef
+      new QRCode(holder, { text: url, width: 240, height: 240 });
+    } else {
+      holder.textContent = url;
+    }
+    document.getElementById('popup-qr-mobile').classList.add('visible');
+  }
+  function fermerPopupQrMobile() {
+    document.getElementById('popup-qr-mobile').classList.remove('visible');
+  }
 
   // ── Suivi ─────────────────────────────────────────────────────────────
   function initialiser() {

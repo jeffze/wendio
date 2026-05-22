@@ -92,6 +92,14 @@ const TRANSLATIONS = {
                                  en: '🤖 Simulate 3 players' },
   'meneur.btn_demo_bots_title':{ fr: 'Ajoute 3 joueurs simules pour faire une demo sans audience',
                                  en: 'Add 3 simulated players for a demo without an audience' },
+  'meneur.btn_qr_mobile':      { fr: '📱 QR carte mobile',
+                                 en: '📱 Mobile card QR' },
+  'meneur.btn_qr_mobile_title':{ fr: 'Affiche un QR a scanner — chaque joueur obtient une carte aleatoire sur son telephone',
+                                 en: 'Show a QR to scan — each player gets a random card on their phone' },
+  'meneur.qr_mobile.titre':    { fr: '📱 Carte mobile',
+                                 en: '📱 Mobile card' },
+  'meneur.qr_mobile.consigne': { fr: 'Scanne avec ton téléphone pour obtenir une carte aléatoire',
+                                 en: 'Scan with your phone to get a random card' },
 
   // ── Labels victoire des clans (texte affiché, le nom du clan reste FR) ─
   // ── Page meneur-config.html ────────────────────────────────────────
