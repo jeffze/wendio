@@ -461,7 +461,9 @@
       align-items: center; justify-content: center;
       background: rgba(0,0,0,.78);
       backdrop-filter: blur(6px);
-      z-index: 400;
+      /* z-index > 9999 du lang-toggle i18n.js et > 1000 de l'auth-widget,
+         sinon la croix de fermeture passe dessous (support #7+#9 finition). */
+      z-index: 10000;
       padding: 32px;
       cursor: pointer;
       animation: pop-fade .2s ease-out;
@@ -1204,11 +1206,20 @@
             jouerSon(num);
             surlignerActuel(num);
           } else if (modePhysique && !partieTerminee) {
-            tirages.push(num);
-            numeroActuel = num;
-            afficherCarte(num);
-            jouerSon(num);
-            mettreAJourSuivi(num);
+            if (modeOnline && socket && codePartie) {
+              // Online + physique (support #12) : delegue au serveur qui
+              // broadcastera numero-tire a tous (meneur compris). Le handler
+              // socket.on('numero-tire') fait alors le push + display + son
+              // + suivi pour le meneur AUSSI. Pas de duplication locale.
+              socket.emit('tirer', { code: codePartie, num });
+            } else {
+              // Local : maj directe (pas de joueurs distants a notifier)
+              tirages.push(num);
+              numeroActuel = num;
+              afficherCarte(num);
+              jouerSon(num);
+              mettreAJourSuivi(num);
+            }
           }
         };
         grille.appendChild(cell);

@@ -464,23 +464,41 @@ io.on('connection', socket => {
   });
 
   // Meneur : tirer un numéro
-  socket.on('tirer', ({ code }) => {
+  socket.on('tirer', ({ code, num: askedNum }) => {
     const partie = parties.get(code);
     if (!partie || partie.maitre !== socket.id || partie.terminee) return;
 
-    const restants = [];
-    for (let i = 1; i <= 72; i++) {
-      if (!partie.tirages.includes(i)) restants.push(i);
+    let num;
+    if (typeof askedNum === 'number' && Number.isInteger(askedNum)) {
+      // Mode physique : le meneur choisit le numero (clic sur sa suivi-grille).
+      // Support #12 : avant, le clic en physique ne faisait que du local et
+      // les joueurs ne recevaient rien. Maintenant le meneur emit avec son
+      // num et le serveur broadcast a tout le monde.
+      if (askedNum < 1 || askedNum > 72) {
+        socket.emit('erreur', 'Numéro invalide.');
+        return;
+      }
+      if (partie.tirages.includes(askedNum)) {
+        socket.emit('erreur', 'Ce numéro a déjà été tiré.');
+        return;
+      }
+      num = askedNum;
+    } else {
+      // Mode aleatoire : serveur pioche
+      const restants = [];
+      for (let i = 1; i <= 72; i++) {
+        if (!partie.tirages.includes(i)) restants.push(i);
+      }
+      if (!restants.length) {
+        io.to(code).emit('tous-tires');
+        return;
+      }
+      num = restants[Math.floor(Math.random() * restants.length)];
     }
-    if (!restants.length) {
-      io.to(code).emit('tous-tires');
-      return;
-    }
-    const num = restants[Math.floor(Math.random() * restants.length)];
     partie.tirages.push(num);
 
     io.to(code).emit('numero-tire', { num });
-    console.log(`[${code}] Numéro tiré : ${num}`);
+    console.log(`[${code}] Numéro tiré : ${num}` + (typeof askedNum === 'number' ? ' (physique)' : ''));
 
     // Auto-detection de victoire serveur-side (support #5) : apres chaque
     // tirage on regarde si une carte joueur remplit la condition du clan.
