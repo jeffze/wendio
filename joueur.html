@@ -23,6 +23,7 @@
       --border:    rgba(244,231,211,.10);  /* bordures subtiles sur fond sombre */
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
     body {
       font-family: 'Inter', 'Segoe UI', sans-serif;
       background: var(--bg);
@@ -31,12 +32,15 @@
         radial-gradient(ellipse 80% 60% at 50% 100%, rgba(40,20,8,.55) 0%, transparent 60%),
         linear-gradient(180deg, var(--bg) 0%, #2c1a0e 60%, var(--bg) 100%);
       color: var(--primary);
-      min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 16px 16px 32px;
+      padding: 8px 8px 8px;
+      overflow: hidden;  /* aucun scrollbar global - tout doit tenir dans 100vh */
     }
+    /* Sur la vue setup (rarement vue : seulement /joueur.html sans param) on
+       desactive le 100vh strict pour laisser un comportement scrollable normal */
+    body:not(:has(#vue-jeu.visible)) { overflow: auto; height: auto; min-height: 100vh; padding-bottom: 32px; }
 
     h1 {
       font-family: 'Cinzel', Georgia, serif;
@@ -190,9 +194,12 @@
     #vue-jeu {
       display: none;
       width: 100%;
+      max-width: 720px;
+      flex: 1;
+      min-height: 0;
       flex-direction: column;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
     }
     #vue-jeu.visible { display: flex; }
 
@@ -282,26 +289,52 @@
     /* Numéro annoncé */
     #annonce {
       display: none;
-      background: var(--primary);
-      color: white;
+      background: var(--surface);
+      color: var(--primary);
+      border: 1px solid var(--border);
       border-radius: 14px;
-      padding: 12px 20px;
+      padding: 8px 14px;
       width: 100%;
       text-align: center;
-      box-shadow: 0 4px 20px rgba(44,26,14,.28);
+      box-shadow: 0 4px 20px rgba(0,0,0,.35);
+      min-height: 0;
+      flex-shrink: 0;
     }
-    #annonce.visible { display: block; }
-    .annonce-label   { font-size: .65rem; color: #b8956a; margin-bottom: 6px; text-transform: uppercase; letter-spacing: .12em; font-weight: 600; }
-    /* Grille bingo */
-    .bingo-wrap { width: 100%; max-width: 560px; }
+    #annonce.visible { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .annonce-label   { font-size: .62rem; color: var(--muted); text-transform: uppercase; letter-spacing: .12em; font-weight: 600; }
+    /* Cap l'image annoncee pour ne pas qu'elle bouffe l'ecran (portrait surtout) */
+    #annonce-image {
+      max-height: 18vh !important;
+      width: auto !important;
+      object-fit: contain;
+    }
+    /* Grille bingo : occupe tout l'espace restant, cellules carrees */
+    .bingo-wrap {
+      width: 100%;
+      flex: 1;
+      min-height: 0;
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
     .bingo-grid {
       display: grid;
       grid-template-columns: 2.4rem repeat(6, 1fr);
-      gap: 5px;
-      background: var(--primary);
-      padding: 12px;
-      border-radius: 16px;
-      box-shadow: 0 8px 32px rgba(44,26,14,.32), inset 0 1px 0 rgba(255,255,255,.04);
+      gap: 4px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 8px;
+      border-radius: 14px;
+      box-shadow: 0 8px 32px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.03);
+      /* Fit dans le bingo-wrap en gardant approximativement les cells carrees.
+         aspect-ratio 1.18 = approx (label_col + 6*cell + 6*gap) / (6*cell + 5*gap) */
+      max-height: 100%;
+      max-width: 100%;
+      height: 100%;
+      width: auto;
+      aspect-ratio: 1.18;
+      grid-auto-rows: 1fr;
     }
     .row-label {
       color: white;
@@ -378,38 +411,42 @@
       50%      { transform: scale(1.025); box-shadow: 0 10px 32px rgba(30,144,80,.68); }
     }
 
-    /* ── Paysage tablette ── */
+    /* ── Paysage (tablette + PC) — sidebar a gauche, grille a droite ── */
     @media (orientation: landscape) and (min-height: 400px) {
       body {
-        flex-direction: row;
-        align-items: flex-start;
-        justify-content: center;
-        padding: 12px;
-        gap: 14px;
+        padding: 8px 12px;
+        gap: 8px;
       }
-      h1 { font-size: 1.5rem; margin-bottom: 8px; }
-      .mode-bar { margin-bottom: 12px; }
+      /* h1 / mode-bar : jamais montres depuis v0.11 puisque la setup vit
+         dans joueur-config.html. Cache au cas ou pour ne pas voler de l'espace. */
+      h1, .mode-bar, #vue-setup { display: none !important; }
 
       #vue-jeu {
         flex-direction: row;
-        align-items: flex-start;
+        align-items: stretch;
         justify-content: center;
-        gap: 14px;
+        gap: 12px;
         width: 100%;
-        max-width: 900px;
+        max-width: 1100px;
+        min-height: 0;
       }
       #jeu-sidebar {
-        width: 200px;
+        flex-direction: column;
+        width: 220px;
         flex-shrink: 0;
         max-width: none;
-        padding-top: 4px;
+        min-height: 0;
+        overflow-y: auto;  /* si la carte annoncee + le bouton WENDIO debordent */
       }
-      #jeu-info { flex-direction: column; align-items: flex-start; }
-      .btn-retour { margin-left: 0; }
-      #annonce { max-width: none; border-radius: 12px; padding: 10px 14px; }
-      #btn-wendio { max-width: none; font-size: 1.1rem; padding: 14px; }
-      .bingo-wrap { flex: 1; max-width: none; }
-      .bingo-grid { grid-auto-rows: 1fr; }
+      #jeu-info { flex-direction: column; align-items: stretch; }
+      .btn-retour { margin-left: 0; align-self: flex-start; }
+      #annonce { padding: 8px 12px; }
+      #annonce-image { max-height: 30vh !important; }  /* en paysage, plus de place */
+      #btn-wendio { font-size: 1.1rem; padding: 14px; }
+      .bingo-grid {
+        /* En paysage, le grid s'aligne sur la hauteur dispo et garde son aspect */
+        height: 100%;
+      }
     }
 
     /* ── Overlay connexion ── */
@@ -734,11 +771,12 @@
 
 </div>
 
+<!-- Bandeau compact en haut du body : rappel du mode/clan + edit
+     (sorti de #vue-jeu pour pas perturber le layout flex 100vh) -->
+<div id="bandeau-config-joueur" style="display:none;"></div>
+
 <!-- ── VUE JEU ── -->
 <div id="vue-jeu">
-
-  <!-- Bandeau compact en haut du jeu : rappel du mode/clan + edit -->
-  <div id="bandeau-config-joueur" style="display:none;"></div>
 
   <div id="jeu-sidebar">
     <div id="jeu-info">
