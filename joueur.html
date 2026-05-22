@@ -420,7 +420,11 @@
     }
 
     /* ── Paysage (tablette + PC) — sidebar a gauche, grille a droite ── */
-    @media (orientation: landscape) and (min-height: 400px) {
+    /* Seuil min-height 320 (au lieu de 400) pour que les telephones en
+       paysage (typiquement 844x390) declenchent aussi le layout 2 colonnes
+       (annonce a gauche, grille a droite). En dessous de 320 c'est du
+       very-tiny — on garde le mode portrait empile par defaut. */
+    @media (orientation: landscape) and (min-height: 320px) {
       body {
         padding: 8px 12px;
         gap: 8px;

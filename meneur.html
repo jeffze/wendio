@@ -618,7 +618,10 @@
     .bandeau-config .edit:hover { background: var(--card); color: var(--gold); }
 
     /* ── Paysage tablette ── */
-    @media (orientation: landscape) and (min-height: 400px) {
+    /* Seuil min-height 320 (au lieu de 400) pour que tablettes/iframes
+       en paysage etroit (390-400 px) declenchent aussi le layout sidebar
+       gauche + grille droite. En dessous de 320 c'est du very-tiny. */
+    @media (orientation: landscape) and (min-height: 320px) {
       body {
         flex-direction: row;
         align-items: stretch;
