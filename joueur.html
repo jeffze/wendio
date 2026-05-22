@@ -308,7 +308,8 @@
       width: auto !important;
       object-fit: contain;
     }
-    /* Grille bingo : occupe tout l'espace restant, cellules carrees */
+    /* Grille bingo : occupe tout l'espace restant, cellules carrees parfaites
+       grace aux container queries qui calculent --cell = min(H_dispo, W_dispo)/6 */
     .bingo-wrap {
       width: 100%;
       flex: 1;
@@ -317,24 +318,29 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      container-type: size;
     }
     .bingo-grid {
       display: grid;
-      grid-template-columns: 2.4rem repeat(6, 1fr);
-      gap: 4px;
-      background: var(--surface);
+      /* Constantes geometriques de la grille */
+      --label-col: 2.4rem;
+      --gap: 4px;
+      --pad: 8px;
+      /* Cellule = la plus petite des deux contraintes (hauteur / largeur)
+         pour garantir que la grille fit ENTIEREMENT dans le bingo-wrap */
+      --cell: min(
+        calc((100cqh - 2 * var(--pad) - 5 * var(--gap)) / 6),
+        calc((100cqw - 2 * var(--pad) - var(--label-col) - 6 * var(--gap)) / 6)
+      );
+      grid-template-columns: var(--label-col) repeat(6, var(--cell));
+      grid-auto-rows: var(--cell);
+      gap: var(--gap);
+      padding: var(--pad);
+      background: var(--bg);
       border: 1px solid var(--border);
-      padding: 8px;
       border-radius: 14px;
       box-shadow: 0 8px 32px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.03);
-      /* Fit dans le bingo-wrap en gardant approximativement les cells carrees.
-         aspect-ratio 1.18 = approx (label_col + 6*cell + 6*gap) / (6*cell + 5*gap) */
-      max-height: 100%;
-      max-width: 100%;
-      height: 100%;
-      width: auto;
-      aspect-ratio: 1.18;
-      grid-auto-rows: 1fr;
+      /* width/height calcules naturellement depuis cells - grid se centre via bingo-wrap flex */
     }
     .row-label {
       color: white;
@@ -350,12 +356,13 @@
     .cell {
       background: var(--surface);
       color: var(--primary);
-      aspect-ratio: 1/1;
+      /* aspect-ratio plus necessaire : cells sont explicitement var(--cell) carre */
       display: flex;
       justify-content: center;
       align-items: center;
       border-radius: 8px;
-      font-size: 1.35rem;
+      /* Taille de police adaptive : 36% de la hauteur de cellule (max 1.6rem) */
+      font-size: min(1.6rem, calc(var(--cell) * 0.36));
       font-weight: 900;
       font-family: 'Cinzel', serif;
       cursor: pointer;
@@ -443,10 +450,8 @@
       #annonce { padding: 8px 12px; }
       #annonce-image { max-height: 30vh !important; }  /* en paysage, plus de place */
       #btn-wendio { font-size: 1.1rem; padding: 14px; }
-      .bingo-grid {
-        /* En paysage, le grid s'aligne sur la hauteur dispo et garde son aspect */
-        height: 100%;
-      }
+      /* Pas d'override de .bingo-grid en paysage : les container queries
+         gerent automatiquement le sizing dans toutes les orientations. */
     }
 
     /* ── Overlay connexion ── */
@@ -948,7 +953,10 @@
     }, 100);
   }
 
-  // Met a jour le petit bandeau compact en haut de #vue-jeu
+  // Met a jour le petit bandeau compact en haut du body (rappel info seulement).
+  // Pas de bouton « modifier » : on ne peut pas changer de clan/mode en cours
+  // de partie. Pour relancer une partie -> bouton « Nouvelle carte » dans la
+  // sidebar (qui redirige vers joueur-config.html).
   function majBandeauConfig({ mode, clan, code, nom }) {
     const el = document.getElementById('bandeau-config-joueur');
     if (!el) return;
@@ -956,20 +964,13 @@
     if (mode === 'local') {
       const clanLbl = (CLANS[clan] && (i18n.t('clan.' + clan) || clan)) || clan;
       el.append(
-        creerBandeauPart('🦌'.replace(/./, CLANS[clan].icon || '🎲'), clanLbl + ' · ' + (i18n.t('jconfig.mode.local') || 'Solo'))
+        creerBandeauPart(CLANS[clan].icon || '🎲', clanLbl + ' · ' + (i18n.t('jconfig.mode.local') || 'Solo'))
       );
     } else if (mode === 'online') {
       el.append(
         creerBandeauPart('🌐', (i18n.t('jconfig.mode.online') || 'En ligne') + ' · ' + code + ' · ' + nom)
       );
     }
-    // Bouton edit -> retour config
-    const btn = document.createElement('a');
-    btn.className = 'edit';
-    btn.href = 'joueur-config.html';
-    btn.title = i18n.t('jconfig.modifier') || 'Modifier';
-    btn.textContent = '✏️';
-    el.append(btn);
     el.style.display = 'flex';
   }
   function creerBandeauPart(icone, label) {
