@@ -1157,12 +1157,24 @@
     });
 
     socket.on('erreur', msg => {
+      console.warn('[wendio joueur] erreur serveur:', msg);
       const el = document.getElementById('msg-erreur');
-      el.textContent = msg;
-      el.classList.add('visible');
-      // Réactive le bouton Rejoindre si on était en train de rejoindre
+      if (el) {
+        el.textContent = msg;
+        el.classList.add('visible');
+      }
       const btn = document.getElementById('btn-rejoindre-submit');
       if (btn) btn.disabled = !document.getElementById('input-nom').value.trim();
+      // Si l'erreur arrive apres un auto-declare victoire, on reset le flag
+      // pour permettre une nouvelle tentative au prochain tap.
+      if (victoireDeclaree) {
+        victoireDeclaree = false;
+        const w = document.getElementById('btn-wendio');
+        w.textContent = '🏆 WENDIO !';
+        w.disabled = false;
+        w.classList.remove('visible');
+        alert(msg); // garantit que le joueur voit l'erreur (msg-erreur est hors vue-jeu)
+      }
     });
   }
 
@@ -1406,15 +1418,22 @@
       }
     }
 
+    console.log('[wendio joueur] verifierVictoire — gagne=' + gagne + ', clan=' + clanActuel + ', modeOnline=' + modeOnline + ', cellules marquees=' + selectionnees.size);
+
     if (gagne) {
       if (modeOnline) {
         // Auto-declare la victoire (support #5) — plus besoin que le joueur
-        // clique le bouton WENDIO, ce qui retardait la fin de partie cote
-        // meneur jusqu'a ce que le joueur quitte. Le serveur valide quand
-        // meme (anti-troll via victoireValide), et le broadcast 'gagnant' +
-        // 'partie-terminee' arrive sur le meneur instantanement.
+        // clique le bouton WENDIO. Le serveur valide quand meme (anti-troll
+        // via victoireValide) et broadcast 'gagnant' + 'partie-terminee'
+        // a la room → meneur voit l'overlay du gagnant instantanement.
+        // On garde le bouton visible pendant la validation comme feedback.
         if (!partieTerminee && !victoireDeclaree) {
-          victoireDeclaree = true;  // guard contre double-declaration (cas verif. multiples)
+          victoireDeclaree = true;
+          const btn = document.getElementById('btn-wendio');
+          btn.textContent = '⏳ ' + (t('joueur.win_validation') || 'Validation...');
+          btn.disabled = true;
+          btn.classList.add('visible');
+          console.log('[wendio joueur] auto-declare victoire envoyee au serveur');
           declarerVictoire();
         }
       } else {
@@ -1424,10 +1443,12 @@
   }
 
   function declarerVictoire() {
-    if (socket && codePartie) {
-      socket.emit('victoire', { code: codePartie, nom: nomJoueur, clan: clanActuel });
+    if (!socket || !codePartie) {
+      console.warn('[wendio joueur] declarerVictoire ignoree : socket ou codePartie manquant', { socket: !!socket, codePartie });
+      victoireDeclaree = false; // permet de retenter sur prochain tap
+      return;
     }
-    document.getElementById('btn-wendio').classList.remove('visible');
+    socket.emit('victoire', { code: codePartie, nom: nomJoueur, clan: clanActuel });
   }
 
   const TROPHEE = '\uD83C\uDFC6';

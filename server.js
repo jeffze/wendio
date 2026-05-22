@@ -481,6 +481,23 @@ io.on('connection', socket => {
 
     io.to(code).emit('numero-tire', { num });
     console.log(`[${code}] Numéro tiré : ${num}`);
+
+    // Auto-detection de victoire serveur-side (support #5) : apres chaque
+    // tirage on regarde si une carte joueur remplit la condition du clan.
+    // Plus besoin que le joueur tape ses cases ni clique le bouton WENDIO.
+    // Le 1er joueur trouve gagne (ordre d'iteration de la Map = ordre
+    // d'inscription, deterministe et juste).
+    for (const [sid, joueur] of partie.joueurs) {
+      if (joueur.deconnecte) continue; // un fantome ne peut pas gagner
+      if (victoireValide(joueur.carte, partie.clan, partie.tirages)) {
+        partie.terminee = true;
+        io.to(code).emit('gagnant', { nom: joueur.nom, clan: partie.clan });
+        io.to(code).emit('partie-terminee', { raison: 'gagnant' });
+        parties.delete(code);
+        console.log(`[${code}] WENDIO ! ${joueur.nom} (${partie.clan}) — detecte auto apres tirage ${num}`);
+        return;
+      }
+    }
   });
 
   // Meneur : démarrer la partie (clôt les inscriptions, code+QR cachés côté UI)
