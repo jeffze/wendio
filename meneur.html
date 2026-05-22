@@ -234,56 +234,79 @@
     .qr-bloc small { display: block; font-size: .68rem; color: var(--muted); margin-top: 6px; letter-spacing: .05em; }
     #qr-rejoindre  { background: white; padding: 8px; border-radius: 10px; display: inline-block; box-shadow: 0 4px 16px rgba(0,0,0,.5); }
 
+    /* Bouton terminer/nouvelle partie — icone compacte dans la btn-bar */
     .btn-arreter {
       background: transparent;
       color: #e05040;
       border: 1px solid #5a2020;
-      border-radius: 8px;
-      padding: 8px 16px;
-      font-size: .83rem;
-      font-weight: 600;
-      cursor: pointer;
-      margin-top: 16px;
+      border-radius: 50%;
+      width: 44px; height: 44px;
+      font-size: 1.15rem;
+      line-height: 1;
       display: none;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
       transition: all .2s;
-      letter-spacing: .03em;
       font-family: inherit;
     }
-    .btn-arreter.visible { display: block; }
-    .btn-arreter:hover { background: #5a2020; border-color: #e05040; color: white; }
+    .btn-arreter.visible { display: inline-flex; }
+    .btn-arreter:hover { background: #5a2020; border-color: #e05040; color: white; transform: scale(1.06); }
+
+    /* Bouton "demo" (spawn joueurs simules pour demonstrer sans audience) */
+    .btn-demo-bots {
+      background: transparent;
+      color: var(--muted);
+      border: 1px dashed var(--border);
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: .8rem;
+      font-weight: 500;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: all .2s;
+      letter-spacing: .02em;
+      font-family: inherit;
+      width: 100%;
+    }
+    .btn-demo-bots:hover { background: var(--card); color: var(--gold-lt); border-color: var(--gold); border-style: solid; }
+    .btn-demo-bots:disabled { opacity: .35; cursor: not-allowed; }
 
     /* ── Boutons d'action ── */
-    .btn-bar { display: flex; gap: 10px; justify-content: center; }
+    /* btn-bar : icones compactes (action principale + reset) au lieu de
+       gros boutons texte. Le de TIRER reste l'element le plus visible. */
+    .btn-bar { display: flex; gap: 10px; justify-content: center; align-items: center; }
     .btn-tirer {
       background: linear-gradient(135deg, var(--gold) 0%, var(--gold-lt) 100%);
       color: #0c0a07;
       border: none;
-      border-radius: 12px;
-      padding: 15px 42px;
-      font-size: 1.1rem;
-      font-weight: 800;
+      border-radius: 50%;
+      width: 64px; height: 64px;
+      font-size: 2rem;
+      line-height: 1;
+      display: inline-flex; align-items: center; justify-content: center;
       cursor: pointer;
       transition: all .2s;
-      letter-spacing: .07em;
       box-shadow: 0 4px 20px rgba(192,120,8,.4);
       font-family: inherit;
     }
-    .btn-tirer:hover  { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(192,120,8,.5); }
-    .btn-tirer:active { transform: translateY(0); }
-    .btn-tirer:disabled { opacity: .28; cursor: default; transform: none; box-shadow: none; }
+    .btn-tirer:hover  { transform: translateY(-2px) rotate(-12deg); box-shadow: 0 8px 28px rgba(192,120,8,.55); filter: brightness(1.06); }
+    .btn-tirer:active { transform: translateY(0) rotate(0); }
+    .btn-tirer:disabled { opacity: .28; cursor: default; transform: none; box-shadow: none; filter: none; }
     .btn-reset {
       background: transparent;
       color: var(--muted);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 15px 22px;
+      border-radius: 50%;
+      width: 44px; height: 44px;
+      font-size: 1.15rem;
+      line-height: 1;
+      display: inline-flex; align-items: center; justify-content: center;
       cursor: pointer;
-      font-size: .88rem;
       transition: all .2s;
-      font-weight: 500;
       font-family: inherit;
     }
-    .btn-reset:hover { border-color: var(--muted); color: var(--text); }
+    .btn-reset:hover { border-color: var(--muted); color: var(--text); transform: rotate(-90deg); }
 
     /* ── Carte numéro tiré ── */
     #carte-numero {
@@ -613,7 +636,7 @@
         width: 260px;
         max-width: none;
         flex-shrink: 0;
-        gap: 12px;
+        gap: 8px;
         min-height: 0;
         overflow-y: auto;
       }
@@ -626,37 +649,32 @@
 
       .mode-bar { max-width: none; margin: 0; }
 
-      /* QR audio retire (support #7) — la carte tiree est maintenant montree
-         dans un popup central declenche par afficherPopupCarte. La petite
-         carte dans la sidebar sert juste de rappel cliquable pour rouvrir. */
+      /* Carte tiree dans la sidebar — taille bornee pour rester visible
+         peu importe le contenu autour (joueurs list, boutons). La grande
+         vue est dans le popup (auto-dismiss 5s). */
       .carte-droite {
-        align-self: stretch;
+        align-self: center;
         justify-content: center;
         min-height: 0;
       }
       .carte-droite #carte-image {
         margin-bottom: 0;
-        flex: 0 1 auto;
-        min-height: 0;
-        max-height: 100%;
+        max-height: 28vh;
+        max-width: 220px;
+        width: auto;
         object-fit: contain;
       }
 
+      /* En landscape, le carte-numero est au TOP de la sidebar (position
+         deplacee). Il garde sa taille naturelle (cappee par max-height
+         sur l'image) — pas de flex:1 sinon il pousserait les autres
+         elements (joueurs/TIRER) hors viewport. */
       #carte-numero.visible {
-        flex: 1;
-        min-height: 0;
-        display: flex;
-        flex-direction: column;
-        /* Pas de justify-content:center : on laisse .carte-interieur prendre
-           toute la hauteur via flex:1, sinon le max-height:100% des enfants
-           reference une hauteur "auto" qui collapse et laisse l'image
-           deborder (support #1 : QR audio clippe en bas de la colonne). */
+        flex: 0 0 auto;
+        display: block;
       }
       #carte-numero.visible .carte-interieur {
-        flex: 1;
         min-height: 0;
-        max-height: 100%;
-        overflow: hidden;
       }
 
       #tableau {
@@ -669,12 +687,39 @@
       .suivi-grille { flex: 1; grid-auto-rows: 1fr; align-content: stretch; }
 
       /* Code online plus compact */
-      .code-valeur { font-size: 2.2rem; }
-      .online-actif.visible { grid-template-columns: 1fr; }
+      .code-valeur { font-size: 1.6rem; margin: 0; padding: 2px 0; }
+      .code-label { font-size: .65rem; margin-bottom: 2px; }
+      .online-actif.visible { grid-template-columns: 1fr; gap: 8px; }
       /* QR visible en paysage — réduit pour tenir dans la sidebar */
-      .qr-bloc { display: block; text-align: center; margin-top: 6px; }
+      .qr-bloc { display: block; text-align: center; margin-top: 4px; }
+      .qr-bloc small { font-size: .62rem; margin-top: 2px; }
       #qr-rejoindre { display: inline-block; }
-      #qr-rejoindre canvas, #qr-rejoindre img { width: 80px !important; height: 80px !important; }
+      #qr-rejoindre canvas, #qr-rejoindre img { width: 72px !important; height: 72px !important; }
+      /* Compactage general en landscape pour tenir 100vh sans scroll */
+      .joueurs-titre { font-size: .68rem; margin-bottom: 4px; }
+      .joueur-item { padding: 3px 0; font-size: .82rem; }
+      .btn-demo-bots { padding: 5px 10px; font-size: .76rem; margin-top: 6px; }
+      .btn-creer { padding: 8px 14px; font-size: .85rem; margin-top: 8px !important; }
+      .btn-arreter { padding: 5px 12px; font-size: .76rem; margin-top: 8px; }
+      .lien-rejoin-wrap { margin: 2px 0; }
+      .lien-rejoin { font-size: .68rem; line-height: 1.3; }
+      .btn-copier { padding: 3px 8px; font-size: .68rem; }
+      /* btn-bar plus compact + sticky au bas de la sidebar pour rester
+         toujours visible peu importe la quantite de contenu au-dessus
+         (joueurs nombreux, qr, etc.). Le bouton de tirage est le critique. */
+      .btn-bar {
+        position: sticky;
+        bottom: 0;
+        background: linear-gradient(to top, var(--bg) 65%, transparent 100%);
+        padding: 10px 0 6px;
+        margin-top: 4px;
+        z-index: 5;
+      }
+      .btn-tirer { width: 54px; height: 54px; font-size: 1.7rem; }
+      .btn-reset { width: 38px; height: 38px; font-size: 1rem; }
+      .btn-arreter { width: 38px; height: 38px; font-size: .95rem; padding: 0; }
+      /* Carte tiree un peu plus compacte pour laisser de la place a la sidebar */
+      .carte-droite #carte-image { max-height: 22vh; max-width: 200px; }
     }
   </style>
 </head>
@@ -719,7 +764,22 @@
 
   <h1 data-i18n="meneur.title">WENDIO &#8212; Meneur</h1>
 
-  <div class="status-online" id="status-online" data-i18n="meneur.status_online">&#127760; Partie en ligne</div>
+  <!-- status-online retire (redondant avec le bandeau-config en haut qui
+       affiche deja « 🌐 En ligne ». Element conserve dans le DOM cache
+       pour ne pas casser le JS qui le toggle, mais display:none CSS). -->
+  <div class="status-online" id="status-online" data-i18n="meneur.status_online" style="display:none !important;">&#127760; Partie en ligne</div>
+
+  <!-- Carte numero tire (place EN HAUT de la sidebar pour rester visible
+       en paysage quand le panneau online-actif est rempli — joueurs +
+       buttons. En landscape, max-height bornee pour ne pas pousser le
+       reste hors viewport). -->
+  <div id="carte-numero">
+    <div class="carte-interieur">
+      <div class="carte-droite">
+        <img id="carte-image" alt="Carte du numéro" style="display:none; width:100%; max-width:300px; border-radius:12px; box-shadow:0 4px 16px rgba(0,0,0,.4); cursor:pointer;" onclick="afficherPopupCarte(numeroActuel, true)" title="Cliquer pour revoir en grand">
+      </div>
+    </div>
+  </div>
 
   <div class="mode-bar" id="barre-connexion">
     <button class="btn-mode actif" id="btn-local"  onclick="setMode('local')"  data-i18n="meneur.btn_local">&#128244; Local</button>
@@ -741,7 +801,9 @@
     </div>
     <div class="online-actif" id="online-actif">
       <div>
-        <div class="clan-actif-banner" id="clan-actif-banner"></div>
+        <!-- clan-actif-banner retire (redondant avec le bandeau-config). Conserve
+             pour ne pas casser le JS, mais display:none. -->
+        <div class="clan-actif-banner" id="clan-actif-banner" style="display:none !important;"></div>
         <div id="zone-code">
           <div class="code-label" data-i18n="meneur.code_label">Code de la partie</div>
           <div class="code-valeur" id="code-affiche">----</div>
@@ -752,8 +814,9 @@
         </div>
         <div class="joueurs-titre"><span data-i18n="meneur.joueurs_titre">Joueurs connect&#233;s :</span> <strong id="joueurs-count">0</strong></div>
         <div id="joueurs-items"></div>
+        <button class="btn-demo-bots" id="btn-demo-bots" type="button" onclick="spawnDemoJoueurs()" data-i18n="meneur.btn_demo_bots" data-i18n-attr="title:meneur.btn_demo_bots_title" title="Ajoute 3 joueurs simules pour faire une demo sans audience" style="display:none;">&#129302; Simuler 3 joueurs</button>
         <button class="btn-creer" id="btn-commencer" onclick="commencerPartie()" style="margin-top:14px;display:none;" disabled data-i18n="meneur.btn_commencer">&#9654;&#65039; Commencer la partie</button>
-        <button class="btn-arreter" id="btn-arreter" onclick="arreterPartie()" data-i18n="meneur.btn_arreter">&#9646; Terminer la partie</button>
+        <!-- btn-arreter deplace dans la btn-bar sticky en bas (icone compacte) -->
       </div>
       <div class="qr-bloc" id="qr-bloc">
         <div id="qr-rejoindre"></div>
@@ -762,23 +825,25 @@
     </div>
   </div>
 
-  <!-- Boutons action -->
+  <!-- Boutons action — icones compactes sticky au bas de la sidebar :
+       reset (gauche) | de TIRER (centre, prioritaire) | terminer (droite).
+       btn-arreter visible apres creation de partie (.visible toggle JS). -->
   <div class="btn-bar">
-    <button class="btn-tirer" id="btn-tirer" onclick="actionTirer()" disabled data-i18n="meneur.btn_tirer">&#127922; TIRER UN NUM&#201;RO</button>
-    <button class="btn-reset"               onclick="resetJeu()"             data-i18n="meneur.btn_reset">&#8635; R&#233;init.</button>
+    <button class="btn-reset" onclick="resetJeu()"
+            data-i18n-attr="title:meneur.btn_reset,aria-label:meneur.btn_reset"
+            title="Réinitialiser" aria-label="Réinitialiser">&#8635;</button>
+    <button class="btn-tirer" id="btn-tirer" onclick="actionTirer()" disabled
+            data-i18n-attr="title:meneur.btn_tirer,aria-label:meneur.btn_tirer"
+            title="Tirer un numéro" aria-label="Tirer un numéro">&#127922;</button>
+    <button class="btn-arreter" id="btn-arreter" onclick="arreterPartie()"
+            data-i18n-attr="title:meneur.btn_arreter,aria-label:meneur.btn_arreter"
+            title="Terminer la partie" aria-label="Terminer la partie">&#9209;&#65039;</button>
   </div>
 
-  <!-- Carte numéro tiré -->
-  <div id="carte-numero">
-    <div class="carte-interieur">
-      <div class="carte-droite">
-        <img id="carte-image" alt="Carte du numéro" style="display:none; width:100%; max-width:300px; border-radius:12px; box-shadow:0 4px 16px rgba(0,0,0,.4); cursor:pointer;" onclick="afficherPopupCarte(numeroActuel, true)" title="Cliquer pour revoir en grand">
-        <!-- QR audio retire (support #7) : cacaphonie si tout le monde rejoue
-             le son. Le son joue auto cote meneur quand il tire. -->
-        <!-- /qrcode -->
-      </div>
-    </div>
-  </div>
+  <!-- Carte numero tire (DEPLACE en HAUT plus haut dans le DOM via l'edit
+       du panneau-online ci-dessus — capped en landscape pour ne pas
+       bouffer la sidebar). Position originale conservee pour fallback
+       portrait mais en pratique le bloc en HAUT prend priorite. -->
 
 </div><!-- /colonne-gauche -->
 
@@ -989,6 +1054,16 @@
     socket.emit('creer', { clan: clanChoisi });
   }
 
+  // Spawn N joueurs simules cote serveur (mode demo sans audience reelle).
+  // Le bouton est dispo dans la sidebar online-actif (avant demarrage).
+  // Le serveur ajoute des bots dans partie.joueurs ; l'auto-detection
+  // victoire les inclut, donc une fois la partie commencee, l'un d'eux
+  // finira par gagner naturellement (Chevreuil = ~10-15 tirages).
+  function spawnDemoJoueurs() {
+    if (!socket || !codePartie) return;
+    socket.emit('demo-spawn-joueurs', { code: codePartie, count: 3 });
+  }
+
   // Bouton copier (à côté du lien à partager) — Clipboard API + feedback visuel
   function copierLien() {
     const lien = document.getElementById('lien-rejoin').textContent.trim();
@@ -1045,14 +1120,17 @@
     partieTerminee = true;
     document.getElementById('btn-tirer').disabled = true;
 
-    // Le bouton "Terminer la partie" se transforme en "Nouvelle partie"
+    // L'icone « ⏹ Terminer » se transforme en « ↻ Nouvelle partie »
+    // (couleur verte pour signaler que c'est l'action positive a faire ensuite).
     const btn = document.getElementById('btn-arreter');
-    btn.setAttribute('data-i18n', 'meneur.btn_nouvelle_partie');
-    btn.textContent = t('meneur.btn_nouvelle_partie');
+    btn.removeAttribute('data-i18n');
+    btn.textContent = '↻';
+    btn.title = t('meneur.btn_nouvelle_partie') || 'Nouvelle partie';
+    btn.setAttribute('aria-label', btn.title);
     btn.onclick = () => nouvellePartieMeneur({ skipTerminer: true });
     btn.style.color = '#80edb5';
     btn.style.borderColor = '#2ecc71';
-    btn.classList.add('visible'); // garantir qu'il reste visible
+    btn.classList.add('visible');
 
     // Fallback défensif : si on reçoit partie-terminee/gagnant SANS avoir reçu
     // l'event 'gagnant' (race condition / glitch réseau), afficher un overlay générique.
@@ -1321,17 +1399,8 @@
   // ── Configuration URL (depuis meneur-config.html ou ?demo=) ──────────
   (function() {
     const params = new URLSearchParams(window.location.search);
-    const demo = params.get('demo');
-
-    // Mode démo : bypasse la page config (comportement existant)
-    if (demo) {
-      document.getElementById('barre-connexion').style.display = 'none';
-      document.getElementById('barre-tirage').style.display    = 'none';
-      if (demo === 'physique') setModePhysique(true);
-      if (demo === 'online')   setMode('online');
-      return;
-    }
-
+    // Ancien bypass ?demo= retire — remplace par le bouton « 🤖 Simuler N joueurs »
+    // dans la sidebar online (qui demande un meneur authentifie, comme tout le reste).
     const mode   = params.get('mode');
     const tirage = params.get('tirage');
     const clan   = params.get('clan');
@@ -1371,6 +1440,16 @@
     }
 
     insertCompactBandeau(mode, tirage, clan);
+
+    // Mode demo (charge depuis demo-duo.html) : on revele le bouton
+    // « 🤖 Simuler 3 joueurs ». En dehors de demo-duo le bouton reste
+    // cache pour eviter qu'un meneur en vraie partie le declenche par
+    // erreur. Detection : URL param ?demo=1 OU charge dans une iframe.
+    const inDemo = params.get('demo') === '1' || (window.parent && window.parent !== window);
+    if (inDemo) {
+      const btnBots = document.getElementById('btn-demo-bots');
+      if (btnBots) btnBots.style.display = '';
+    }
   })();
 
   function insertCompactBandeau(mode, tirage, clan) {
@@ -1400,15 +1479,12 @@
     const span3 = document.createElement('span');
     span3.textContent = tirage === 'physique' ? '🃏 Physique' : '🎲 Aléatoire';
 
-    const edit = document.createElement('a');
-    edit.href = 'meneur-config.html?mode=' + encodeURIComponent(mode) +
-                '&tirage=' + encodeURIComponent(tirage) +
-                '&clan=' + encodeURIComponent(clan);
-    edit.className = 'edit';
-    edit.textContent = '✏️';
-    edit.title = 'Modifier la configuration';
+    // Crayon « ✏️ Modifier » retire : pour changer le clan/mode/tirage il
+    // faut de toute facon terminer la partie en cours (puis « Nouvelle
+    // partie » redirige vers meneur-config). Pas de raccourci en cours
+    // de partie qui pourrait laisser un etat ambigu.
 
-    bandeau.append(span1, sep1, span2, sep2, span3, edit);
+    bandeau.append(span1, sep1, span2, sep2, span3);
 
     const h1 = document.querySelector('#colonne-gauche h1');
     if (h1 && h1.parentNode) h1.after(bandeau);

@@ -32,7 +32,7 @@ const ROOT_DIR = __dirname;
 const VERSIONED_FILES = [
   'i18n.js', 'data.js', 'auth-widget.js', 'qrcode.min.js',
   'index.html', 'lobby.html', 'meneur.html', 'meneur-config.html',
-  'joueur.html', 'joueur-config.html', 'imprimer.html', 'imprimer-trophees.html', 'demo.html',
+  'joueur.html', 'joueur-config.html', 'imprimer.html', 'imprimer-trophees.html', 'demo-duo.html',
   'login.html', 'aide-meneur.html', 'aide-joueur.html', 'admin-meneurs.html', 'accueil.html',
 ];
 let ASSET_VERSION = 'dev';
@@ -91,7 +91,7 @@ app.get('/_widget-loader.js', (_req, res) => {
 // ── Auth meneur (magic link) ─────────────────────────────────────────
 // Routes /login, /auth/* + middleware protégeant les pages meneur.
 
-const PROTECTED_PATHS = new Set(['/lobby.html', '/meneur.html', '/meneur-config.html', '/admin-meneurs.html']);
+const PROTECTED_PATHS = new Set(['/lobby.html', '/meneur.html', '/meneur-config.html', '/admin-meneurs.html', '/demo-duo.html']);
 const ADMIN_ONLY_PATHS = new Set(['/admin-meneurs.html']);
 
 app.get('/login', (_req, res) => {
@@ -461,6 +461,42 @@ io.on('connection', socket => {
       nom: nomPropre, clan: partie.clan, count: partie.joueurs.size
     });
     console.log(`[${code}] ${nomPropre} (${partie.clan}) connecté — ${partie.joueurs.size} joueur(s)`);
+  });
+
+  // Meneur : simuler N joueurs virtuels (mode demo, support #13/demo).
+  // Spawn N joueurs « bots » dans la partie avec cartes random uniques.
+  // Pas de vrai socket : les bots existent juste dans partie.joueurs et
+  // l'auto-detection victoire serveur-side (apres chaque tirer) les inclut
+  // naturellement. Utile pour demonstrer le flow sans audience reelle.
+  const DEMO_NAMES = ['Alice', 'Bob', 'Carla', 'Diego', 'Eva', 'Frank', 'Gina', 'Hugo'];
+  socket.on('demo-spawn-joueurs', ({ code, count }) => {
+    const partie = parties.get(code);
+    if (!partie || partie.maitre !== socket.id) return;
+    if (partie.demarree) {
+      socket.emit('erreur', 'Impossible d\'ajouter des joueurs démo une fois la partie démarrée.');
+      return;
+    }
+    const n = Math.max(1, Math.min(8, Number(count) || 3));
+    let added = 0;
+    for (let i = 0; i < n; i++) {
+      // Genere une carte unique
+      let carte, hash, tries = 0;
+      do {
+        carte = genererCarte();
+        hash = carteHash(carte);
+        tries++;
+      } while (partie.cartes.has(hash) && tries < 30);
+      if (partie.cartes.has(hash)) continue; // saturated, skip
+      partie.cartes.add(hash);
+
+      const fakeSid = 'demo-' + crypto.randomBytes(8).toString('hex');
+      const baseName = DEMO_NAMES[(partie.joueurs.size + i) % DEMO_NAMES.length];
+      const nom = baseName + ' 🤖';
+      partie.joueurs.set(fakeSid, { nom, clan: partie.clan, carte, token: null, deconnecte: false, isVirtual: true });
+      io.to(partie.maitre).emit('joueur-connecte', { nom, clan: partie.clan, count: partie.joueurs.size });
+      added++;
+    }
+    console.log(`[${code}] +${added} joueurs demo (total ${partie.joueurs.size})`);
   });
 
   // Meneur : tirer un numéro

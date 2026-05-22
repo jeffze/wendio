@@ -896,7 +896,7 @@
   let nomJoueur           = null;
   let tiresOnline         = [];
   let dernierNumeroClique = null;
-  let modeDemo            = false;
+  // modeDemo retire avec l'ancien bypass ?demo=local
   let oursDataUrl         = null; // cache canvas : fond noir supprimé
   let partieTerminee      = false;
   let victoireDeclaree    = false;  // anti double-emit auto-victoire (support #5)
@@ -966,14 +966,8 @@
     });
 
     const params = new URLSearchParams(window.location.search);
-
-    // Mode demo : bypass total (ancien flux preserve)
-    if (params.get('demo') === 'local') {
-      modeDemo = true;
-      document.getElementById('barre-mode').style.display = 'none';
-      return;
-    }
-
+    // Ancien bypass ?demo=local retire — le mode Solo de joueur-config.html
+    // joue le meme role (page de config → joueur.html?mode=local&clan=X).
     const mode = params.get('mode');
     const clan = params.get('clan');
     const code = (params.get('code') || '').toUpperCase();
@@ -1262,7 +1256,7 @@
 
   function basculerVersSetup() {
     document.querySelector('h1').style.display        = '';
-    if (!modeDemo) document.getElementById('barre-mode').style.display = '';
+    document.getElementById('barre-mode').style.display = '';
     document.getElementById('vue-setup').style.display = '';
     document.getElementById('vue-jeu').classList.remove('visible');
   }

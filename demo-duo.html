@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WENDIO — Démo Duo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #1a1008;
+      --surface: #221710;
+      --surface-2: #2c1d12;
+      --border: rgba(244,231,211,.10);
+      --gold: #c8843a;
+      --gold-lt: #e8a85a;
+      --ember: #d35400;
+      --bone: #f4e7d3;
+      --bone-dim: #b89978;
+      --bone-mute: #7a5a3a;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(--bone); font-family: 'Inter', 'Segoe UI', sans-serif; }
+
+    .toolbar {
+      position: fixed; top: 0; left: 0; right: 0;
+      height: 48px; z-index: 100;
+      display: flex; align-items: center; gap: 12px;
+      padding: 0 16px;
+      background: linear-gradient(180deg, rgba(33,21,8,.96) 0%, rgba(33,21,8,.85) 100%);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(8px);
+      font-size: 12.5px;
+      flex-wrap: wrap;
+    }
+    .toolbar .badge {
+      background: linear-gradient(135deg, var(--ember) 0%, var(--gold) 100%);
+      color: #1a0e02;
+      padding: 4px 12px;
+      border-radius: 14px;
+      font-family: 'Cinzel', serif;
+      font-weight: 700;
+      letter-spacing: .08em;
+      font-size: 11px;
+      text-transform: uppercase;
+    }
+    .toolbar .status { color: var(--bone-dim); letter-spacing: .02em; }
+    .toolbar .status strong { color: var(--gold-lt); font-weight: 600; }
+    .toolbar .sep {
+      width: 1px; height: 18px;
+      background: var(--border);
+      margin: 0 4px;
+    }
+    .toolbar .picker {
+      display: flex; align-items: center; gap: 6px;
+      color: var(--bone-mute);
+      font-size: 11.5px;
+    }
+    .toolbar .picker label {
+      letter-spacing: .04em;
+    }
+    .toolbar select {
+      background: var(--surface);
+      color: var(--bone);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 4px 8px;
+      font: inherit;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .toolbar select:hover { border-color: var(--gold); }
+    .toolbar .actions { margin-left: auto; display: flex; gap: 8px; }
+    .toolbar a, .toolbar button {
+      color: var(--bone-dim);
+      text-decoration: none;
+      font: inherit;
+      background: transparent;
+      border: 1px solid var(--border);
+      padding: 5px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background .15s, color .15s, border-color .15s;
+    }
+    .toolbar a:hover, .toolbar button:hover {
+      background: var(--surface);
+      color: var(--bone);
+      border-color: var(--gold);
+    }
+
+    .frames {
+      position: absolute;
+      top: 48px; left: 0; right: 0; bottom: 0;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2px;
+      background: #000;
+    }
+    .frame {
+      position: relative;
+      overflow: hidden;
+      background: radial-gradient(ellipse at center, #2a1808 0%, var(--bg) 70%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 18px 12px 12px;
+    }
+    .frame .label {
+      position: absolute;
+      top: 8px; left: 50%;
+      transform: translateX(-50%);
+      padding: 4px 14px;
+      background: rgba(33,21,8,.88);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      font-family: 'Cinzel', serif;
+      font-size: 10.5px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--gold-lt);
+      z-index: 50;
+      pointer-events: none;
+      box-shadow: 0 2px 8px rgba(0,0,0,.4);
+      white-space: nowrap;
+    }
+
+    /* Container iframe : par defaut remplit, sinon simule un appareil */
+    .device {
+      position: relative;
+      width: 100%; height: 100%;
+      max-width: 100%; max-height: 100%;
+      background: #1a1008;
+      border-radius: 6px;
+      overflow: hidden;
+      box-shadow: 0 6px 24px rgba(0,0,0,.5);
+      transition: width .25s ease-out, height .25s ease-out;
+    }
+    /* Tailles d'appareils — w x h. Le navigateur centre via flex parent. */
+    .device.size-phone-portrait    { width: 390px;  height: 844px; max-height: 100%; aspect-ratio: 390/844; }
+    .device.size-phone-landscape   { width: 844px;  height: 390px; max-width: 100%; aspect-ratio: 844/390; }
+    .device.size-tablet-portrait   { width: 768px;  height: 1024px; max-height: 100%; aspect-ratio: 768/1024; }
+    .device.size-tablet-landscape  { width: 1024px; height: 768px; max-width: 100%; aspect-ratio: 1024/768; }
+    .device.size-desktop           { width: 1280px; height: 800px; max-width: 100%; aspect-ratio: 1280/800; }
+    /* Pour que l'aspect-ratio joue correctement quand max-* kick in */
+    .device.size-phone-portrait,
+    .device.size-tablet-portrait { height: auto; max-height: calc(100% - 4px); }
+    .device.size-phone-landscape,
+    .device.size-tablet-landscape,
+    .device.size-desktop { width: auto; max-width: calc(100% - 4px); }
+
+    .device iframe {
+      width: 100%; height: 100%;
+      border: 0;
+      display: block;
+    }
+
+    .frame.waiting {
+      color: var(--bone-dim);
+      text-align: center;
+      padding: 24px;
+    }
+    .frame.waiting .device { background: transparent; box-shadow: none; }
+    .frame.waiting .device .placeholder {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      height: 100%; gap: 14px;
+    }
+    .frame.waiting .icon {
+      font-size: 3rem;
+      opacity: .4;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%, 100% { opacity: .35; } 50% { opacity: .65; } }
+    .frame.waiting p { font-size: .92rem; max-width: 280px; line-height: 1.5; }
+    .frame.waiting code {
+      font-family: 'Cinzel', serif;
+      color: var(--gold-lt);
+      background: var(--surface);
+      padding: 2px 8px;
+      border-radius: 6px;
+    }
+
+    @media (max-width: 900px) {
+      .frames { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; }
+      .toolbar { font-size: 11.5px; padding: 0 10px; }
+      .toolbar .picker label { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="toolbar">
+  <span class="badge">Démo Duo</span>
+  <span class="status" id="status">⏳ En attente de la création de partie côté meneur...</span>
+  <div class="sep"></div>
+  <div class="picker">
+    <label for="sel-meneur">Meneur</label>
+    <select id="sel-meneur">
+      <option value="auto">Remplit</option>
+      <option value="desktop">Desktop 1280×800</option>
+      <option value="tablet-landscape" selected>Tablette paysage 1024×768</option>
+      <option value="tablet-portrait">Tablette portrait 768×1024</option>
+    </select>
+  </div>
+  <div class="picker">
+    <label for="sel-joueur">Joueur</label>
+    <select id="sel-joueur">
+      <option value="auto">Remplit</option>
+      <option value="phone-portrait" selected>Téléphone portrait 390×844</option>
+      <option value="phone-landscape">Téléphone paysage 844×390</option>
+      <option value="tablet-portrait">Tablette portrait 768×1024</option>
+    </select>
+  </div>
+  <div class="actions">
+    <button type="button" id="btn-reset" title="Recharger les deux fenêtres">🔄 Reset</button>
+    <a href="/lobby.html">← Retour lobby</a>
+  </div>
+</div>
+
+<div class="frames">
+  <div class="frame" id="frame-meneur">
+    <div class="label">🎲 Meneur</div>
+    <div class="device size-tablet-landscape" id="device-meneur">
+      <iframe id="iframe-meneur"
+              src="/meneur.html?mode=online&tirage=aleatoire&clan=Chevreuil&demo=1"
+              title="Vue meneur"
+              allow="autoplay"></iframe>
+    </div>
+  </div>
+  <div class="frame waiting" id="frame-joueur">
+    <div class="label">📱 Joueur</div>
+    <div class="device size-phone-portrait" id="device-joueur">
+      <div class="placeholder">
+        <div class="icon">📱</div>
+        <p id="frame-joueur-msg"></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+const iframeMeneur = document.getElementById('iframe-meneur');
+const frameJoueur  = document.getElementById('frame-joueur');
+const deviceJoueur = document.getElementById('device-joueur');
+const deviceMeneur = document.getElementById('device-meneur');
+const status       = document.getElementById('status');
+const btnReset     = document.getElementById('btn-reset');
+const selMeneur    = document.getElementById('sel-meneur');
+const selJoueur    = document.getElementById('sel-joueur');
+
+const STORAGE_KEY_M = 'wendio-demo-duo-meneur-size';
+const STORAGE_KEY_J = 'wendio-demo-duo-joueur-size';
+
+// ─ Tailles d'appareils ─────────────────────────────────────────────
+function applySize(deviceEl, size) {
+  for (const cls of [...deviceEl.classList]) {
+    if (cls.startsWith('size-')) deviceEl.classList.remove(cls);
+  }
+  if (size && size !== 'auto') deviceEl.classList.add('size-' + size);
+}
+
+function bindSizePicker(sel, deviceEl, storageKey) {
+  // restore from localStorage if present
+  try {
+    const saved = localStorage.getItem(storageKey);
+    if (saved) {
+      sel.value = saved;
+      applySize(deviceEl, saved);
+    } else {
+      applySize(deviceEl, sel.value);
+    }
+  } catch (_) { applySize(deviceEl, sel.value); }
+  sel.addEventListener('change', () => {
+    applySize(deviceEl, sel.value);
+    try { localStorage.setItem(storageKey, sel.value); } catch (_) {}
+  });
+}
+bindSizePicker(selMeneur, deviceMeneur, STORAGE_KEY_M);
+bindSizePicker(selJoueur, deviceJoueur, STORAGE_KEY_J);
+
+// ─ Placeholder en attente ─────────────────────────────────────────
+function setWaitingMessage() {
+  const msg = document.getElementById('frame-joueur-msg');
+  if (!msg) return;
+  msg.replaceChildren();
+  msg.append('Côté joueur — apparaîtra dès que tu auras cliqué ');
+  const code = document.createElement('code');
+  code.textContent = '« Créer la partie »';
+  msg.append(code);
+  msg.append(' à gauche.');
+}
+setWaitingMessage();
+
+function setStatus(parts) {
+  status.replaceChildren();
+  for (const p of parts) status.append(p);
+}
+
+let codeLu = null;
+let joueurNumeroDemo = 1;
+
+function loadJoueur(code) {
+  const nom = 'Demo' + (joueurNumeroDemo === 1 ? '' : joueurNumeroDemo);
+  const url = '/joueur.html?mode=online&code=' + encodeURIComponent(code) + '&nom=' + encodeURIComponent(nom);
+
+  frameJoueur.classList.remove('waiting');
+  // Reconstruit le device-joueur avec un iframe
+  deviceJoueur.replaceChildren();
+  const iframe = document.createElement('iframe');
+  iframe.id = 'iframe-joueur';
+  iframe.src = url;
+  iframe.title = 'Vue joueur ' + nom;
+  iframe.setAttribute('allow', 'autoplay');
+  deviceJoueur.append(iframe);
+
+  // Mettre a jour le label
+  const label = frameJoueur.querySelector('.label');
+  if (label) label.textContent = '📱 Joueur (' + nom + ')';
+
+  const partieStrong = document.createElement('strong');
+  partieStrong.textContent = code;
+  const nomStrong = document.createElement('strong');
+  nomStrong.textContent = nom;
+  setStatus(['Partie ', partieStrong, ' — joueur ', nomStrong, ' connecté']);
+}
+
+const itv = setInterval(() => {
+  try {
+    const doc = iframeMeneur.contentDocument;
+    if (!doc) return;
+    const codeEl = doc.getElementById('code-affiche');
+    if (!codeEl) return;
+    const code = (codeEl.textContent || '').trim();
+    if (code && code !== '----' && code !== codeLu) {
+      codeLu = code;
+      loadJoueur(code);
+    }
+  } catch (e) { /* iframe pas encore chargee */ }
+}, 500);
+
+btnReset.addEventListener('click', () => {
+  joueurNumeroDemo += 1;
+  codeLu = null;
+  iframeMeneur.src = '/meneur.html?mode=online&tirage=aleatoire&clan=Chevreuil&demo=1&_=' + Date.now();
+  frameJoueur.classList.add('waiting');
+  // Reconstruit le placeholder dans device-joueur
+  deviceJoueur.replaceChildren();
+  const placeholder = document.createElement('div');
+  placeholder.className = 'placeholder';
+  const icon = document.createElement('div'); icon.className = 'icon'; icon.textContent = '📱';
+  const p = document.createElement('p'); p.id = 'frame-joueur-msg';
+  placeholder.append(icon, p);
+  deviceJoueur.append(placeholder);
+  setWaitingMessage();
+  // Restore label
+  const label = frameJoueur.querySelector('.label');
+  if (label) label.textContent = '📱 Joueur';
+  status.textContent = '⏳ En attente de la création de partie côté meneur...';
+});
+</script>
+
+</body>
+</html>

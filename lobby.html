@@ -199,20 +199,20 @@
       <div class="fleche">→</div>
     </a>
 
-    <a class="nav-carte" href="demo.html" style="--couleur: #8e44ad;">
-      <div class="icone">🎬</div>
-      <div class="label" data-i18n="lobby.demo.label">Mode Démo</div>
-      <div class="description" data-i18n="lobby.demo.desc">
-        Choisissez un scénario de démonstration — configuration automatique.
-      </div>
-      <div class="fleche">→</div>
-    </a>
-
     <a class="nav-carte" href="aide-meneur.html" style="--couleur: #16a085;">
       <div class="icone">📖</div>
       <div class="label" data-i18n="lobby.aide.label">Aide du meneur</div>
       <div class="description" data-i18n="lobby.aide.desc">
         Tout pour animer une partie : modes, clans, étapes en ligne, mode physique, dépannage.
+      </div>
+      <div class="fleche">→</div>
+    </a>
+
+    <a class="nav-carte" href="demo-duo.html" id="nav-demo" style="--couleur: #c8843a; display:none;">
+      <div class="icone">🎬</div>
+      <div class="label" data-i18n="lobby.demo.label">Démo duo</div>
+      <div class="description" data-i18n="lobby.demo.desc">
+        Vue meneur + vue joueur côte-à-côte dans une seule page, pour faire une démo de Wendio sans audience.
       </div>
       <div class="fleche">→</div>
     </a>
@@ -248,11 +248,16 @@
   if (!document.documentElement.requestFullscreen) {
     document.getElementById('conseil-fs').classList.add('cache');
   }
-  // Montrer les tuiles admin (gestion meneurs + Support) uniquement aux admins
+  // Montrer les tuiles selon le role :
+  //  - Demo duo : tout meneur authentifie
+  //  - Gerer les meneurs + Support : admins seulement
   fetch('/auth/me', { credentials: 'same-origin' })
     .then(r => r.ok ? r.json() : null)
     .then(u => {
-      if (!u || u.role !== 'admin') return;
+      if (!u) return;
+      const navDemo = document.getElementById('nav-demo');
+      if (navDemo) navDemo.style.display = 'flex';
+      if (u.role !== 'admin') return;
       const navAdmin = document.getElementById('nav-admin');
       if (navAdmin) navAdmin.style.display = 'flex';
       const navSupport = document.getElementById('nav-support');
