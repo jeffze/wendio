@@ -203,7 +203,20 @@
     }
     #vue-jeu.visible { display: flex; }
 
-    /* Bandeau compact : rappel du mode/clan + edit (style aligne meneur) */
+    /* Colonne grille : enveloppe bandeau + grille pour les aligner ensemble */
+    .bingo-column {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-height: 0;
+      min-width: 0;
+      width: 100%;  /* en portrait remplit la largeur dispo, en paysage override par flex:1 */
+      align-items: center;
+    }
+
+    /* Bandeau compact : rappel du mode (info seulement, pas de bouton modifier).
+       Largeur auto pour rester centre sur la grille. */
     #bandeau-config-joueur {
       display: none;
       align-items: center;
@@ -213,29 +226,17 @@
       background: rgba(244,231,211,.04);
       border: 1px solid var(--border);
       border-radius: 999px;
-      padding: 6px 6px 6px 14px;
-      max-width: 560px;
-      width: 100%;
+      padding: 6px 14px;
+      width: max-content;
+      max-width: 100%;
       box-shadow: 0 1px 6px rgba(0,0,0,.25);
+      flex-shrink: 0;
     }
     #bandeau-config-joueur .bandeau-part {
-      flex: 1;
       color: var(--primary);
       letter-spacing: .02em;
       white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
     }
-    #bandeau-config-joueur .edit {
-      color: var(--muted);
-      text-decoration: none;
-      padding: 4px 10px;
-      border-radius: 999px;
-      font-size: .9rem;
-      transition: background .15s, color .15s;
-      flex-shrink: 0;
-    }
-    #bandeau-config-joueur .edit:hover { background: var(--surface-2); color: var(--accent-lt); }
 
     /* Barre d'info (en jeu) */
     #jeu-sidebar {
@@ -439,17 +440,32 @@
       }
       #jeu-sidebar {
         flex-direction: column;
-        width: 220px;
+        width: 240px;
         flex-shrink: 0;
         max-width: none;
         min-height: 0;
-        overflow-y: auto;  /* si la carte annoncee + le bouton WENDIO debordent */
       }
-      #jeu-info { flex-direction: column; align-items: stretch; }
+      #jeu-info { flex-direction: column; align-items: stretch; flex-shrink: 0; }
       .btn-retour { margin-left: 0; align-self: flex-start; }
-      #annonce { padding: 8px 12px; }
-      #annonce-image { max-height: 30vh !important; }  /* en paysage, plus de place */
-      #btn-wendio { font-size: 1.1rem; padding: 14px; }
+      /* En paysage, l'annonce remplit la hauteur restante de la sidebar
+         (apres le bouton Nouvelle carte en haut et le bouton WENDIO en bas) */
+      #annonce {
+        padding: 8px 12px;
+        flex: 1;
+        min-height: 0;
+        justify-content: center;
+      }
+      #annonce.visible { display: flex; }
+      #annonce-image {
+        max-height: 100% !important;
+        max-width: 100% !important;
+        width: auto !important;
+        height: auto !important;
+        object-fit: contain;
+        flex: 1;
+        min-height: 0;
+      }
+      #btn-wendio { font-size: 1.1rem; padding: 14px; flex-shrink: 0; }
       /* Pas d'override de .bingo-grid en paysage : les container queries
          gerent automatiquement le sizing dans toutes les orientations. */
     }
@@ -776,17 +792,14 @@
 
 </div>
 
-<!-- Bandeau compact en haut du body : rappel du mode/clan + edit
-     (sorti de #vue-jeu pour pas perturber le layout flex 100vh) -->
-<div id="bandeau-config-joueur" style="display:none;"></div>
-
 <!-- ── VUE JEU ── -->
 <div id="vue-jeu">
 
   <div id="jeu-sidebar">
     <div id="jeu-info">
-      <span class="info-badge clan"   id="badge-clan"   style="display:none;"></span>
-      <span class="info-badge online" id="badge-online" style="display:none;" data-i18n="joueur.badge_online">&#127760; En ligne</span>
+      <!-- Les badges clan/online ont ete retires (support #4) : redondants
+           avec le bandeau du haut « 🦌 Chevreuil · Solo / pratique » ou
+           « 🌐 En ligne · AB3K · Sylvain » qui dit deja tout ca. -->
       <button class="btn-retour" onclick="nouvellePartie()" data-i18n="joueur.btn_nouvelle_carte">&#8617; Nouvelle carte</button>
     </div>
 
@@ -798,8 +811,14 @@
     <button id="btn-wendio" onclick="declarerVictoire()" data-i18n="joueur.btn_wendio">&#127805; WENDIO !</button>
   </div>
 
-  <div class="bingo-wrap">
-    <div class="bingo-grid" id="grille"></div>
+  <!-- Colonne grille : bandeau au-dessus + grille, centres ensemble.
+       En paysage, cette colonne est a droite (sidebar a gauche).
+       En portrait, sous la sidebar. Le bandeau suit la grille en taille. -->
+  <div class="bingo-column">
+    <div id="bandeau-config-joueur" style="display:none;"></div>
+    <div class="bingo-wrap">
+      <div class="bingo-grid" id="grille"></div>
+    </div>
   </div>
 
 </div>
@@ -1096,8 +1115,7 @@
       tiresOnline   = tirages;
       carteActuelle = carte;
 
-      afficherBadgeClan(clanActuel);
-      document.getElementById('badge-online').style.display = 'inline-flex';
+      // badges clan/online retires (support #4) — info dans le bandeau du haut
       document.getElementById('annonce').classList.add('visible');
       basculerVersJeu();
       rendreGrille();
@@ -1176,14 +1194,10 @@
     document.getElementById('vue-jeu').classList.remove('visible');
   }
 
-  function afficherBadgeClan(nom) {
-    const clan  = CLANS[nom] || {};
-    const badge = document.getElementById('badge-clan');
-    const label = (typeof i18n !== 'undefined' ? i18n.t('clan.' + nom) : nom) || nom;
-    badge.textContent    = clan.icon + ' ' + label;
-    badge.setAttribute('data-clan', nom); // pour re-traduire au changement de langue
-    badge.style.display  = 'inline-flex';
-  }
+  // afficherBadgeClan : no-op depuis support #4 (le badge dans la sidebar a
+  // ete retire car redondant avec le bandeau du haut). Garde la signature au
+  // cas ou des handlers externes l'appellent encore.
+  function afficherBadgeClan(_nom) { /* no-op */ }
 
   // ── Nouvelle carte / retour config ───────────────────────────────────
   function nouvellePartie() {
