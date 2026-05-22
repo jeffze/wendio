@@ -1072,48 +1072,20 @@
     nouvellePartieMeneur({ skipTerminer: true });
   }
 
+  // Support #10 : « Nouvelle partie » redirige maintenant vers meneur-config
+  // avec les params URL actuels pre-remplis (mode/tirage/clan). Le meneur
+  // n a plus qu un seul clic « Commencer » pour relancer une partie identique,
+  // ou il modifie ce qu il veut avant. Plus de reset en place qui laissait
+  // l ecran dans un etat ambigu et peu intuitif.
   function nouvellePartieMeneur(opts) {
     opts = opts || {};
+    // Notifie clean les joueurs que la partie est terminee si pas deja fait.
     if (!opts.skipTerminer && socket && codePartie && !partieTerminee) {
       socket.emit('terminer', { code: codePartie });
     }
-    codePartie     = null;
-    clanChoisi     = null;
-    partieTerminee = false;
-    document.querySelectorAll('.btn-clan-meneur').forEach(b => b.classList.remove('actif'));
-    document.getElementById('clan-objectif').textContent = '\u00a0';
-    document.getElementById('btn-creer-partie').disabled = true;
-    document.getElementById('btn-tirer').disabled = true; // re-d\u00e9sactiv\u00e9 jusqu'au prochain choix de clan
-    document.getElementById('online-actif').classList.remove('visible');
-
-    // Restaurer le bouton btn-arreter dans son \u00e9tat initial
-    const btn = document.getElementById('btn-arreter');
-    btn.setAttribute('data-i18n', 'meneur.btn_arreter');
-    btn.textContent = t('meneur.btn_arreter');
-    btn.onclick = arreterPartie;
-    btn.style.color = '';
-    btn.style.borderColor = '';
-    btn.classList.remove('visible');
-
-    document.getElementById('online-creation').style.display = '';
-    document.getElementById('joueurs-items').replaceChildren();
-    document.getElementById('joueurs-count').textContent = '0';
-    document.getElementById('clan-actif-banner').classList.remove('visible');
-
-    // Réinitialiser bouton commencer + zone code/QR pour la prochaine partie
-    const btnCommencer = document.getElementById('btn-commencer');
-    btnCommencer.style.display = 'none';
-    btnCommencer.disabled = true;
-    document.getElementById('zone-code').style.display = '';
-    document.getElementById('qr-bloc').style.display = '';
-
-    // Restaurer les toggles + cacher le pill « En ligne »
-    document.getElementById('barre-connexion').style.display = '';
-    document.getElementById('barre-tirage').style.display    = '';
-    document.getElementById('status-online').classList.remove('visible');
-
-    fermerWin();
-    resetJeu();
+    // Le socket sera reinitialise par la nouvelle page meneur.html chargee
+    // apres le passage par meneur-config.
+    window.location.href = 'meneur-config.html' + window.location.search;
   }
 
   // ── Tirer ─────────────────────────────────────────────────────────────
