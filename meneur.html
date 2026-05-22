@@ -308,7 +308,7 @@
     .carte-interieur { display: flex; justify-content: center; gap: 24px; align-items: flex-start; min-height: 0; }
     .carte-droite { display: flex; flex-direction: column; align-items: center; gap: 12px; flex-shrink: 1; min-height: 0; max-height: 100%; }
     .carte-droite img#carte-image { max-height: 100%; object-fit: contain; }
-    #qrcode { background: white; padding: 8px; border-radius: 10px; box-shadow: 0 4px 16px rgba(0,0,0,.4); }
+    /* #qrcode retire (support #7) — la carte tiree est dans le popup */
 
     /* ── Tableau de suivi ── */
     #tableau {
@@ -452,6 +452,57 @@
     .win-card button:hover { background: rgba(255,255,255,.2); }
     @keyframes pop { from { transform: scale(.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
+    /* ── Popup carte tiree (support #7+#9) ──
+       Overlay sombre semi-transparent, image grande au centre, auto-dismiss 5s,
+       X en haut a droite, clic n'importe ou pour fermer. */
+    #popup-carte {
+      position: fixed; inset: 0;
+      display: none;
+      align-items: center; justify-content: center;
+      background: rgba(0,0,0,.78);
+      backdrop-filter: blur(6px);
+      z-index: 400;
+      padding: 32px;
+      cursor: pointer;
+      animation: pop-fade .2s ease-out;
+    }
+    #popup-carte.visible { display: flex; }
+    #popup-carte img {
+      max-width: min(90vw, 540px);
+      max-height: 88vh;
+      width: auto; height: auto;
+      object-fit: contain;
+      border-radius: 18px;
+      box-shadow: 0 24px 80px rgba(0,0,0,.7), 0 0 60px rgba(200,132,58,.15);
+      animation: pop-zoom .28s cubic-bezier(.22,.8,.4,1);
+    }
+    #popup-carte .close {
+      position: absolute;
+      top: 18px; right: 18px;
+      width: 42px; height: 42px;
+      border: 1px solid rgba(244,231,211,.25);
+      border-radius: 50%;
+      background: rgba(33,21,8,.7);
+      color: var(--text);
+      font-size: 22px;
+      line-height: 1;
+      cursor: pointer;
+      transition: background .15s, transform .12s, border-color .15s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    #popup-carte .close:hover { background: rgba(33,21,8,.95); border-color: var(--gold); transform: scale(1.08); }
+    #popup-carte .progress {
+      position: absolute;
+      bottom: 0; left: 0; height: 3px;
+      background: linear-gradient(90deg, var(--ember) 0%, var(--gold-lt) 100%);
+      width: 100%;
+      transform-origin: left;
+      animation: pop-progress 5s linear forwards;
+    }
+    @keyframes pop-fade { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes pop-zoom { from { opacity: 0; transform: scale(.85); } to { opacity: 1; transform: scale(1); } }
+    @keyframes pop-progress { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+
     /* ── Bouton plein écran ── */
     #btn-fullscreen {
       position: fixed;
@@ -573,15 +624,9 @@
 
       .mode-bar { max-width: none; margin: 0; }
 
-      /* QR audio en paysage : réduit pour tenir dans la sidebar (carte image au-dessus) */
-      .carte-droite #qrcode { padding: 4px !important; margin-top: 8px; }
-      .carte-droite #qrcode canvas, .carte-droite #qrcode img {
-        width: 80px !important; height: 80px !important;
-      }
-      /* Étire la colonne sur toute la hauteur dispo et centre son
-         contenu verticalement. L'image garde sa taille naturelle
-         (height auto), max-height: 100% du CSS de base la borne pour
-         éviter le débordement (support #7). Le QR reste fixe. */
+      /* QR audio retire (support #7) — la carte tiree est maintenant montree
+         dans un popup central declenche par afficherPopupCarte. La petite
+         carte dans la sidebar sert juste de rappel cliquable pour rouvrir. */
       .carte-droite {
         align-self: stretch;
         justify-content: center;
@@ -591,14 +636,9 @@
         margin-bottom: 0;
         flex: 0 1 auto;
         min-height: 0;
-        /* Plafond explicite = hauteur dispo - QR (80px) - gap flex (12px).
-           Sans ca, le navigateur prend la hauteur naturelle de l'image comme
-           flex-basis et ne shrinke pas correctement, le QR audio finit clippe
-           par overflow:hidden de .carte-interieur (support #1). */
-        max-height: calc(100% - 92px);
+        max-height: 100%;
         object-fit: contain;
       }
-      .carte-droite #qrcode { flex-shrink: 0; }
 
       #carte-numero.visible {
         flex: 1;
@@ -654,6 +694,13 @@
     <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/>
   </svg>
 </button>
+
+<!-- Popup carte tiree (support #7+#9) — affichee 5s puis auto-dismiss -->
+<div id="popup-carte" onclick="fermerPopupCarte()">
+  <button class="close" type="button" onclick="event.stopPropagation(); fermerPopupCarte()" aria-label="Fermer">✕</button>
+  <img id="popup-carte-img" alt="Carte du numéro tiré">
+  <div class="progress"></div>
+</div>
 
 <div id="win-overlay">
   <div class="win-card">
@@ -723,8 +770,10 @@
   <div id="carte-numero">
     <div class="carte-interieur">
       <div class="carte-droite">
-        <img id="carte-image" alt="Carte du numéro" style="display:none; width:100%; max-width:300px; border-radius:12px; box-shadow:0 4px 16px rgba(0,0,0,.4); cursor:pointer;" onclick="rejouerSon()">
-        <div id="qrcode"></div>
+        <img id="carte-image" alt="Carte du numéro" style="display:none; width:100%; max-width:300px; border-radius:12px; box-shadow:0 4px 16px rgba(0,0,0,.4); cursor:pointer;" onclick="afficherPopupCarte(numeroActuel, true)" title="Cliquer pour revoir en grand">
+        <!-- QR audio retire (support #7) : cacaphonie si tout le monde rejoue
+             le son. Le son joue auto cote meneur quand il tire. -->
+        <!-- /qrcode -->
       </div>
     </div>
   </div>
@@ -1099,13 +1148,40 @@
     img.title = t('meneur.carte_tooltip', { n: num });
 
 
-    const base  = window.location.href.replace(/[^/]*$/, '');
-    const qrEl  = document.getElementById('qrcode');
-    qrEl.replaceChildren();
-    if (typeof QRCode !== 'undefined') {
-      new QRCode(qrEl, { text: base + cheminAudio(num), width: 100, height: 100 });  // eslint-disable-line no-undef
-    }
+    // Affiche le popup carte tiree (support #7+#9 combines) : grosse image
+    // au centre, auto-dismiss 5s, X en haut a droite, clic n'importe ou.
+    afficherPopupCarte(num);
   }
+
+  // ── Popup carte tiree (support #7+#9 combines) ──────────────────────
+  let popupTimer = null;
+  // replaySound: true quand on rouvre via clic sur la petite carte ; false
+  // quand auto-declenche par afficherCarte (le son est deja joue ailleurs).
+  function afficherPopupCarte(num, replaySound) {
+    if (!num) return;
+    const overlay = document.getElementById('popup-carte');
+    const img     = document.getElementById('popup-carte-img');
+    img.src = `cartes/${num}.jpg`;
+    // Re-trigger CSS animation en clonant le node (sinon la progress bar
+    // ne redemarre pas si on rouvre le popup pour la meme carte).
+    const progress = overlay.querySelector('.progress');
+    const newProgress = progress.cloneNode();
+    progress.replaceWith(newProgress);
+    overlay.classList.add('visible');
+    if (replaySound) jouerSon(num);
+    if (popupTimer) clearTimeout(popupTimer);
+    popupTimer = setTimeout(fermerPopupCarte, 5000);
+  }
+  function fermerPopupCarte() {
+    document.getElementById('popup-carte').classList.remove('visible');
+    if (popupTimer) { clearTimeout(popupTimer); popupTimer = null; }
+  }
+  // ESC ferme aussi le popup
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && document.getElementById('popup-carte').classList.contains('visible')) {
+      fermerPopupCarte();
+    }
+  });
 
   // ── Suivi ─────────────────────────────────────────────────────────────
   function initialiser() {

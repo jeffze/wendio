@@ -610,6 +610,54 @@
     .win-card button:hover { background: rgba(255,255,255,.2); }
     @keyframes pop { from { transform: scale(.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
+    /* ── Popup carte tiree (support #7+#9) ── */
+    #popup-carte {
+      position: fixed; inset: 0;
+      display: none;
+      align-items: center; justify-content: center;
+      background: rgba(0,0,0,.78);
+      backdrop-filter: blur(6px);
+      z-index: 400;
+      padding: 32px;
+      cursor: pointer;
+      animation: pop-fade .2s ease-out;
+    }
+    #popup-carte.visible { display: flex; }
+    #popup-carte img {
+      max-width: min(90vw, 540px);
+      max-height: 88vh;
+      width: auto; height: auto;
+      object-fit: contain;
+      border-radius: 18px;
+      box-shadow: 0 24px 80px rgba(0,0,0,.7), 0 0 60px rgba(200,132,58,.15);
+      animation: pop-zoom .28s cubic-bezier(.22,.8,.4,1);
+    }
+    #popup-carte .close {
+      position: absolute;
+      top: 18px; right: 18px;
+      width: 42px; height: 42px;
+      border: 1px solid rgba(244,231,211,.25);
+      border-radius: 50%;
+      background: rgba(33,21,8,.7);
+      color: var(--primary);
+      font-size: 22px; line-height: 1;
+      cursor: pointer;
+      transition: background .15s, transform .12s, border-color .15s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    #popup-carte .close:hover { background: rgba(33,21,8,.95); border-color: var(--accent); transform: scale(1.08); }
+    #popup-carte .progress {
+      position: absolute;
+      bottom: 0; left: 0; height: 3px;
+      background: linear-gradient(90deg, var(--accent) 0%, var(--accent-lt) 100%);
+      width: 100%;
+      transform-origin: left;
+      animation: pop-progress 5s linear forwards;
+    }
+    @keyframes pop-fade { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes pop-zoom { from { opacity: 0; transform: scale(.85); } to { opacity: 1; transform: scale(1); } }
+    @keyframes pop-progress { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+
     /* ── Bouton plein écran ── */
     #btn-fullscreen {
       position: fixed;
@@ -747,6 +795,13 @@
   <button class="toast-close" onclick="fermerToast()">&#215;</button>
 </div>
 
+<!-- Popup carte tiree (support #7+#9) -->
+<div id="popup-carte" onclick="fermerPopupCarte()">
+  <button class="close" type="button" onclick="event.stopPropagation(); fermerPopupCarte()" aria-label="Fermer">✕</button>
+  <img id="popup-carte-img" alt="Carte du numéro tiré">
+  <div class="progress"></div>
+</div>
+
 <!-- Overlay victoire -->
 <div id="win-overlay">
   <div class="win-card">
@@ -805,7 +860,7 @@
 
     <div id="annonce">
       <div class="annonce-label" data-i18n="joueur.annonce.label">Case s&#233;lectionn&#233;e</div>
-      <img id="annonce-image" alt="Carte WENDIO" style="display:none; width:100%; max-width:280px; height:auto; margin:0 auto; border-radius:10px; box-shadow:0 3px 12px rgba(0,0,0,.4); cursor:pointer;" onclick="rejouerSon()">
+      <img id="annonce-image" alt="Carte WENDIO" style="display:none; width:100%; max-width:280px; height:auto; margin:0 auto; border-radius:10px; box-shadow:0 3px 12px rgba(0,0,0,.4); cursor:pointer;" onclick="afficherPopupCarte(dernierNumeroClique, true)" title="Cliquer pour revoir en grand">
     </div>
 
     <button id="btn-wendio" onclick="declarerVictoire()" data-i18n="joueur.btn_wendio">&#127805; WENDIO !</button>
@@ -1125,11 +1180,11 @@
     socket.on('numero-tire', ({ num }) => {
       if (partieTerminee) return;
       tiresOnline.push(num);
+      // afficherInfoNumero met a jour la petite carte sidebar ET ouvre le
+      // popup carte tiree (support #7+#9) — auto-dismiss 5s, pas de son
+      // (anti-cacaphonie Sylvain). Le joueur peut rouvrir + entendre via
+      // clic sur la petite carte de l'annonce.
       afficherInfoNumero(num);
-      // Pas d'auto-marquage ni de son : le joueur marque lui-même sa carte
-      // au tap (Sylvain Lavertu, feedback 2026-05-04 — « le joueur marque
-      // lui-même sa carte pour le garder actif »). La case devient juste
-      // .auto-marque (fond jaune pâle) tant qu'il n'a pas cliqué.
       rendreGrille();
     });
 
@@ -1233,7 +1288,40 @@
     img.title = t('joueur.carte_tooltip', { n: num });
 
     annonce.classList.add('visible');
+
+    // Popup carte (support #7+#9) — affiche aussi le grand format au centre.
+    // replaySound=false : le son est joue ailleurs (cell.onclick) ou pas du tout
+    // (numero-tire serveur, anti-cacaphonie). Le clic sur la petite carte de
+    // l'annonce passe replaySound=true via son propre handler.
+    afficherPopupCarte(num, false);
   }
+
+  // ── Popup carte tiree (support #7+#9 combines) ──────────────────────
+  // replaySound: true si l'utilisateur clique la petite carte (rejouer son),
+  // false si auto-declenche par numero-tire (anti-cacaphonie Sylvain).
+  let popupTimer = null;
+  function afficherPopupCarte(num, replaySound) {
+    if (!num) return;
+    const overlay = document.getElementById('popup-carte');
+    const img     = document.getElementById('popup-carte-img');
+    img.src = `cartes/${num}.jpg`;
+    const progress = overlay.querySelector('.progress');
+    const newProgress = progress.cloneNode();
+    progress.replaceWith(newProgress);
+    overlay.classList.add('visible');
+    if (replaySound) jouerSon(num);
+    if (popupTimer) clearTimeout(popupTimer);
+    popupTimer = setTimeout(fermerPopupCarte, 5000);
+  }
+  function fermerPopupCarte() {
+    document.getElementById('popup-carte').classList.remove('visible');
+    if (popupTimer) { clearTimeout(popupTimer); popupTimer = null; }
+  }
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && document.getElementById('popup-carte').classList.contains('visible')) {
+      fermerPopupCarte();
+    }
+  });
 
   function rejouerSon() {
     if (dernierNumeroClique) jouerSon(dernierNumeroClique);
