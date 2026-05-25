@@ -104,6 +104,19 @@
       color: var(--gold-lt);
       border-color: var(--gold-lt);
     }
+    /* Bouton quitter : visible (fond plein) pour que la sortie soit evidente */
+    .toolbar a.btn-quitter {
+      color: var(--bone);
+      background: var(--surface-2);
+      border-color: rgba(244,231,211,.22);
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .toolbar a.btn-quitter:hover {
+      background: var(--ember);
+      color: #1a0e02;
+      border-color: var(--ember);
+    }
 
     .frames {
       position: absolute;
@@ -230,7 +243,7 @@
   <div class="actions">
     <a class="btn-help" href="/aide-meneur.html#demo" target="_blank" rel="noopener" title="Aide démo — comment animer une démo">❓ Aide démo</a>
     <button type="button" id="btn-reset" title="Recharger les deux fenêtres">🔄 Reset</button>
-    <a href="/lobby.html" title="Retour au lobby">←</a>
+    <a class="btn-quitter" href="/lobby.html" title="Quitter la démo et revenir au menu">← Quitter la démo</a>
   </div>
 </div>
 
