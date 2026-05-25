@@ -3,14 +3,15 @@ const fs = require('fs');
 const path = require('path');
 const sharp = require('sharp');
 
-const SRC = path.resolve(__dirname, '..', '..', '_sources', 'Wendio', 'Carte');
+const SRC = path.resolve(__dirname, '..', '..', '_sources', 'Wendio', 'Carte2');
 const DST = path.resolve(__dirname, '..', 'cartes');
 const QUALITY = 85;
 
 function targetName(file) {
   const m1 = file.match(/^carte chiffre (\d+)\.png$/i);
   if (m1) return `${m1[1]}.jpg`;
-  const m2 = file.match(/^(\d+) points?\.png$/i);
+  // Trophées clan : nouveau nommage « Carte point N.png » + ancien « N point(s).png »
+  const m2 = file.match(/^carte point (\d+)\.png$/i) || file.match(/^(\d+) points?\.png$/i);
   if (m2) return `clan-${m2[1]}pt.jpg`;
   return null;
 }
@@ -34,7 +35,7 @@ async function run() {
   let ok = 0, fail = 0;
   for (const j of jobs) {
     try {
-      const buf = await sharp(j.src).jpeg({ quality: QUALITY, mozjpeg: true }).toBuffer();
+      const buf = await sharp(j.src).flatten({ background: '#ffffff' }).jpeg({ quality: QUALITY, mozjpeg: true }).toBuffer();
       fs.writeFileSync(j.dst, buf);
       const kb = Math.round(buf.length / 1024);
       console.log(`  ✓ ${j.srcName.padEnd(28)} → ${j.dstName.padEnd(14)} ${kb}KB`);
