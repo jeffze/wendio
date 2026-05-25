@@ -1,6 +1,8 @@
 # Modèle financier Wendio — Quick & Dirty
 
-*v4 — 2026-05-22 — JF + Claude*
+*v5 — 2026-05-25 — JF + Claude*
+
+> **Décision tarifaire 2026-05-25** : objectif = **vraie petite entreprise** (cible 20+ nations), financement client **mixte** (subvention + hors-poche). Grille multi-tiers ; tier « Nation » en **fourchette négociée** 2 400-3 600 $/an selon le financement réel. Voir §8.
 
 TCO annuel de **Wendio** (jeu + tracker Support) modélisé pour scaler de 1 à N nations.
 
@@ -122,16 +124,44 @@ Hypothèses : Resend imputé 33 % (partagé), Claude 50 % imputé (CAD), audio f
 
 ---
 
-## 8. Pistes pour la grille tarifaire (v2 du modèle)
+## 8. Grille tarifaire (v5)
 
-Coût marginal par nation tendant vers ~50 $/an au-delà de 20 nations. Pas de cash one-shot à amortir. Pistes :
+**Positionnement** : Wendio n'est PAS un jeu grand public à quelques dollars. C'est un **outil de revitalisation linguistique** pour des programmes de langue de Premières Nations — souvent financés par subvention (Loi sur les langues autochtones, Patrimoine canadien, budgets éducation de bande). Le prix reflète cette **valeur institutionnelle**, pas le coût marginal d'infra (qui tend vers ~50 $/nation/an, §7).
 
-- **Setup one-shot par nation** : 500-2 000 $ (couvre le temps JF d'onboarding, formation meneurs, accompagnement initial — pas un coût mais une rémunération du travail d'intégration)
-- **Tier « Découverte »** : 1 meneur, max 20 parties/mois, **gratuit** (« pied dans la porte »)
-- **Tier « Nation »** : N meneurs illimités, support email, **100-200 $/mois** par nation
-- **Tier « Multi-nation entreprise »** : white-label, SLA, **500-1 500 $/mois**
+### Frais d'installation (one-shot, par nation)
 
-À 5 nations « Nation » à 150 $/mois = **9 000 $/an de revenus** vs **1 429 $/an de coûts** = marge brute ~84 %. Le modèle économique tient largement.
+**~2 000 $/nation** — intégration (tenant DB, sous-domaine, branding), formation des meneurs, accompagnement initial (~20-40 h). Pas un coût refacturé : la **rémunération du travail d'onboarding**. Réduit/offert pour la **nation fondatrice (Wendat)** au titre de la co-création.
+
+### Tiers d'abonnement annuel
+
+| Tier | Pour qui | Inclus | Prix/an CAD |
+|------|----------|--------|-------------|
+| **Découverte** | pilote, hors-poche curieux | 1 meneur, parties limitées (~5/mois), support communautaire | **Gratuit** (pied dans la porte) |
+| **Communauté** | petit OBNL, hors-poche | 1-2 meneurs, parties illimitées, support email | **~750 $** (≈ 60 $/mois) |
+| **Nation** ⭐ | bande / programme de langue financé | meneurs illimités, branding nation, support prioritaire, SLA | **2 400-3 600 $** négocié selon le financement (≈ 200-300 $/mois) |
+| **Conseil / Multi-nation** | conseil tribal, organisme régional (N langues) | white-label, multi-langues, formation, SLA renforcé | **6 000-15 000 $** |
+
+Le tier **Nation** est le cœur du revenu. La **fourchette** absorbe le financement mixte : une bande bien subventionnée paie le haut (3 600 $, ligne budgétaire triviale), une nation moins dotée négocie vers le bas (2 400 $) — jamais sous le plancher qui rémunère le support.
+
+### Projection revenus (marge brute, hors temps humain — Nation @ 3 000 $ milieu de fourchette)
+
+| Scénario | Mix | Récurrent/an | − coûts (§6) | Net à partager | **Par associé*** |
+|----------|-----|--------------|--------------|----------------|-------------------|
+| **Prudent (10 payantes)** | 6 Nation + 3 Communauté + 1 fondatrice | 20 250 $ | 1 963 $ | 18 287 $ | **~9 150 $/an** |
+| **Cible (20 payantes)** | 12 Nation + 5 Communauté + 2 Conseil + 1 fondatrice | 55 750 $ | 2 000 $ | 53 750 $ | **~26 900 $/an** |
+
+\+ frais d'installation ~2 000 $ × nb de nations onboardées (one-time, étalé sur la montée en charge — ex. ~38 000 $ pour 19 nations).
+
+\* *Répartition 50/50 illustrative — le partage réel est à formaliser (voir mémoire partenariat : co-création paritaire, mais tout le dev/ops = JF).* **Marge brute > 95 %** : l'infra plafonne à ~2 300 $/an même à 40 nations.
+
+### Pourquoi « quelques centaines $/an » est insuffisant (argumentaire pour Sylvain)
+
+À ~300 $/an/nation :
+- **1 nation** : 300 $ vs 1 261 $ de coûts cash → **déficitaire de ~960 $** (on paie pour travailler).
+- **5 nations** : ~1 500 $ vs 1 429 $ → +71 $, soit **35 $ chacun/an**.
+- **10 nations** : ~3 000 $ vs 1 963 $ → ~1 037 $, soit **~500 $ chacun/an** — sous le salaire minimum pour les seules ~120 h/an de support.
+
+Le prix « grand public » ne paie alors **ni l'infra à faible volume, ni une heure du travail des associés**, et ignore que la valeur livrée supporte aisément 2 400-3 600 $/an. D'où la grille ci-dessus.
 
 ---
 
@@ -139,6 +169,56 @@ Coût marginal par nation tendant vers ~50 $/an au-delà de 20 nations. Pas de c
 
 1. **Allocation Resend** : 33 % imputé Wendio est une estimation à la louche (1/3 entre Wendio, Compta, CCU). À affiner selon l'usage réel. Si Wendio est dominant → monter à 50 %. Si marginal → descendre à 20 %.
 2. **Allocation Claude 50 %** : idem, à confirmer au feeling. Sur les 6 dernières semaines Wendio a probablement consommé plus que sa quote-part normale (sprint v1.0) — à terme ça devrait baisser.
+3. **Partage des revenus JF/Sylvain** : ✅ position JF arrêtée 2026-05-25 (install → JF, récurrent 50/50) — voir §10. Reste à faire valider par Sylvain + formaliser par écrit.
+4. **Programmes de financement** : ✅ documentés et vérifiés 2026-05-25 — voir §11.
+5. **Qui vend ?** Sylvain = canal Premières Nations (réseau, crédibilité Wendat). Définir son rôle commercial vs le support technique (JF).
+
+---
+
+## 10. Partage des revenus JF / Sylvain (proposition JF, 2026-05-25)
+
+Modèle retenu côté JF — **à valider avec Sylvain** (c'est un partenariat, pas une décision unilatérale) :
+
+1. **Coûts cash d'infra remboursés en premier** (VPS, domaines, quote-part Resend/Claude — §1).
+2. **Frais d'installation (~2 000 $/nation) → JF** : c'est le travail technique d'onboarding (intégration tenant, branding, formation meneurs). Compense la charge dev/ops continue, portée à 100 % par JF.
+3. **Abonnements récurrents → 50/50** : les deux apports y sont continus et indispensables — JF (ops/support/évolution), Sylvain (relation, légitimité wendat, réseau, vente).
+
+**Rationnel** : le 50/50 sur le récurrent honore la co-création paritaire — la légitimité + le réseau de Sylvain *sont* le go-to-market, pas un apport ponctuel. L'attribution des frais d'installation à JF règle l'asymétrie du travail technique sans dévaloriser Sylvain. Chaque flux de revenu correspond au travail qui le génère.
+
+**Exemple (scénario cible 20 nations, §8)** : ~38 000 $ de frais d'installation cumulés → JF (one-time, étalé) ; ~53 750 $/an de récurrent net → **~26 900 $ chacun/an**.
+
+> À formaliser par écrit une fois Sylvain d'accord (entente de partenariat simple). Voir [[project-wendio-partenariat-sylvain]].
+
+---
+
+## 11. Sources de financement des nations (vérifié 2026-05-25)
+
+**Principe stratégique** : Wendio (le partenariat) ne demande PAS de subvention. C'est **la nation cliente qui applique**, et Wendio devient une **dépense admissible** dans un programme qu'elle utilise déjà pour son plan de langue. Argument de vente : « voici l'outil ET le programme qui le paie ». Les montants des programmes (min 5 000 $, max 400 000 $+) rendent le prix Wendio trivial.
+
+### Fédéral (Canada-wide)
+- **Programme des langues autochtones** — Patrimoine canadien, sous la **Loi sur les langues autochtones (2019)**. >1 G$ sur 2019-2029 + 162,7 M$/an permanents. Deux volets : *plan linguistique* + *projet*. **Wendio = volet projet.**
+  - Admissibilité : organisation/gouvernement des Premières Nations, plan linguistique + ≥2 ans d'expérience.
+  - **Au Québec : on applique via le Comité régional des langues ancestrales (CRLA / RCFNL)** (désigné par l'APNQL). Hors QC : l'organisation régionale désignée de la région (ex. **First Peoples' Cultural Council** en C.-B.).
+  - ⚠️ Appels **annuels** (2026-27 fermé le 2025-11-12) → aligner sur le prochain cycle (~automne).
+
+### Québec (provincial)
+- **Partenariat culturel autochtone** (Secrétariat aux relations avec les Premières Nations et les Inuit) — min **5 000 $**, max **400 000 $/an** par entente (jusqu'à **1,5 M$/an** pour les nations nordiques : Innus, Cris, Inuit, Naskapis). Remplace « Aide au développement culturel autochtone » (juin 2025). Vitalité des langues = axe explicite.
+- **Fonds d'initiatives autochtones IV** (2022-23 → 2026-27) — volet développement social incl. langue/culture. *(Se termine 2026-27 ; surveiller un éventuel FIA V.)*
+- **Programme du patrimoine culturel autochtone** (Culture Québec) — par projets.
+
+### Autres pistes
+- **Budgets éducation/culture de bande** (transferts fédéraux via Services aux Autochtones Canada) : une bande peut allouer son propre budget sans programme dédié.
+
+### Caveats
+Programmes, montants et dates **changent chaque année** — l'agent de financement / le conseil de bande de la nation reste l'autorité. Ne pas affirmer un programme précis à un client sans revérifier.
+
+### Sources (consultées 2026-05-25)
+- Programme des langues autochtones : https://www.canada.ca/en/canadian-heritage/services/funding/aboriginal-peoples.html
+- Modèle de financement des langues des Premières Nations : https://www.canada.ca/en/canadian-heritage/services/funding/aboriginal-peoples/languages.html
+- CRLA / RCFNL : https://crla-rcfnl.ca/en/home
+- Partenariat culturel autochtone (QC) : https://www.quebec.ca/en/culture/aide-financiere/initiatives-de-partenariat/partenariat-culturel-autochtone/program-indigenous-cultural-partnership
+- Fonds d'initiatives autochtones IV (QC) : https://www.quebec.ca/en/gouvernement/portrait-quebec/premieres-nations-inuits/aides-financieres-autochtones/fond-initiatives-autochtones-iv/about-the-initiatives-fund-fia4
+- Patrimoine culturel autochtone (QC) : https://www.quebec.ca/en/culture/aide-financiere/aide-aux-projets-appel/patrimoine-culturel-autochtone/indigenous-cultural-heritage-call-for-projects
 
 ---
 
