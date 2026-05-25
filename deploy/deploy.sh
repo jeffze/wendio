@@ -57,6 +57,12 @@ rsync -avz --delete \
   --exclude 'sources/*.psd' \
   --exclude 'deploy/' \
   --exclude '*.log' \
+  --exclude '.env' \
+  --exclude '.deploy.env' \
+  --exclude 'data/' \
+  --exclude 'cartes-orig/' \
+  --exclude 'cartes-pales/' \
+  --exclude 'cartes-test/' \
   "$REPO_ROOT/" \
   "${VPS_USER}@${VPS_HOST}:${REMOTE_DIR}/"
 ok "Code synchronisé"
