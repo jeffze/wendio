@@ -1537,7 +1537,9 @@
 
     // Apply config
     setMode(mode);
-    setModePhysique(tirage === 'physique');
+    // support #29 — si le tirage physique est désactivé, ignorer le param `tirage`
+    // (protège contre un vieux localStorage / URL bookmarkée ?tirage=physique).
+    setModePhysique(TIRAGE_PHYSIQUE_ACTIF ? tirage === 'physique' : false);
     choisirClanMeneur(clan);
 
     // Cache les sélecteurs maintenant inutiles (gain ~150-200px verticaux)
@@ -1602,7 +1604,12 @@
     // partie » redirige vers meneur-config). Pas de raccourci en cours
     // de partie qui pourrait laisser un etat ambigu.
 
-    bandeau.append(span1, sep1, span2, sep2, span3);
+    // Pastille tirage masquée quand le physique est désactivé (toujours aléatoire = bruit).
+    if (TIRAGE_PHYSIQUE_ACTIF) {
+      bandeau.append(span1, sep1, span2, sep2, span3);
+    } else {
+      bandeau.append(span1, sep1, span2);
+    }
 
     const h1 = document.querySelector('#colonne-gauche h1');
     if (h1 && h1.parentNode) h1.after(bandeau);
