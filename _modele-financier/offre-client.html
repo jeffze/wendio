@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WENDIO — Outil de revitalisation linguistique</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;900&family=Spectral:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink:       #2c1d0b;   /* brun chaud profond — texte */
+    --ink-soft:  #5a4527;
+    --muted:     #8a6c41;
+    --gold:      #b06f06;
+    --gold-deep: #8a5604;
+    --gold-lt:   #e0a429;
+    --parch:     #f4ead4;   /* fond parchemin */
+    --parch-2:   #efe1c4;
+    --card:      #fcf7ec;   /* surface claire */
+    --card-line: #e4d4ad;
+    --seal:      #7a4e0a;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    font-family: 'Spectral', Georgia, serif;
+    font-size: 17px;
+    line-height: 1.72;
+    color: var(--ink);
+    background:
+      radial-gradient(1200px 600px at 80% -10%, #fbf2dd 0%, rgba(251,242,221,0) 60%),
+      radial-gradient(900px 500px at -10% 110%, #f0e0bf 0%, rgba(240,224,191,0) 55%),
+      linear-gradient(160deg, var(--parch) 0%, var(--parch-2) 100%);
+    background-attachment: fixed;
+  }
+
+  /* Grain léger pour la texture parchemin */
+  body::before {
+    content: "";
+    position: fixed; inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    opacity: .05;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* ───────────── Barre de navigation (écran seulement) ───────────── */
+  .topbar {
+    position: sticky; top: 0; z-index: 50;
+    display: flex; align-items: center; gap: 18px;
+    flex-wrap: wrap;
+    padding: 12px 22px;
+    background: rgba(28, 18, 7, .94);
+    border-bottom: 1px solid var(--gold-deep);
+    box-shadow: 0 6px 22px rgba(0,0,0,.28);
+  }
+  .topbar .mark {
+    font-family: 'Cinzel', serif; font-weight: 900;
+    letter-spacing: .18em; font-size: .98rem;
+    color: var(--gold-lt);
+    margin-right: auto;
+  }
+  .topbar .mark small {
+    display: block; font-family: 'Spectral', serif; font-style: italic;
+    font-weight: 400; letter-spacing: .02em; font-size: .62rem;
+    color: #c9a86e; text-transform: none;
+  }
+  .navlink {
+    font-family: 'Cinzel', serif; font-weight: 600;
+    font-size: .74rem; letter-spacing: .04em;
+    text-decoration: none;
+    color: #efdcb4;
+    padding: 7px 13px; border-radius: 999px;
+    border: 1px solid rgba(224,164,41,.34);
+    transition: background .15s, color .15s, border-color .15s;
+    white-space: nowrap;
+  }
+  .navlink:hover { background: var(--gold); color: #1c1207; border-color: var(--gold-lt); }
+  .navlink.print { border-style: dashed; }
+  .nav-note {
+    width: 100%; text-align: center;
+    font-size: .64rem; font-style: italic; color: #b9986a;
+    margin-top: -2px;
+  }
+
+  /* ───────────── Pages ───────────── */
+  .wrap { position: relative; z-index: 1; padding: 40px 18px 70px; }
+
+  .page {
+    max-width: 830px;
+    margin: 0 auto 42px;
+    background: var(--card);
+    border: 1px solid var(--card-line);
+    border-radius: 14px;
+    box-shadow: 0 20px 50px rgba(70,44,8,.14), 0 2px 0 rgba(255,255,255,.6) inset;
+    padding: 52px 58px 56px;
+    position: relative;
+    overflow: hidden;
+  }
+  /* liseré doré en haut de chaque page */
+  .page::before {
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 5px;
+    background: linear-gradient(90deg, var(--gold-deep), var(--gold-lt), var(--gold-deep));
+  }
+
+  /* ───────────── En-tête / couverture ───────────── */
+  .hero { text-align: center; margin-bottom: 30px; }
+  .hero .clanseals { display: flex; justify-content: center; gap: 14px; margin-bottom: 20px; }
+  .hero .seal {
+    width: 76px; height: 76px; border-radius: 50%;
+    background: radial-gradient(circle at 50% 32%, #fffdf6 0%, #efe1c2 100%);
+    border: 2px solid var(--gold);
+    box-shadow: 0 6px 18px rgba(80,48,4,.22), 0 1px 0 rgba(255,255,255,.7) inset;
+    display: flex; align-items: center; justify-content: center; overflow: hidden;
+  }
+  .hero .seal img { width: 86%; height: 86%; object-fit: contain; }
+  .hero h1 {
+    font-family: 'Cinzel', serif; font-weight: 900;
+    font-size: 3.1rem; letter-spacing: .14em; line-height: 1;
+    margin: 0;
+    background: linear-gradient(135deg, var(--gold-deep) 0%, var(--gold-lt) 55%, var(--gold-deep) 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .hero .tagline {
+    font-style: italic; color: var(--ink-soft);
+    font-size: 1.08rem; margin-top: 12px;
+  }
+  .hero .clanrow {
+    font-family: 'Cinzel', serif; font-weight: 600;
+    font-size: .74rem; letter-spacing: .2em; text-transform: uppercase;
+    color: var(--muted); margin-top: 16px;
+  }
+
+  /* ───────────── Typographie sections ───────────── */
+  h2 {
+    font-family: 'Cinzel', serif; font-weight: 700;
+    font-size: 1.5rem; color: var(--gold-deep);
+    letter-spacing: .03em;
+    margin: 38px 0 4px;
+    display: flex; align-items: baseline; gap: 12px;
+  }
+  h2 .num {
+    font-size: .78rem; color: #fff; background: var(--gold);
+    width: 26px; height: 26px; flex: 0 0 26px;
+    border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
+    font-family: 'Spectral', serif; transform: translateY(-2px);
+  }
+  .rule {
+    height: 0; border: none;
+    border-top: 1.5px solid var(--gold);
+    width: 100%;
+    margin: 8px 0 20px;
+    position: relative;
+    opacity: .5;
+  }
+  .lead { font-size: 1.12rem; color: var(--ink); }
+  p { margin: 0 0 14px; }
+  strong { color: var(--gold-deep); font-weight: 600; }
+  .kicker {
+    text-align: center; font-family: 'Cinzel', serif; font-weight: 600;
+    letter-spacing: .26em; text-transform: uppercase;
+    font-size: .72rem; color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  /* ───────────── Grille de fonctionnalités ───────────── */
+  .features { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 8px; }
+  .feat {
+    background: linear-gradient(180deg, #fffdf8, #f8efdd);
+    border: 1px solid var(--card-line);
+    border-left: 3px solid var(--gold);
+    border-radius: 10px;
+    padding: 16px 18px;
+  }
+  .feat .ic { font-size: 1.45rem; line-height: 1; }
+  .feat h3 {
+    font-family: 'Cinzel', serif; font-weight: 600; font-size: 1rem;
+    margin: 8px 0 5px; color: var(--ink);
+  }
+  .feat p { margin: 0; font-size: .95rem; color: var(--ink-soft); line-height: 1.55; }
+
+  /* ───────────── Financement ───────────── */
+  .fund {
+    background: linear-gradient(180deg, #fbf4e3, #f6ebd2);
+    border: 1px solid var(--card-line);
+    border-radius: 12px;
+    padding: 22px 26px;
+    margin-top: 6px;
+  }
+  .fund ul { margin: 8px 0 0; padding-left: 0; list-style: none; }
+  .fund li { position: relative; padding-left: 26px; margin-bottom: 12px; }
+  .fund li::before {
+    content: "🪶"; position: absolute; left: 0; top: 0; font-size: .95rem;
+  }
+  .fineprint { font-size: .86rem; font-style: italic; color: var(--muted); margin-top: 10px; }
+
+  /* ───────────── Forfaits ───────────── */
+  .tiers { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 6px; }
+  .tier {
+    background: var(--card);
+    border: 1px solid var(--card-line);
+    border-radius: 12px;
+    padding: 18px 20px 16px;
+    display: flex; flex-direction: column;
+    position: relative;
+  }
+  .tier.star {
+    border: 2px solid var(--gold);
+    background: linear-gradient(180deg, #fff8e8, #fbf0d6);
+    box-shadow: 0 10px 26px rgba(176,111,6,.16);
+  }
+  .tier .badge {
+    position: absolute; top: -11px; right: 16px;
+    background: linear-gradient(135deg, var(--gold), var(--gold-lt));
+    color: #2a1a05; font-family: 'Cinzel', serif; font-weight: 700;
+    font-size: .62rem; letter-spacing: .08em;
+    padding: 4px 10px; border-radius: 999px;
+    box-shadow: 0 3px 8px rgba(120,72,4,.3);
+  }
+  .tier .tname {
+    font-family: 'Cinzel', serif; font-weight: 700; font-size: 1.12rem;
+    color: var(--gold-deep); margin-bottom: 2px;
+  }
+  .tier .twho { font-size: .85rem; color: var(--muted); font-style: italic; margin-bottom: 9px; }
+  .tier .tdesc { font-size: .92rem; color: var(--ink-soft); line-height: 1.5; margin-bottom: 12px; flex: 1; }
+  .tier .price {
+    font-family: 'Cinzel', serif; font-weight: 700;
+    font-size: 1.18rem; color: var(--ink);
+    border-top: 1px dashed var(--card-line); padding-top: 10px;
+  }
+  .tier .price .per { font-family: 'Spectral', serif; font-weight: 400; font-size: .82rem; color: var(--muted); font-style: italic; }
+  .tier .price.free { color: var(--gold-deep); }
+
+  .install {
+    margin-top: 16px;
+    background: linear-gradient(135deg, #2c1d0b, #3c2810);
+    color: #f2e3c4;
+    border-radius: 12px;
+    padding: 16px 22px;
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  }
+  .install .ic { font-size: 1.5rem; }
+  .install .txt { flex: 1; min-width: 200px; }
+  .install .txt b { font-family: 'Cinzel', serif; color: var(--gold-lt); }
+  .install .amount {
+    font-family: 'Cinzel', serif; font-weight: 700; font-size: 1.1rem;
+    color: #fff; white-space: nowrap;
+  }
+
+  /* ───────────── FAQ ───────────── */
+  .faq { margin-top: 30px; }
+  .faq .qa { padding: 14px 0; border-bottom: 1px solid var(--card-line); }
+  .faq .qa:last-child { border-bottom: none; }
+  .faq .q {
+    font-family: 'Cinzel', serif; font-weight: 600; font-size: 1rem;
+    color: var(--gold-deep); margin-bottom: 5px;
+    display: flex; gap: 9px; align-items: baseline;
+  }
+  .faq .q::before { content: "—"; color: var(--gold); }
+  .faq .a { font-size: .96rem; color: var(--ink-soft); line-height: 1.6; }
+  .faq .a strong { color: var(--gold-deep); }
+
+  /* ───────────── Pied de page ───────────── */
+  .closing {
+    text-align: center; margin-top: 34px; padding-top: 24px;
+    border-top: 2px solid var(--gold);
+  }
+  .closing .cta {
+    font-family: 'Cinzel', serif; font-weight: 700; font-size: 1.35rem;
+    color: var(--gold-deep); margin-bottom: 8px;
+  }
+  .closing .sig { font-style: italic; color: var(--muted); font-size: .92rem; }
+  .closing .contact {
+    margin-top: 14px; font-size: .9rem; color: var(--ink-soft);
+  }
+  .closing .contact a {
+    color: var(--gold-deep); font-weight: 600; text-decoration: none;
+    border-bottom: 1px solid var(--gold-lt);
+  }
+
+  .pagelabel {
+    text-align: center; font-family: 'Cinzel', serif; letter-spacing: .22em;
+    text-transform: uppercase; font-size: .68rem; color: var(--muted);
+    margin-bottom: 4px;
+  }
+
+  /* ───────────── Apparition au chargement ───────────── */
+  @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+  .anim { opacity: 0; animation: rise .7s cubic-bezier(.22,.8,.3,1) forwards; }
+  .d1 { animation-delay: .05s; } .d2 { animation-delay: .15s; }
+  .d3 { animation-delay: .25s; } .d4 { animation-delay: .35s; } .d5 { animation-delay: .45s; }
+  /* Le contenu ne doit JAMAIS rester invisible si l'animation ne joue pas */
+  @media (prefers-reduced-motion: reduce) { .anim { opacity: 1; animation: none; } }
+  .no-anim .anim { opacity: 1 !important; animation: none !important; }
+
+  /* ───────────── Responsive ───────────── */
+  @media (max-width: 680px) {
+    .page { padding: 34px 24px 40px; }
+    .hero h1 { font-size: 2.3rem; }
+    .features, .tiers { grid-template-columns: 1fr; }
+  }
+
+  /* ───────────── Impression / PDF ───────────── */
+  @media print {
+    @page { size: A4; margin: 14mm; }
+    html { scroll-behavior: auto; }
+    body {
+      background: #fff !important;
+      font-size: 11.5pt; color: #000;
+    }
+    body::before { display: none; }
+    .topbar { display: none !important; }
+    .wrap { padding: 0; }
+    .page {
+      max-width: 100%; margin: 0; border: none; border-radius: 0;
+      box-shadow: none; padding: 0 0 6mm;
+      page-break-after: always; break-after: page;
+    }
+    .page:last-child { page-break-after: auto; }
+    .page::before { display: none; }
+    .anim { opacity: 1 !important; animation: none !important; }
+    .tier.star { box-shadow: none; }
+    .install { background: #2c1d0b !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .hero h1 { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Navigation (écran seulement) -->
+<nav class="topbar">
+  <span class="mark">WENDIO<small>Le jeu des clans</small></span>
+  <a class="navlink" href="#accueil">Présentation</a>
+  <a class="navlink" href="#forfait-detaille">Forfaits · prix détaillés</a>
+  <a class="navlink" href="#forfait-devis">Forfaits · sur devis</a>
+  <a class="navlink" href="#forfait-apartir">Forfaits · à partir de</a>
+  <a class="navlink print" href="#" onclick="window.print();return false;">🖨 Imprimer / PDF</a>
+  <div class="nav-note">Trois façons de présenter les forfaits — montrez celle qui convient. (Barre masquée à l'impression.)</div>
+</nav>
+
+<div class="wrap">
+
+  <!-- ════════════ PAGE 1 — PRÉSENTATION (commune) ════════════ -->
+  <section class="page" id="accueil">
+    <div class="hero">
+      <div class="clanseals anim d1">
+        <span class="seal"><img src="../sources/Chevreuil.png" alt="Clan du Chevreuil"></span>
+        <span class="seal"><img src="../sources/Loup.png" alt="Clan du Loup"></span>
+        <span class="seal"><img src="../sources/Ours.png" alt="Clan de l'Ours"></span>
+        <span class="seal"><img src="../sources/Tortue.png" alt="Clan de la Tortue"></span>
+      </div>
+      <h1 class="anim d1">WENDIO</h1>
+      <div class="tagline anim d2">Apprendre les nombres dans la langue — en jouant, ensemble.</div>
+      <div class="clanrow anim d3">Chevreuil · Loup · Ours · Tortue</div>
+    </div>
+
+    <h2 class="anim d3"><span class="num">1</span>Un outil de revitalisation linguistique</h2>
+    <hr class="rule">
+    <p class="lead anim d3">Wendio n'est pas un simple jeu : c'est un <strong>outil de revitalisation linguistique</strong> pensé pour les programmes de langue des Premières Nations.</p>
+    <p class="anim d4">Chaque nombre se présente en <strong>trois couches</strong> — le chiffre, le <strong>mot dans votre langue</strong>, et un <strong>guide phonétique</strong> — pour que petits et grands apprennent en jouant, dans une vraie ambiance de groupe. Un jeu de style bingo, simple à animer, où la langue est au centre.</p>
+
+    <h2 class="anim d4"><span class="num">2</span>Ce que Wendio vous apporte</h2>
+    <hr class="rule">
+    <div class="features">
+      <div class="feat anim d4"><div class="ic">🎲</div><h3>Une animation de groupe</h3><p>Un meneur tire les numéros ; les participants jouent sur leur téléphone ou leur tablette — ou sur des cartes papier à imprimer.</p></div>
+      <div class="feat anim d4"><div class="ic">🔊</div><h3>La voix de vos aînés</h3><p>Un enregistrement audio authentique pour chaque nombre, dans votre langue, intégré au jeu.</p></div>
+      <div class="feat anim d5"><div class="ic">🪶</div><h3>À l'image de votre nation</h3><p>Vocabulaire, clans, symboles et couleurs personnalisés pour votre communauté.</p></div>
+      <div class="feat anim d5"><div class="ic">📱</div><h3>Web + application</h3><p>Rien à installer dans le navigateur, et une application Android. Sur ordinateur, tablette ou téléphone.</p></div>
+      <div class="feat anim d5"><div class="ic">🛡️</div><h3>Clé en main</h3><p>Hébergement, mises à jour et support inclus. Connexion simple, sans mot de passe à retenir.</p></div>
+      <div class="feat anim d5"><div class="ic">🤝</div><h3>Conçu avec les Premières Nations</h3><p>Créé main dans la main avec les Wendats, sa nation fondatrice.</p></div>
+    </div>
+
+    <h2 class="anim d5"><span class="num">3</span>Financer Wendio : une dépense déjà prévue</h2>
+    <hr class="rule">
+    <div class="fund anim d5">
+      <p>Votre nation n'a pas à puiser dans ses fonds propres. Des <strong>programmes publics</strong> financent exactement ce type d'outil de revitalisation des langues autochtones :</p>
+      <ul>
+        <li><strong>Programme des langues autochtones</strong> — fédéral (Patrimoine canadien, sous la <em>Loi sur les langues autochtones</em>). Au Québec, l'accès se fait via le <strong>Comité régional des langues ancestrales (CRLA)</strong> ; Wendio entre dans le « volet projet ».</li>
+        <li><strong>Partenariat culturel autochtone</strong> — Québec, avec la vitalité des langues comme priorité.</li>
+      </ul>
+      <p class="fineprint">Nous vous aidons à inscrire Wendio dans votre plan de langue. Les programmes et leurs dates évoluent chaque année — hors Québec, chaque région possède son organisme équivalent.</p>
+    </div>
+  </section>
+
+  <!-- ════════════ PAGE 2 — FORFAITS · PRIX DÉTAILLÉS ════════════ -->
+  <section class="page" id="forfait-detaille">
+    <div class="pagelabel">Option de présentation A</div>
+    <div class="kicker">Nos forfaits</div>
+    <h2 style="justify-content:center"><span class="num">$</span>Des prix clairs, selon votre réalité</h2>
+    <hr class="rule">
+    <div class="tiers">
+      <div class="tier">
+        <div class="tname">Découverte</div>
+        <div class="twho">Essai / pilote</div>
+        <div class="tdesc">Pour goûter à Wendio avec un vrai groupe, sans engagement.</div>
+        <div class="price free">Gratuit</div>
+      </div>
+      <div class="tier">
+        <div class="tname">Communauté</div>
+        <div class="twho">Petit organisme, budget modeste</div>
+        <div class="tdesc">Pour un organisme communautaire ou un petit programme de langue.</div>
+        <div class="price">~ 750 $ <span class="per">/ an (≈ 60 $/mois)</span></div>
+      </div>
+      <div class="tier star">
+        <div class="badge">★ Recommandé</div>
+        <div class="tname">Nation</div>
+        <div class="twho">Bande avec programme de langue financé</div>
+        <div class="tdesc">Le cœur de l'offre : votre nation et son programme de langue, sans limite de participants.</div>
+        <div class="price">2 400 – 3 600 $ <span class="per">/ an, selon votre financement</span></div>
+      </div>
+      <div class="tier">
+        <div class="tname">Conseil / multi-nations</div>
+        <div class="twho">Conseil tribal, organisme régional</div>
+        <div class="tdesc">Plusieurs communautés ou plusieurs langues réunies sous un même toit.</div>
+        <div class="price">6 000 – 15 000 $ <span class="per">/ an</span></div>
+      </div>
+    </div>
+    <div class="install">
+      <div class="ic">🛠️</div>
+      <div class="txt"><b>Installation</b> — une seule fois : mise en place complète, personnalisation à votre nation et formation de vos meneurs.</div>
+      <div class="amount">~ 2 000 $</div>
+    </div>
+
+    <div class="faq">
+      <div class="kicker" style="text-align:left;margin-top:6px">Questions fréquentes</div>
+      <div class="qa"><div class="q">Peut-on essayer avant de s'engager ?</div><div class="a">Oui. Le forfait <strong>Découverte est gratuit</strong> : vous testez Wendio avec un vrai groupe avant toute décision.</div></div>
+      <div class="qa"><div class="q">Est-ce personnalisé à notre langue ?</div><div class="a">Oui. Le vocabulaire, l'audio (la voix de vos aînés), vos clans et symboles, et votre image de marque sont intégrés à votre version.</div></div>
+      <div class="qa"><div class="q">Est-ce que ça fonctionne en salle, avec un groupe ?</div><div class="a">Oui. Un meneur anime, les participants jouent sur leurs appareils — et vous pouvez imprimer des cartes papier pour jouer hors écran.</div></div>
+      <div class="qa"><div class="q">Sur quels appareils ?</div><div class="a">Dans un navigateur web (rien à installer) et via une application Android. Ordinateur, tablette ou téléphone.</div></div>
+      <div class="qa"><div class="q">Et le support, les mises à jour, nos données ?</div><div class="a">L'hébergement, les mises à jour et le support sont inclus. Vos enregistrements et votre contenu restent votre propriété.</div></div>
+      <div class="qa"><div class="q">Comment finance-t-on Wendio ?</div><div class="a">Par les programmes de langues autochtones (voir « Financer Wendio »). Nous vous aidons à l'inscrire dans votre plan de langue.</div></div>
+      <div class="qa"><div class="q">Combien ça coûte, au juste ?</div><div class="a">L'installation est d'<strong>environ 2 000 $ (une fois)</strong>, puis un abonnement <strong>annuel</strong> : gratuit en Découverte, ~750 $ en Communauté, <strong>2 400 à 3 600 $ pour le forfait Nation</strong> selon votre financement.</div></div>
+    </div>
+  </section>
+
+  <!-- ════════════ PAGE 3 — FORFAITS · SUR DEVIS ════════════ -->
+  <section class="page" id="forfait-devis">
+    <div class="pagelabel">Option de présentation B</div>
+    <div class="kicker">Nos forfaits</div>
+    <h2 style="justify-content:center"><span class="num">$</span>Une formule adaptée à votre programme</h2>
+    <hr class="rule">
+    <div class="tiers">
+      <div class="tier">
+        <div class="tname">Découverte</div>
+        <div class="twho">Essai / pilote</div>
+        <div class="tdesc">Pour goûter à Wendio avec un vrai groupe, sans engagement.</div>
+        <div class="price free">Gratuit</div>
+      </div>
+      <div class="tier">
+        <div class="tname">Communauté</div>
+        <div class="twho">Petit organisme, budget modeste</div>
+        <div class="tdesc">Pour un organisme communautaire ou un petit programme de langue.</div>
+        <div class="price">Sur devis</div>
+      </div>
+      <div class="tier star">
+        <div class="badge">★ Recommandé</div>
+        <div class="tname">Nation</div>
+        <div class="twho">Bande avec programme de langue financé</div>
+        <div class="tdesc">Le cœur de l'offre : votre nation et son programme de langue, sans limite de participants.</div>
+        <div class="price">Sur devis</div>
+      </div>
+      <div class="tier">
+        <div class="tname">Conseil / multi-nations</div>
+        <div class="twho">Conseil tribal, organisme régional</div>
+        <div class="tdesc">Plusieurs communautés ou plusieurs langues réunies sous un même toit.</div>
+        <div class="price">Sur devis</div>
+      </div>
+    </div>
+    <div class="install">
+      <div class="ic">🛠️</div>
+      <div class="txt"><b>Installation</b> — une seule fois : mise en place complète, personnalisation à votre nation et formation de vos meneurs.</div>
+      <div class="amount">Sur devis</div>
+    </div>
+    <p style="text-align:center;font-style:italic;color:var(--muted);margin-top:16px">Le montant exact se fixe ensemble, <strong>selon votre forfait et votre source de financement</strong>. Notre objectif : que Wendio entre dans un budget que vous avez déjà.</p>
+
+    <div class="faq">
+      <div class="kicker" style="text-align:left;margin-top:6px">Questions fréquentes</div>
+      <div class="qa"><div class="q">Peut-on essayer avant de s'engager ?</div><div class="a">Oui. Le forfait <strong>Découverte est gratuit</strong> : vous testez Wendio avec un vrai groupe avant toute décision.</div></div>
+      <div class="qa"><div class="q">Est-ce personnalisé à notre langue ?</div><div class="a">Oui. Le vocabulaire, l'audio (la voix de vos aînés), vos clans et symboles, et votre image de marque sont intégrés à votre version.</div></div>
+      <div class="qa"><div class="q">Est-ce que ça fonctionne en salle, avec un groupe ?</div><div class="a">Oui. Un meneur anime, les participants jouent sur leurs appareils — et vous pouvez imprimer des cartes papier pour jouer hors écran.</div></div>
+      <div class="qa"><div class="q">Sur quels appareils ?</div><div class="a">Dans un navigateur web (rien à installer) et via une application Android. Ordinateur, tablette ou téléphone.</div></div>
+      <div class="qa"><div class="q">Et le support, les mises à jour, nos données ?</div><div class="a">L'hébergement, les mises à jour et le support sont inclus. Vos enregistrements et votre contenu restent votre propriété.</div></div>
+      <div class="qa"><div class="q">Comment finance-t-on Wendio ?</div><div class="a">Par les programmes de langues autochtones (voir « Financer Wendio »). Nous vous aidons à l'inscrire dans votre plan de langue.</div></div>
+      <div class="qa"><div class="q">Combien ça coûte, au juste ?</div><div class="a"><strong>Sur devis</strong> : on établit le montant ensemble, selon le forfait qui vous convient et le financement disponible. L'essai Découverte reste gratuit.</div></div>
+    </div>
+  </section>
+
+  <!-- ════════════ PAGE 4 — FORFAITS · À PARTIR DE ════════════ -->
+  <section class="page" id="forfait-apartir">
+    <div class="pagelabel">Option de présentation C</div>
+    <div class="kicker">Nos forfaits</div>
+    <h2 style="justify-content:center"><span class="num">$</span>Des forfaits accessibles, à partir de…</h2>
+    <hr class="rule">
+    <div class="tiers">
+      <div class="tier">
+        <div class="tname">Découverte</div>
+        <div class="twho">Essai / pilote</div>
+        <div class="tdesc">Pour goûter à Wendio avec un vrai groupe, sans engagement.</div>
+        <div class="price free">Gratuit</div>
+      </div>
+      <div class="tier">
+        <div class="tname">Communauté</div>
+        <div class="twho">Petit organisme, budget modeste</div>
+        <div class="tdesc">Pour un organisme communautaire ou un petit programme de langue.</div>
+        <div class="price">à partir de 750 $ <span class="per">/ an</span></div>
+      </div>
+      <div class="tier star">
+        <div class="badge">★ Recommandé</div>
+        <div class="tname">Nation</div>
+        <div class="twho">Bande avec programme de langue financé</div>
+        <div class="tdesc">Le cœur de l'offre : votre nation et son programme de langue, sans limite de participants.</div>
+        <div class="price">à partir de 2 400 $ <span class="per">/ an</span></div>
+      </div>
+      <div class="tier">
+        <div class="tname">Conseil / multi-nations</div>
+        <div class="twho">Conseil tribal, organisme régional</div>
+        <div class="tdesc">Plusieurs communautés ou plusieurs langues réunies sous un même toit.</div>
+        <div class="price">à partir de 6 000 $ <span class="per">/ an</span></div>
+      </div>
+    </div>
+    <div class="install">
+      <div class="ic">🛠️</div>
+      <div class="txt"><b>Installation</b> — une seule fois : mise en place complète, personnalisation à votre nation et formation de vos meneurs.</div>
+      <div class="amount">à partir de 2 000 $</div>
+    </div>
+
+    <div class="faq">
+      <div class="kicker" style="text-align:left;margin-top:6px">Questions fréquentes</div>
+      <div class="qa"><div class="q">Peut-on essayer avant de s'engager ?</div><div class="a">Oui. Le forfait <strong>Découverte est gratuit</strong> : vous testez Wendio avec un vrai groupe avant toute décision.</div></div>
+      <div class="qa"><div class="q">Est-ce personnalisé à notre langue ?</div><div class="a">Oui. Le vocabulaire, l'audio (la voix de vos aînés), vos clans et symboles, et votre image de marque sont intégrés à votre version.</div></div>
+      <div class="qa"><div class="q">Est-ce que ça fonctionne en salle, avec un groupe ?</div><div class="a">Oui. Un meneur anime, les participants jouent sur leurs appareils — et vous pouvez imprimer des cartes papier pour jouer hors écran.</div></div>
+      <div class="qa"><div class="q">Sur quels appareils ?</div><div class="a">Dans un navigateur web (rien à installer) et via une application Android. Ordinateur, tablette ou téléphone.</div></div>
+      <div class="qa"><div class="q">Et le support, les mises à jour, nos données ?</div><div class="a">L'hébergement, les mises à jour et le support sont inclus. Vos enregistrements et votre contenu restent votre propriété.</div></div>
+      <div class="qa"><div class="q">Comment finance-t-on Wendio ?</div><div class="a">Par les programmes de langues autochtones (voir « Financer Wendio »). Nous vous aidons à l'inscrire dans votre plan de langue.</div></div>
+      <div class="qa"><div class="q">Combien ça coûte, au juste ?</div><div class="a">L'abonnement <strong>annuel</strong> démarre à <strong>partir de 750 $</strong> (Communauté) et de <strong>2 400 $</strong> pour le forfait Nation, l'installation à partir de 2 000 $. L'essai Découverte est gratuit.</div></div>
+    </div>
+
+    <div class="closing">
+      <div class="cta">Parlons de votre programme de langue.</div>
+      <div class="sig">WENDIO — co-création avec les Wendats.</div>
+      <div class="contact">Pour une démonstration ou un pilote, écrivez-nous : <a href="mailto:jeuxlirlok@gmail.com">jeuxlirlok@gmail.com</a></div>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>
