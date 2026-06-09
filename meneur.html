@@ -1559,20 +1559,20 @@
       if (panneau) panneau.style.display = 'none';
     }
 
-    insertCompactBandeau(mode, tirage, clan);
-
-    // Mode demo (charge depuis demo-duo.html) : on revele le bouton
-    // « 🤖 Simuler 3 joueurs ». En dehors de demo-duo le bouton reste
-    // cache pour eviter qu'un meneur en vraie partie le declenche par
-    // erreur. Detection : URL param ?demo=1 OU charge dans une iframe.
+    // Mode demo (charge depuis demo-duo.html) : detection URL param ?demo=1 OU
+    // charge dans une iframe. Sert au bouton « 🤖 Simuler 3 joueurs » ET au
+    // bandeau (la pastille tirage reste visible en demo, cf. insertCompactBandeau).
     const inDemo = params.get('demo') === '1' || (window.parent && window.parent !== window);
+
+    insertCompactBandeau(mode, tirage, clan, inDemo);
+
     if (inDemo) {
       const btnBots = document.getElementById('btn-demo-bots');
       if (btnBots) btnBots.style.display = '';
     }
   })();
 
-  function insertCompactBandeau(mode, tirage, clan) {
+  function insertCompactBandeau(mode, tirage, clan, inDemo) {
     const CLAN_ICONS = { Chevreuil: '🦌', Loup: '🐺', Ours: '🐻', Tortue: '🐢' };
 
     const bandeau = document.createElement('div');
@@ -1604,8 +1604,9 @@
     // partie » redirige vers meneur-config). Pas de raccourci en cours
     // de partie qui pourrait laisser un etat ambigu.
 
-    // Pastille tirage masquée quand le physique est désactivé (toujours aléatoire = bruit).
-    if (TIRAGE_PHYSIQUE_ACTIF) {
+    // Pastille tirage masquée quand le physique est désactivé (toujours aléatoire = bruit),
+    // SAUF en démo où on la garde (valeur pédagogique pour montrer le tirage — Sylvain).
+    if (TIRAGE_PHYSIQUE_ACTIF || inDemo) {
       bandeau.append(span1, sep1, span2, sep2, span3);
     } else {
       bandeau.append(span1, sep1, span2);
