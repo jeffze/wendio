@@ -294,6 +294,7 @@
 
 </div>
 
+<script src="data.js"></script>
 <script>
   const choices = { mode: null, tirage: null, clan: null };
   const STORAGE_PREFIX = 'wendio-config-';
@@ -329,6 +330,18 @@
     const qs = new URLSearchParams(choices).toString();
     window.location.href = 'meneur.html?' + qs;
   });
+
+  // support #29 — masquer le tirage Physique (réactivable via TIRAGE_PHYSIQUE_ACTIF dans data.js).
+  if (typeof TIRAGE_PHYSIQUE_ACTIF !== 'undefined' && !TIRAGE_PHYSIQUE_ACTIF) {
+    const h2Tirage = document.querySelector('h2[data-i18n="config.tirage"]');
+    const secTirage = h2Tirage && h2Tirage.closest('.section');
+    if (secTirage) secTirage.style.display = 'none';
+    // L'étape Clan devient l'étape 2 (le numéro est rendu via content: attr(data-step)).
+    const h2Clan = document.querySelector('h2[data-i18n="config.clan"]');
+    if (h2Clan) h2Clan.setAttribute('data-step', '2');
+    // Force le tirage et réactive le bouton Commencer (Mode + Clan suffisent).
+    selectOpt('tirage', 'aleatoire');
+  }
 </script>
 
 <script src="i18n.js"></script>
