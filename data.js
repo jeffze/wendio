@@ -18,6 +18,10 @@ const CLANS = {
   Tortue:    { icon: '🐢', wendat: "Yāndia'wich",  victoire: 'pleine', points: 4, label: 'Carte pleine (32 cases)' },
 };
 
+// support #29 — masquer le mode « tirage physique » avant présentation.
+// Repasser à true pour tout restaurer (config + meneur) ; aucun code Physique n'est supprimé.
+const TIRAGE_PHYSIQUE_ACTIF = false;
+
 // Cases cœur : lignes N et D, colonnes 2 et 3 (centre de la grille)
 // Grille 6×6 : W-E-N-D-I-O en lignes, positions 0-5 en colonnes
 //       col: 0   1  [2]  [3]  4   5
