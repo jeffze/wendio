@@ -12,5 +12,7 @@ cartes-orig/
 # DB auth meneur (sqlite local)
 data/
 
-# PDF généré depuis _modele-financier/offre-client.html (régénérable, lourd)
+# Artefacts régénérables depuis _modele-financier/offre-client.html (lourds)
 _modele-financier/*.pdf
+_modele-financier/*.zip
+_modele-financier/pack-sylvain/
