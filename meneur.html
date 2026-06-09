@@ -617,9 +617,10 @@
     }
     .bandeau-config .edit:hover { background: var(--card); color: var(--gold); }
 
-    /* ── Bouton « QR carte mobile » + popup QR (support #16)
-       Visible UNIQUEMENT en mode physique (le meneur veut offrir une carte
-       numerique aux joueurs qui scannent — equivalent mobile des cartes papier). */
+    /* ── Bouton « QR carte mobile » + popup QR (support #16, élargi #21/#22)
+       Visible en mode LOCAL (tout tirage) — le meneur offre une carte numerique
+       aux joueurs qui scannent. Masqué en online (les joueurs rejoignent via le
+       code/QR de la vraie partie). */
     .btn-qr-mobile {
       display: none;
       align-items: center; justify-content: center;
@@ -634,7 +635,7 @@
       cursor: pointer;
       transition: background .15s, color .15s, border-style .15s;
     }
-    body.mode-physique .btn-qr-mobile { display: inline-flex; }
+    body:not(.mode-online) .btn-qr-mobile { display: inline-flex; }
     .btn-qr-mobile:hover { background: var(--card); color: var(--gold); border-style: solid; }
 
     #popup-qr-mobile {
