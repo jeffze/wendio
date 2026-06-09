@@ -617,9 +617,10 @@
     }
     .bandeau-config .edit:hover { background: var(--card); color: var(--gold); }
 
-    /* ── Bouton « QR carte mobile » + popup QR (support #16)
-       Visible UNIQUEMENT en mode physique (le meneur veut offrir une carte
-       numerique aux joueurs qui scannent — equivalent mobile des cartes papier). */
+    /* ── Bouton « QR carte mobile » + popup QR (support #16, élargi #21/#22)
+       Visible en mode LOCAL (tout tirage) — le meneur offre une carte numerique
+       aux joueurs qui scannent. Masqué en online (les joueurs rejoignent via le
+       code/QR de la vraie partie). */
     .btn-qr-mobile {
       display: none;
       align-items: center; justify-content: center;
@@ -634,7 +635,7 @@
       cursor: pointer;
       transition: background .15s, color .15s, border-style .15s;
     }
-    body.mode-physique .btn-qr-mobile { display: inline-flex; }
+    body:not(.mode-online) .btn-qr-mobile { display: inline-flex; }
     .btn-qr-mobile:hover { background: var(--card); color: var(--gold); border-style: solid; }
 
     #popup-qr-mobile {
@@ -1536,7 +1537,9 @@
 
     // Apply config
     setMode(mode);
-    setModePhysique(tirage === 'physique');
+    // support #29 — si le tirage physique est désactivé, ignorer le param `tirage`
+    // (protège contre un vieux localStorage / URL bookmarkée ?tirage=physique).
+    setModePhysique(TIRAGE_PHYSIQUE_ACTIF ? tirage === 'physique' : false);
     choisirClanMeneur(clan);
 
     // Cache les sélecteurs maintenant inutiles (gain ~150-200px verticaux)
@@ -1601,7 +1604,12 @@
     // partie » redirige vers meneur-config). Pas de raccourci en cours
     // de partie qui pourrait laisser un etat ambigu.
 
-    bandeau.append(span1, sep1, span2, sep2, span3);
+    // Pastille tirage masquée quand le physique est désactivé (toujours aléatoire = bruit).
+    if (TIRAGE_PHYSIQUE_ACTIF) {
+      bandeau.append(span1, sep1, span2, sep2, span3);
+    } else {
+      bandeau.append(span1, sep1, span2);
+    }
 
     const h1 = document.querySelector('#colonne-gauche h1');
     if (h1 && h1.parentNode) h1.after(bandeau);
