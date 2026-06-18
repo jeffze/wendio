@@ -303,6 +303,28 @@ const TRANSLATIONS = {
   'lobby.demo.desc':           { fr: 'Vue meneur + vue joueur côte-à-côte dans une seule page, pour faire une démo de Wendio sans audience.',
                                  en: 'Master + player views side-by-side in one page, to demo Wendio without an audience.' },
 
+  // ── Crédits et remerciements (page credits.html) ───────────────────
+  'lobby.credits.label':       { fr: 'Crédits et remerciements',
+                                 en: 'Credits & Acknowledgements' },
+  'lobby.credits.desc':        { fr: 'Merci à celles et ceux qui ont prêté leur voix, leur talent et leurs conseils à WENDIO.',
+                                 en: 'Thanks to those who lent their voice, talent and counsel to WENDIO.' },
+  'credits.titre':             { fr: 'Crédits et remerciements',
+                                 en: 'Credits & Acknowledgements' },
+  'credits.sous_titre':        { fr: 'WENDIO — Le Jeu des Clans',
+                                 en: 'WENDIO — The Game of Clans' },
+  'credits.intro':             { fr: 'Merci à celles et ceux qui ont rendu WENDIO possible.',
+                                 en: 'Thanks to those who made WENDIO possible.' },
+  'credits.sonia.nom':         { fr: 'Sonia Gros-Louis', en: 'Sonia Gros-Louis' },
+  'credits.sonia.role':        { fr: '', en: '' },
+  'credits.sonia.txt':         { fr: 'Un grand merci à madame Sonia Gros-Louis pour son soutien indéfectible et ses conseils avisés tout au long de ce projet.',
+                                 en: 'Our heartfelt thanks to Mrs. Sonia Gros-Louis for her unwavering support and wise counsel throughout this project.' },
+  'credits.andree.nom':        { fr: 'Andrée Levesque Sioui', en: 'Andrée Levesque Sioui' },
+  'credits.andree.role':       { fr: 'autrice-interprète', en: 'author-performer' },
+  'credits.andree.txt':        { fr: "Nous exprimons notre profonde gratitude à madame Andrée Levesque Sioui, autrice-interprète, qui a prêté sa voix et son talent à la création des 72 fichiers audio en wendat, français et anglais, donnant ainsi toute sa richesse à l'application WENDIO.",
+                                 en: 'We express our deep gratitude to Mrs. Andrée Levesque Sioui, author-performer, who lent her voice and talent to the creation of the 72 audio files in Wendat, French and English, giving the WENDIO application all of its richness.' },
+  'credits.footer':            { fr: "Une main sur le passé, une oreille sur l'avenir.",
+                                 en: 'One hand on the past, one ear on the future.' },
+
   // ── Aide du meneur ─────────────────────────────────────────────────
   'aide.retour':               { fr: '← Retour au lobby',         en: '← Back to lobby' },
   'aide.retour_long':          { fr: '← Retour au lobby Wendio',  en: '← Back to Wendio lobby' },
