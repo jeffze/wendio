@@ -330,7 +330,7 @@ Cible : VPS WHC Ubuntu 24.04 LTS **dédié aux jeux Sylvain** (séparé du VPS c
 | `Caddyfile` | Reverse proxy HTTPS auto (Let's Encrypt). Bloc `wendio.jeuxlirlok.com → 127.0.0.1:5000`, commentaire pour ajouter futurs jeux | Copié en `/etc/caddy/Caddyfile` par `install-wendio.sh` |
 | `wendio.service` | systemd unit : `User=darkvador`, `Environment=PORT=5000 HOST=127.0.0.1 NODE_ENV=production`, durcissement (`ProtectSystem=strict`, `ProtectHome=read-only`, `NoNewPrivileges`) | Copié en `/etc/systemd/system/` par `install-wendio.sh` |
 | `install-wendio.sh` | 1re installation : copie systemd unit + Caddyfile, activate au boot, démarre le service | **1× sur le VPS** après le 1er deploy |
-| `deploy.sh` | rsync code (exclut `node_modules`, `.git`, `Manual/`, `deploy/`) + `npm ci --omit=dev` + restart systemd + healthcheck HTTP. Variables : `VPS_HOST=100.84.108.49`, `VPS_PORT=2243` | **Depuis le poste local**, à chaque push |
+| `deploy.sh` | rsync code (exclut `node_modules`, `.git`, `Manual/`, `deploy/`) + `npm ci --omit=dev` + restart systemd + healthcheck HTTP. Variables lues depuis `.deploy.env` (gitignored, **fait foi**) : `VPS_HOST` (actuellement `100.70.50.17`), `VPS_PORT=2243` | **Depuis le poste local**, à chaque push |
 | `template-jeu.service` | Squelette systemd pour ajouter un futur jeu (placeholders `<JEU>`, `<PORT>`, etc.) | À copier-renommer-éditer puis déposer dans `/etc/systemd/system/<jeu>.service` |
 
 ### Note sécurité
@@ -376,10 +376,10 @@ Wendio sur `http://localhost:3000`, Support sur `http://localhost:5099`. `ALLOWE
 **VPS WHC** « Apps VPS 2G » Ubuntu 24.04 LTS, conteneur **LXC** (pas KVM — visible via `zzz-lxc-service.conf` drop-in systemd) :
 - Hostname : `cloud288212.mywhc.ca`
 - IP publique : `23.27.253.63`
-- IP Tailscale : `100.84.108.49` (device `cloud288212-wendio`, expiry désactivée, même tailnet que VPS Compta)
+- IP Tailscale : `100.70.50.17` (⚠️ **changée après la réinstall post-compromission du 2026-05-20** ; l'ancienne `100.84.108.49` n'est plus valide — `.deploy.env` fait foi ; hostname actuel `cloud-288212`), expiry désactivée, même tailnet que VPS Compta
 - Port SSH : **`2243`** (custom WHC après essais ratés du 11-13 mai, **pas 22**)
 - User : `darkvador` (sudo avec mdp), root login désactivé, password auth désactivée — uniquement clé SSH
-- Connexion : `ssh darkvador@100.84.108.49 -p 2243` (via Tailscale, indépendant du VPN)
+- Connexion : `ssh darkvador@100.70.50.17 -p 2243` (via Tailscale, indépendant du VPN)
 
 **Services tournants** :
 - `wendio.service` : Node 20.20.2 / server.js, écoute `127.0.0.1:5000`
@@ -397,7 +397,7 @@ Wendio sur `http://localhost:3000`, Support sur `http://localhost:5099`. `ALLOWE
 **⚠ Limitation persistante — accès direct bloqué pour l'IP de JF** (depuis 2026-05-11) :
 L'IP publique de JF (`207.96.200.53`, ISP COC Charlesbourg) reste droppée par le réseau iWeb/WHC au hop 6 (`184.107.194.135`) pour `23.27.253.63` tous protocoles. Ticket WHC stagne. **Workaround permanent en place** :
 - **HTTP/HTTPS** : passe par Cloudflare anycast (`104.x` / `172.x`) que WHC ne bloque pas → accès admin restauré sans VPN depuis 2026-05-14
-- **SSH** : via Tailscale `100.84.108.49:2243` (filet de secours indépendant)
+- **SSH** : via Tailscale `100.70.50.17:2243` (filet de secours indépendant)
 
 **Étapes de bootstrap historiques (1× exécutées le 2026-05-13)** :
 1. SSH root via VPN Toronto sur `23.27.253.63:2243`
