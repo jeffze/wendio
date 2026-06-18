@@ -34,6 +34,7 @@ const VERSIONED_FILES = [
   'index.html', 'lobby.html', 'meneur.html', 'meneur-config.html',
   'joueur.html', 'joueur-config.html', 'imprimer.html', 'imprimer-trophees.html', 'demo-duo.html',
   'login.html', 'aide-meneur.html', 'aide-joueur.html', 'admin-meneurs.html', 'accueil.html',
+  'credits.html',
 ];
 let ASSET_VERSION = 'dev';
 try {
