@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WENDIO — Crédits et remerciements</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #1a1008;
+      color: #f4e7d3;
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    .page {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 32px 24px 96px;
+    }
+
+    /* ── Haut (retour) ── */
+    .haut {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    .haut .accueil {
+      color: #c8843a;
+      text-decoration: none;
+      font-size: .95rem;
+      padding: 8px 14px;
+      border: 1px solid #3e2510;
+      border-radius: 10px;
+      transition: background .2s, border-color .2s;
+    }
+    .haut .accueil:hover { background: #2c1a0e; border-color: #c8843a; }
+
+    /* ── Titre ── */
+    .titre-bloc { text-align: center; margin-bottom: 40px; }
+    .titre {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(2rem, 6vw, 3.2rem);
+      font-weight: 900;
+      letter-spacing: .1em;
+      line-height: 1.1;
+      background: linear-gradient(135deg, #d35400 0%, #f39c12 50%, #d35400 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 12px;
+    }
+    .sous-titre {
+      font-size: 1rem;
+      color: #a08060;
+      letter-spacing: .04em;
+    }
+    .intro {
+      text-align: center;
+      max-width: 560px;
+      margin: 0 auto 44px;
+      color: #c8a070;
+      font-style: italic;
+      font-size: 1.02rem;
+    }
+
+    /* ── Cartes de remerciement ── */
+    .merci {
+      background: #221710;
+      border: 1px solid #3e2510;
+      border-radius: 16px;
+      padding: 28px 28px;
+      margin-bottom: 22px;
+    }
+    .merci .nom {
+      font-family: 'Cinzel', serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #f39c12;
+      letter-spacing: .03em;
+      margin-bottom: 4px;
+    }
+    .merci .role {
+      font-size: .9rem;
+      color: #a08060;
+      font-style: italic;
+      margin-bottom: 14px;
+    }
+    .merci .role:empty { display: none; margin: 0; }
+    .merci .texte {
+      font-size: 1.05rem;
+      color: #f4e7d3;
+      line-height: 1.7;
+    }
+
+    /* ── Pied de page ── */
+    footer {
+      margin-top: 48px;
+      font-size: .82rem;
+      color: #6a4a28;
+      text-align: center;
+      font-style: italic;
+      letter-spacing: .03em;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="page">
+
+    <div class="haut">
+      <a class="accueil" href="lobby.html" data-i18n="aide.retour">← Retour au lobby</a>
+    </div>
+
+    <div class="titre-bloc">
+      <div class="titre" data-i18n="credits.titre">Crédits et remerciements</div>
+      <div class="sous-titre" data-i18n="credits.sous_titre">WENDIO — Le Jeu des Clans</div>
+    </div>
+
+    <p class="intro" data-i18n="credits.intro">Merci à celles et ceux qui ont rendu WENDIO possible.</p>
+
+    <div class="merci">
+      <div class="nom" data-i18n="credits.sonia.nom">Sonia Gros-Louis</div>
+      <div class="role" data-i18n="credits.sonia.role"></div>
+      <div class="texte" data-i18n="credits.sonia.txt">Un grand merci à madame Sonia Gros-Louis pour son soutien indéfectible et ses conseils avisés tout au long de ce projet.</div>
+    </div>
+
+    <div class="merci">
+      <div class="nom" data-i18n="credits.andree.nom">Andrée Levesque Sioui</div>
+      <div class="role" data-i18n="credits.andree.role">autrice-interprète</div>
+      <div class="texte" data-i18n="credits.andree.txt">Nous exprimons notre profonde gratitude à madame Andrée Levesque Sioui, autrice-interprète, qui a prêté sa voix et son talent à la création des 72 fichiers audio en wendat, français et anglais, donnant ainsi toute sa richesse à l'application WENDIO.</div>
+    </div>
+
+    <footer data-i18n="credits.footer">Une main sur le passé, une oreille sur l'avenir.</footer>
+
+  </div>
+
+<script src="i18n.js"></script>
+<script src="/auth-widget.js" defer></script>
+<script src="/_widget-loader.js" defer></script>
+</body>
+</html>
