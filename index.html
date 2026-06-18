@@ -168,6 +168,24 @@
       opacity: .85;
     }
 
+    /* Lien crédits discret, ancré en bas */
+    .credits-lien {
+      position: fixed;
+      bottom: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 2;
+      font-family: 'Segoe UI', sans-serif;
+      font-size: .72rem;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      text-decoration: none;
+      color: var(--bone-mute);
+      opacity: .65;
+      transition: color .2s, opacity .2s;
+    }
+    .credits-lien:hover { color: var(--amber-lt); opacity: 1; }
+
     @media (max-width: 480px) {
       .cta-row { flex-direction: column; gap: .7rem; }
       .btn { width: 100%; max-width: 280px; justify-content: center; }
@@ -224,6 +242,8 @@
     </div>
 
   </div>
+
+  <a class="credits-lien" href="credits.html">Crédits</a>
 
   <script>
     // Pressed Enter on landing -> defaults to "Je joue" (parcours le plus frequent)
