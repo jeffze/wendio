@@ -63,7 +63,7 @@ Then open `http://localhost:3000` (redirects to `lobby.html`).
 | `cartes/` | 72 cartes numérotées + 4 cartes-trophées clan (`clan-{1..4}pt.jpg`) |
 | `sound/` | WAV audio files named `Wendat numbers {num}.wav` |
 | `sources/` | PNG des 4 animaux clans (utilisés dans `accueil.html`) |
-| `scripts/export-cartes.js` | Conversion `D:/Carte Wendio/*.png` → `cartes/*.jpg` (sharp, qualité 85). Sans filtre — le client gère le rendu côté source |
+| `scripts/export-cartes.js` | Conversion `D:/_sources/Wendio/Carte5/*.png` → `cartes/*.jpg` (sharp, qualité 85). `SRC` = dernier lot Sylvain rangé dans `_sources/Wendio/CarteN` (v1=`Carte`, v2=`Carte2`… v5=`Carte5`) ; bumper `SRC` à chaque nouveau lot. Sans filtre — le client gère le rendu côté source |
 | `deploy/` | Scripts de déploiement VPS Ubuntu 24.04 dédié jeux Sylvain : `setup-vps.sh`, `Caddyfile`, `wendio.service`, `install-wendio.sh`, `deploy.sh` (cf. section Déploiement) |
 | `Manual/` | Documents de référence (gitignored) : PPTX, PDFs règles, vidéo démo |
 
