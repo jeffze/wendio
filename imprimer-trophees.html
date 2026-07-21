@@ -259,7 +259,8 @@
     const nom  = document.getElementById('input-nom').value.trim();
     const date = document.getElementById('input-date').value.trim();
 
-    // Ordre fixe : on respecte l'ordre WENDIO logique (Chevreuil → Loup → Ours → Tortue)
+    // Ordre fixe : préséance du mythe de création (Chevreuil → Tortue → Ours → Loup),
+    // porté par l'ordre des clés de CLANS dans data.js.
     Object.keys(CLANS).forEach(clanNom => {
       if (!clansSelectionnes.has(clanNom)) return;
       wrap.appendChild(creerPage(clanNom, nom, date));
