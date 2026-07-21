@@ -12,7 +12,5 @@ cartes-orig/
 # DB auth meneur (sqlite local)
 data/
 
-# Artefacts régénérables depuis _modele-financier/offre-client.html (lourds)
-_modele-financier/*.pdf
-_modele-financier/*.zip
-_modele-financier/pack-sylvain/
+# Économie interne — JAMAIS public (purgé de l'historique 2026-07-21)
+_modele-financier/
