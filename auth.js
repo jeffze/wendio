@@ -19,11 +19,30 @@ function isValidEmail(email) {
 
 function createMagicToken(email, { ip, userAgent } = {}) {
   const token = crypto.randomBytes(32).toString('hex');
-  const expiresAt = new Date(Date.now() + MAGIC_TTL_MIN * 60 * 1000).toISOString();
+  // expires_at stocké au format SQLite (datetime('now', '+N minutes')) pour que la
+  // comparaison `expires_at > datetime('now')` soit correcte. Un ISO toISOString()
+  // ('2026-...T..Z') se comparait lexicographiquement au format SQLite ('2026-... ..')
+  // et le 'T' > ' ' faisait que le TTL ne se déclenchait jamais dans la même journée.
   db.prepare(
-    `INSERT INTO magic_tokens (token, email, expires_at, ip, user_agent) VALUES (?, ?, ?, ?, ?)`
-  ).run(token, email, expiresAt, ip || null, userAgent || null);
+    `INSERT INTO magic_tokens (token, email, expires_at, ip, user_agent)
+     VALUES (?, ?, datetime('now', ?), ?, ?)`
+  ).run(token, email, `+${MAGIC_TTL_MIN} minutes`, ip || null, userAgent || null);
   return token;
+}
+
+// Valide un jeton SANS le consommer (jeton non consommé + non expiré).
+// Utilisé par le GET /auth/verify pour afficher un écran de confirmation :
+// les scanners d'email institutionnels (Microsoft Safe Links, etc.) pré-ouvrent
+// le lien en GET et consommeraient un jeton à usage unique avant que l'humain
+// ne clique. On ne consomme donc qu'au POST de confirmation (ticket #38).
+function peekMagicToken(token) {
+  if (!token) return null;
+  return db
+    .prepare(
+      `SELECT * FROM magic_tokens
+       WHERE token = ? AND consumed_at IS NULL AND expires_at > datetime('now')`
+    )
+    .get(token) || null;
 }
 
 function consumeMagicToken(token) {
@@ -52,11 +71,13 @@ function touchLastLogin(userId) {
 
 function createSession(userId, { ip, userAgent } = {}) {
   const id = crypto.randomBytes(32).toString('hex');
-  const expiresAt = new Date(Date.now() + SESSION_TTL_DAYS * 86400 * 1000).toISOString();
+  // Même correctif de format que createMagicToken : expires_at en datetime SQLite
+  // pour que `expires_at > datetime('now')` (getSessionUser) compare correctement.
   db.prepare(
-    `INSERT INTO sessions (id, user_id, expires_at, ip, user_agent) VALUES (?, ?, ?, ?, ?)`
-  ).run(id, userId, expiresAt, ip || null, userAgent || null);
-  return { id, expiresAt };
+    `INSERT INTO sessions (id, user_id, expires_at, ip, user_agent)
+     VALUES (?, ?, datetime('now', ?), ?, ?)`
+  ).run(id, userId, `+${SESSION_TTL_DAYS} days`, ip || null, userAgent || null);
+  return { id };
 }
 
 function getSessionUser(sessionId) {
@@ -157,6 +178,7 @@ module.exports = {
   normEmail,
   isValidEmail,
   createMagicToken,
+  peekMagicToken,
   consumeMagicToken,
   getUser,
   touchLastLogin,

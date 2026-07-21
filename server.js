@@ -19,6 +19,7 @@ const io         = new Server(httpServer);
 app.disable('x-powered-by');
 
 app.use(express.json({ limit: '100kb' }));
+app.use(express.urlencoded({ extended: false, limit: '10kb' })); // formulaire de confirmation magic link
 app.use(tenantMw.attachTenant);
 app.use(auth.attachUser);
 
@@ -122,9 +123,61 @@ app.post('/auth/request', async (req, res) => {
   res.json({ ok: true });
 });
 
+function sanitizeNext(next_) {
+  // Toujours interne — pas d'open redirect
+  return next_.startsWith('/') && !next_.startsWith('//') ? next_ : '/lobby.html';
+}
+
+// Nonce anti-CSRF de connexion (double-submit) : posé en cookie au GET, réémis
+// dans un champ caché, revérifié au POST. Empêche un POST forgé cross-site de
+// connecter la victime dans un compte tiers (login-CSRF). Le cookie SameSite=Lax
+// n'accompagne pas un POST cross-site → le nonce ne matche pas.
+const VERIFY_CSRF_COOKIE = 'verify_csrf';
+function verifyCsrfCookie(nonce, { clear = false } = {}) {
+  return auth.serializeCookie(VERIFY_CSRF_COOKIE, nonce, {
+    httpOnly: true, secure: process.env.NODE_ENV === 'production',
+    sameSite: 'Lax', maxAge: clear ? 0 : 1800 * 1000, path: '/auth/verify',
+  });
+}
+function verifyCsrfMatches(req) {
+  const submitted = String(req.body?.csrf || '');
+  const expected = auth.parseCookies(req.headers.cookie)[VERIFY_CSRF_COOKIE] || '';
+  if (!expected || submitted.length !== expected.length) return false;
+  return crypto.timingSafeEqual(Buffer.from(submitted), Buffer.from(expected));
+}
+
+// GET = on NE consomme PAS le jeton (ticket #38). Les scanners d'email
+// institutionnels (Microsoft Safe Links au Cégep, etc.) pré-ouvrent le lien en
+// GET ; s'ils consommaient le jeton à usage unique, l'utilisateur trouverait le
+// lien « expiré » avant même d'avoir cliqué. On valide le jeton et on affiche un
+// bouton de confirmation ; le jeton n'est consommé qu'au POST ci-dessous.
 app.get('/auth/verify', (req, res) => {
   const token = String(req.query.token || '');
-  const next_ = String(req.query.next || '/lobby.html');
+  const next_ = sanitizeNext(String(req.query.next || '/lobby.html'));
+  const row = auth.peekMagicToken(token);
+  if (!row) {
+    return res.status(400).type('html').send(renderErrorPage(
+      'Lien invalide ou expiré',
+      'Demande un nouveau lien depuis la page de connexion.'
+    ));
+  }
+  const nonce = crypto.randomBytes(16).toString('hex');
+  res.setHeader('Cache-Control', 'no-store');
+  res.setHeader('Set-Cookie', verifyCsrfCookie(nonce));
+  res.type('html').send(renderConfirmPage(token, next_, nonce));
+});
+
+// POST = confirmation humaine : c'est ici qu'on consomme le jeton et crée la session.
+app.post('/auth/verify', (req, res) => {
+  const token = String(req.body?.token || req.query.token || '');
+  const next_ = sanitizeNext(String(req.body?.next || req.query.next || '/lobby.html'));
+  // Anti-CSRF de connexion : le nonce du formulaire doit matcher le cookie posé au GET.
+  if (!verifyCsrfMatches(req)) {
+    return res.status(400).type('html').send(renderErrorPage(
+      'Lien invalide ou expiré',
+      'Ta page de confirmation a expiré. Demande un nouveau lien depuis la page de connexion.'
+    ));
+  }
   const row = auth.consumeMagicToken(token);
   if (!row) {
     return res.status(400).type('html').send(renderErrorPage(
@@ -150,10 +203,11 @@ app.get('/auth/verify', (req, res) => {
   }
   auth.touchLastLogin(user.id);
   const session = auth.createSession(user.id, { ip: req.ip, userAgent: req.get('user-agent') });
-  res.setHeader('Set-Cookie', auth.serializeCookie(auth.SESSION_COOKIE, session.id, auth.cookieOptions()));
-  // Redirige vers next_ (toujours interne — pas d'open redirect)
-  const safeNext = next_.startsWith('/') && !next_.startsWith('//') ? next_ : '/lobby.html';
-  res.redirect(safeNext);
+  res.setHeader('Set-Cookie', [
+    auth.serializeCookie(auth.SESSION_COOKIE, session.id, auth.cookieOptions()),
+    verifyCsrfCookie('', { clear: true }),
+  ]);
+  res.redirect(next_);
 });
 
 app.post('/auth/logout', (req, res) => {
@@ -206,6 +260,39 @@ a:hover{color:#f39c12;text-decoration:underline}
 </style></head>
 <body><div class="card"><div class="label">WENDIO · Feu de conseil</div><h1>${esc(title)}</h1><p>${esc(body)}</p>
 <p><a href="/login">← Retour à la connexion</a></p></div></body></html>`;
+}
+
+// Écran de confirmation du magic link : le jeton (dans le champ caché) n'est
+// consommé que lorsque l'humain soumet ce formulaire (POST). Les scanners d'email
+// suivent les GET mais ne soumettent pas de formulaire — le jeton reste valide
+// pour le vrai clic de l'utilisateur (ticket #38).
+function renderConfirmPage(token, next_, csrf) {
+  function esc(s) { return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;' }[c])); }
+  return `<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Confirmer ta connexion</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600&family=Inter:wght@400;500&display=swap">
+<style>
+body{margin:0;background:#1a1008;color:#f4e7d3;font-family:'Inter',-apple-system,Segoe UI,Roboto,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px}
+.card{background:#221710;border:1px solid rgba(244,231,211,.10);padding:36px 32px;border-radius:14px;max-width:420px;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.4)}
+.label{font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#8a5c2a;margin-bottom:14px}
+h1{margin:0 0 12px;font-family:'Cinzel',Georgia,serif;font-size:22px;font-weight:600;background:linear-gradient(135deg,#e8a85a 0%,#c8843a 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+p{margin:0 0 20px;color:#b89978;line-height:1.55}
+button{font-family:'Cinzel',Georgia,serif;font-size:15px;font-weight:600;letter-spacing:.04em;color:#1a0e02;border:0;border-radius:8px;padding:13px 28px;cursor:pointer;background:linear-gradient(135deg,#f39c12 0%,#d35400 100%)}
+button:hover{filter:brightness(1.07)}
+a{color:#e8a85a;text-decoration:none;font-weight:500;font-size:.9rem}
+a:hover{color:#f39c12;text-decoration:underline}
+</style></head>
+<body><div class="card"><div class="label">WENDIO · Feu de conseil</div>
+<h1>Confirmer ta connexion</h1>
+<p>Clique sur le bouton pour ouvrir ta session de meneur.</p>
+<form method="POST" action="/auth/verify">
+<input type="hidden" name="token" value="${esc(token)}">
+<input type="hidden" name="next" value="${esc(next_)}">
+<input type="hidden" name="csrf" value="${esc(csrf)}">
+<button type="submit">Se connecter →</button>
+</form>
+<p style="margin:18px 0 0"><a href="/login">Demander un nouveau lien</a></p>
+</div></body></html>`;
 }
 
 // Intercepte les requetes HTML avant express.static pour injecter
