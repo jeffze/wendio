@@ -26,6 +26,11 @@ npm start
 # → http://localhost:3000
 ```
 
+```bash
+# Tests (runner intégré Node, aucune dépendance)
+npm test
+```
+
 Then open `http://localhost:3000` (redirects to `lobby.html`).
 
 ## Architecture
@@ -37,7 +42,7 @@ Then open `http://localhost:3000` (redirects to `lobby.html`).
 **`lobby.html`** — Hub de navigation (atteint après la couverture) :
 - Meneur de Jeu (`meneur-config.html` → page de config 3 étapes → `meneur.html?mode=…&tirage=…&clan=…`)
 - Cartes à imprimer (`imprimer.html`)
-- Trophées à imprimer (`imprimer-trophees.html`)
+- Cartes-gagnant·e à imprimer (`imprimer-trophees.html`)
 - Carte numérique joueur (`joueur.html`)
 - Mode Démo (`demo.html`)
 
@@ -53,14 +58,15 @@ Then open `http://localhost:3000` (redirects to `lobby.html`).
 | `meneur.html` | Game master: draws numbers, broadcasts via Socket.io |
 | `joueur.html` | Player card: marks numbers, declares victory |
 | `imprimer.html` | Generates 4 random cards on an A4 page for printing |
-| `imprimer-trophees.html` | Page d'impression des cartes-trophées par clan, avec nom du gagnant optionnel + date (1 trophée par page A4, sélection multi-clans = N pages) |
+| `imprimer-trophees.html` | Page d'impression des cartes-gagnant·e par clan, avec nom du gagnant optionnel + date (1 carte par page A4, sélection multi-clans = N pages) |
 | `demo.html` | Mode démo : sélection de scénario avec config automatique |
 | `data.js` | Shared game data: grid config, clans, Wendat vocabulary, card generation |
+| `test/regles.test.js` | Tests `node:test` du mapping clan ↔ condition ↔ points et de `victoireValide()`. Lancer avec `npm test` |
 | `i18n.js` | Toggle FR/EN injecté automatiquement en haut à droite de chaque page ; dictionnaire centralisé, persistance `localStorage['wendio-lang']`, hook `i18n.onLangChange(cb)` pour ré-render les textes composés (cf. section i18n) |
 | `server.js` | Node.js + Express + Socket.io multiplayer server (bind `HOST` env var, défaut `0.0.0.0` en dev, `127.0.0.1` en prod via systemd) |
 | `qrcode.min.js` | QR code generation library (used by meneur to share game code) |
 | `script.js` / `style.css` | Legacy stubs — **not used**; all logic and styles are inline |
-| `cartes/` | 72 cartes numérotées + 4 cartes-trophées clan (`clan-{1..4}pt.jpg`) |
+| `cartes/` | 72 cartes numérotées + 4 cartes-gagnant·e par clan (`clan-<nom>.jpg`, chemin déclaré dans `CLANS[].image`). Voir `cartes/README-images-clans.md` |
 | `sound/` | WAV audio files named `Wendat numbers {num}.wav` |
 | `sources/` | PNG des 4 animaux clans (utilisés dans `accueil.html`) |
 | `scripts/export-cartes.js` | Conversion `D:/_sources/Wendio/Carte5/*.png` → `cartes/*.jpg` (sharp, qualité 85). `SRC` = dernier lot Sylvain rangé dans `_sources/Wendio/CarteN` (v1=`Carte`, v2=`Carte2`… v5=`Carte5`) ; bumper `SRC` à chaque nouveau lot. Sans filtre — le client gère le rendu côté source |
@@ -76,7 +82,7 @@ The server manages game sessions identified by a 4-character code (e.g. `AB3K`).
 
 | Event | Payload | Émetteur | Effet |
 |-------|---------|----------|-------|
-| `creer` | `{ clan }` | meneur | crée la partie avec le clan **imposé** ; reply `partie-creee` |
+| `creer` | `{ clan }` | meneur | crée la partie avec le clan **proposé** ; reply `partie-creee` |
 | `rejoindre` | `{ code, nom, sessionToken }` | joueur | rejoint ou **se reconnecte** ; reply `rejoint` avec `{ tirages, clan, carte }` |
 | `demarrer` | `{ code }` | meneur | clôt les inscriptions ; broadcast `partie-demarree` |
 | `tirer` | `{ code }` | meneur | tire un numéro ; broadcast `numero-tire` |
@@ -101,7 +107,7 @@ The server manages game sessions identified by a 4-character code (e.g. `AB3K`).
 
 #### Règles invariantes du flow online
 
-1. **Clan imposé** : le meneur choisit un clan unique avant `creer`. Tous les joueurs jouent ce clan. Pas de sélection de clan côté joueur.
+1. **Clan proposé** : le meneur choisit un clan unique avant `creer`. Tous les joueurs jouent ce clan. Pas de sélection de clan côté joueur.
 2. **Cartes uniques** : générées côté serveur avec déduplication par hash dans `partie.cartes` (Set). Pas de doublon possible dans une même partie.
 3. **Premier gagnant = fin** : `victoire` valide → broadcast `gagnant` + `partie-terminee` immédiats, `partie.terminee = true`, partie supprimée. Plus aucune autre victoire acceptée.
 4. **Anti-troll** : `victoire` est validée côté serveur — le socket doit être inscrit dans la partie ET sa carte doit réellement remplir la condition (`victoireValide(carte, clan, tirages)` reproduit la logique de `verifierVictoire` côté client).
@@ -120,9 +126,14 @@ The server manages game sessions identified by a 4-character code (e.g. `AB3K`).
 - `victoire` : socket inscrit && carte remplit la condition pour `partie.clan`
 - `terminer`, `demarrer` : `partie.maitre === socket.id`
 
-`CLAN_VICTOIRE = { Chevreuil: 'ligne', Loup: 'coins', Ours: 'carre', Tortue: 'pleine' }` reproduit côté serveur. `victoireValide(carte, clan, tirages)` parcourt la grille selon le mode et retourne `true` ssi la condition est remplie. Idem `estCoeur` et `valeurCase` répliqués (depuis `data.js`).
+`server.js` require `data.js` — il n'y a plus de miroir. `victoireValide(carte,
+clan, tirages)` vit dans `data.js`, lit la condition dans `CLANS[clan].victoire`
+et est couverte par `test/regles.test.js` (`npm test`, runner `node --test`).
 
-Pour `'ligne'` (Chevreuil), la victoire accepte : (1) toute rangée horizontale, (2) toute colonne verticale, (3) la diagonale principale `\` (0,0)→(5,5), (4) la diagonale anti `/` (0,5)→(5,0). Les cases cœur (N2, N3, D2, D3) comptent comme libres dans toutes ces lignes — d'où des lignes effectives de 4 ou 6 cases selon le tracé.
+Pour `'ligne'` (Loup), la victoire accepte : (1) toute rangée horizontale,
+(2) toute colonne verticale, (3) la diagonale principale `\` (0,0)→(5,5),
+(4) la diagonale anti `/` (0,5)→(5,0). Les cases cœur (N2, N3, D2, D3) comptent
+comme libres dans toutes ces lignes.
 
 **Offline mode**: both `meneur.html` and `joueur.html` have a local/online toggle. In local mode, Socket.io is not used.
 
@@ -147,10 +158,14 @@ The grid is 6×6, columns labeled **W-E-N-D-I-O** (note: **I**, not A):
 
 | Clan | Wendat Name | Victory | Points |
 |------|-------------|---------|--------|
-| Chevreuil 🦌 | Ohskënonton' | One complete line: horizontal, vertical, or main diagonal (4–6 cells, hearts count as free) | 1 pt |
-| Loup 🐺 | Yānariskwa' | All 4 corners | 2 pts |
-| Ours 🐻 | Yānionyen' | 12-cell protective ring around center | 3 pts |
-| Tortue 🐢 | Yāndia'wich | All 32 numbered cells | 4 pts |
+| Chevreuil 🦌 | Ohskënonton' | All 32 numbered cells | 4 pts |
+| Tortue 🐢 | Yāndia'wich | 12-cell protective ring around center | 3 pts |
+| Ours 🐻 | Yānionyen' | All 4 corners | 2 pts |
+| Loup 🐺 | Yānariskwa' | One complete line: horizontal, vertical, or main diagonal (4–6 cells, hearts count as free) | 1 pt |
+
+Order follows the Wendat creation myth (Chevreuil, Tortue, Ours, Loup) — the key
+order of `CLANS` in `data.js` is the single source of truth and propagates to
+every page that iterates over it.
 
 The 4 center heart cells display clan icons (🐢🐻🐺🦌) — they are not just free spaces, they incarnate the clans.
 
@@ -166,13 +181,13 @@ The 4 center heart cells display clan icons (🐢🐻🐺🦌) — they are not 
 ### `meneur.html`
 - `setMode(mode)` — toggles `local` ↔ `online`. Pose `body.mode-online` (CSS cache `#btn-creer-partie` hors online). Le bouton TIRER reste désactivé tant que la partie n'est pas prête (online : jusqu'à `commencerPartie()` ; local : jusqu'au choix de clan)
 - `setModePhysique(physique)` — toggles between `aléatoire` and `physique` draw modes; adds/removes `body.mode-physique` class
-- `genererBoutonsClanMeneur()` / `choisirClanMeneur(nom)` — UI de sélection du clan **imposé** (4 boutons radio), **en local comme en online** (Sylvain feedback 2026-05-04 : « aucun numéro ne peut être tiré sans ce choix »). Les boutons sont toujours visibles dans la sidebar
+- `genererBoutonsClanMeneur()` / `choisirClanMeneur(nom)` — UI de sélection du clan **proposé** (4 boutons radio), **en local comme en online** (Sylvain feedback 2026-05-04 : « aucun numéro ne peut être tiré sans ce choix »). Les boutons sont toujours visibles dans la sidebar
 - `creerPartie()` — emits `creer` with `{ clan: clanChoisi }` (bouton désactivé tant qu'aucun clan choisi, visible uniquement en mode online)
 - `commencerPartie()` — emits `demarrer` ; cache `#zone-code` (code + lien), `#qr-bloc`, `#barre-connexion` (toggle Local/En ligne) et `#barre-tirage` (toggle Aléatoire/Physique) ; affiche le pill `#status-online` « 🌐 Partie en ligne » à la place ; **active `#btn-tirer`**. Toggles immutables une fois la partie lancée. Restauration auto via `nouvellePartieMeneur()`.
 - `actionTirer()` — draws a random number (locally or via socket); hidden in physical mode ; early return si `partieTerminee` ou `!clanChoisi`
 - `clanLabel(nom)` — helper i18n : retourne le label de victoire traduit (`t('clan.<nom>.victoire')`) avec fallback sur `CLANS[nom].label`
 - `afficherCarte(num)` — adds `.visible` class to `#carte-numero` (never sets `style.display` directly — the class drives both portrait `display:block` and landscape `display:flex`)
-- `afficherGagnant(nom, clan)` — shows win overlay (un seul gagnant par partie, plus de rang) ; affiche aussi la carte-trophée `cartes/clan-{points}pt.jpg` dans `#win-trophee` selon `CLANS[clan].points`
+- `afficherGagnant(nom, clan)` — shows win overlay (un seul gagnant par partie, plus de rang) ; affiche aussi la carte-gagnant·e (`CLANS[clan].image`) dans `#win-trophee` si `CLANS[clan].points` est défini
 - `terminerCoteMeneur(raison)` — handler de `partie-terminee` ; désactive btn-tirer ; transforme btn-arreter en bouton vert "🔄 Nouvelle partie" ; **fallback overlay** si raison='gagnant' et overlay non visible
 - `nouvellePartieMeneur({ skipTerminer })` — reset complet, retour à l'écran de choix de clan ; restaure btn-arreter dans son état initial
 - `resetJeu()` — resets game state; removes `.visible` from `#carte-numero`
@@ -186,14 +201,14 @@ The 4 center heart cells display clan icons (🐢🐻🐺🦌) — they are not 
 - `nouvellePartie()` — resets all state, returns to setup view (mode local uniquement — voir `quitterPartie()` pour le mode online) ; clear `selectionnees` + `sessionStorage`
 - `quitterPartie()` — disconnect socket + clear `sessionStorage['wendio-token']` + `clearSelections()` + redirect vers `lobby.html`. Appelé depuis le win-overlay.
 - `demarrer()` — init; auto-activates online mode if `?code=` param present
-- `validerFormulaire()` — validates name only (le clan est imposé par le meneur en mode online)
+- `validerFormulaire()` — validates name only (le clan est proposé par le meneur en mode online)
 - `rejoindrePartie()` — emits `rejoindre` with `{ code, nom, sessionToken }` ; le bouton est désactivé après le 1er click (anti double-click)
 - `setClan(nom)` — local mode only ; sets active clan, highlights target cells via `estCible()` ; pose `dataset.clan` sur `#objectif` pour la re-traduction i18n ; en online le clan vient du serveur via l'event `rejoint`
 - `clanLabel(nom)` / `objectifTexte(nom)` — helpers i18n pour les textes composés (label victoire, objectif complet avec points)
 - `rendreGrille()` — renders the card grid into the DOM
 - `verifierVictoire()` — checks win condition for active clan after each mark ; affiche le bouton WENDIO! (online) ou directement le win-overlay (local)
 - `declarerVictoire()` — emits `victoire { code }` ; le serveur valide la carte avant d'accepter
-- `afficherGagnant(nom, clan, isMoi)` — overlay vert ; texte différent si `isMoi` (« Bravo X ! ») ou non (« X a gagné ») ; affiche la carte-trophée `cartes/clan-{points}pt.jpg` (Chevreuil=1pt, Loup=2pt, Ours=3pt, Tortue=4pt) avec animation pop ; persiste `{nom, clan, isMoi}` dans `dataset.gagnant` pour re-traduction
+- `afficherGagnant(nom, clan, isMoi)` — overlay vert ; texte différent si `isMoi` (« Bravo X ! ») ou non (« X a gagné ») ; affiche la carte-gagnant·e (`CLANS[clan].image`) avec animation pop ; persiste `{nom, clan, isMoi}` dans `dataset.gagnant` pour re-traduction
 - `afficherInfoNumero(num)` — affiche la carte complète du numéro dans `#annonce` ; appelée au clic sur toute case non-cœur et à chaque `numero-tire` online
 - `rejouerSon()` — rejoue le son du `dernierNumeroClique`
 - `persistSelections()` / `loadSelections()` / `clearSelections()` — persistance `selectionnees` dans `sessionStorage['wendio-selections-<sessionToken>']` (cf. section ci-dessous)
