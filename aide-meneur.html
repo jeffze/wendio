@@ -427,7 +427,7 @@
       Chaque partie se joue avec <strong>un seul clan imposé par toi</strong>. Tous les joueurs ont la même condition de victoire. Plus le clan est rare (et exigeant), plus il rapporte de points.
     </p>
     <p data-i18n="aide.s4.coeur">
-      <strong>Les 4 cases centrales (le Cœur)</strong> sont toujours libres dans toutes les conditions. Elles affichent les icônes des clans 🦌🐺🐻🐢 — ce ne sont pas juste des cases gratuites, elles incarnent les clans au centre de la carte.
+      <strong>Les 4 cases centrales (le Cœur)</strong> sont toujours libres dans toutes les conditions. Elles affichent les icônes des clans 🦌🐢🐻🐺 — ce ne sont pas juste des cases gratuites, elles incarnent les clans au centre de la carte.
     </p>
 
     <div class="clans-grille">
@@ -435,6 +435,94 @@
       <div class="clan-carte chevreuil">
         <h4>🦌 Chevreuil</h4>
         <div class="wendat">Ohskënonton'</div>
+        <svg width="120" height="120" viewBox="0 0 120 120" aria-label="Carte pleine">
+          <!-- Toutes les cases numérotées (32) en vert -->
+          <g fill="#82c060" stroke="#a0d878" stroke-width="1.5">
+            <rect x="0" y="0" width="20" height="20"/><rect x="20" y="0" width="20" height="20"/><rect x="40" y="0" width="20" height="20"/><rect x="60" y="0" width="20" height="20"/><rect x="80" y="0" width="20" height="20"/><rect x="100" y="0" width="20" height="20"/>
+            <rect x="0" y="20" width="20" height="20"/><rect x="20" y="20" width="20" height="20"/><rect x="40" y="20" width="20" height="20"/><rect x="60" y="20" width="20" height="20"/><rect x="80" y="20" width="20" height="20"/><rect x="100" y="20" width="20" height="20"/>
+            <rect x="0" y="40" width="20" height="20"/><rect x="20" y="40" width="20" height="20"/><rect x="80" y="40" width="20" height="20"/><rect x="100" y="40" width="20" height="20"/>
+            <rect x="0" y="60" width="20" height="20"/><rect x="20" y="60" width="20" height="20"/><rect x="80" y="60" width="20" height="20"/><rect x="100" y="60" width="20" height="20"/>
+            <rect x="0" y="80" width="20" height="20"/><rect x="20" y="80" width="20" height="20"/><rect x="40" y="80" width="20" height="20"/><rect x="60" y="80" width="20" height="20"/><rect x="80" y="80" width="20" height="20"/><rect x="100" y="80" width="20" height="20"/>
+            <rect x="0" y="100" width="20" height="20"/><rect x="20" y="100" width="20" height="20"/><rect x="40" y="100" width="20" height="20"/><rect x="60" y="100" width="20" height="20"/><rect x="80" y="100" width="20" height="20"/><rect x="100" y="100" width="20" height="20"/>
+          </g>
+          <!-- Coeur central -->
+          <g fill="#5a3a1a" stroke="#7a5a3a" stroke-width="1">
+            <rect x="40" y="40" width="20" height="20"/><rect x="60" y="40" width="20" height="20"/>
+            <rect x="40" y="60" width="20" height="20"/><rect x="60" y="60" width="20" height="20"/>
+          </g>
+        </svg>
+        <div class="victoire" data-i18n="aide.s4.chevreuil.victoire">Les 32 cases numérotées de la carte.</div>
+        <div class="points">4 pts</div>
+      </div>
+
+      <!-- Tortue -->
+      <div class="clan-carte tortue">
+        <h4>🐢 Tortue</h4>
+        <div class="wendat">Yāndia'wich</div>
+        <svg width="120" height="120" viewBox="0 0 120 120" aria-label="Anneau central">
+          <g fill="#2c1a0e" stroke="#4a3020" stroke-width="1">
+            <rect x="0" y="0" width="20" height="20"/><rect x="100" y="0" width="20" height="20"/>
+            <rect x="0" y="100" width="20" height="20"/><rect x="100" y="100" width="20" height="20"/>
+            <rect x="40" y="40" width="20" height="20"/><rect x="60" y="40" width="20" height="20"/>
+            <rect x="40" y="60" width="20" height="20"/><rect x="60" y="60" width="20" height="20"/>
+          </g>
+          <!-- Anneau 12 cases autour du centre (lignes 1-4, cols 1-4) -->
+          <g fill="#c8704a" stroke="#e0815a" stroke-width="1.5">
+            <!-- Ligne 1 : 4 cases (cols 1,2,3,4) -->
+            <rect x="20" y="20" width="20" height="20"/><rect x="40" y="20" width="20" height="20"/><rect x="60" y="20" width="20" height="20"/><rect x="80" y="20" width="20" height="20"/>
+            <!-- Ligne 2 : cols 1 et 4 -->
+            <rect x="20" y="40" width="20" height="20"/><rect x="80" y="40" width="20" height="20"/>
+            <!-- Ligne 3 : cols 1 et 4 -->
+            <rect x="20" y="60" width="20" height="20"/><rect x="80" y="60" width="20" height="20"/>
+            <!-- Ligne 4 : 4 cases -->
+            <rect x="20" y="80" width="20" height="20"/><rect x="40" y="80" width="20" height="20"/><rect x="60" y="80" width="20" height="20"/><rect x="80" y="80" width="20" height="20"/>
+          </g>
+          <!-- Reste en fond -->
+          <g fill="#2c1a0e" stroke="#4a3020" stroke-width="1">
+            <rect x="20" y="0" width="20" height="20"/><rect x="40" y="0" width="20" height="20"/><rect x="60" y="0" width="20" height="20"/><rect x="80" y="0" width="20" height="20"/>
+            <rect x="0" y="20" width="20" height="20"/><rect x="100" y="20" width="20" height="20"/>
+            <rect x="0" y="40" width="20" height="20"/><rect x="100" y="40" width="20" height="20"/>
+            <rect x="0" y="60" width="20" height="20"/><rect x="100" y="60" width="20" height="20"/>
+            <rect x="0" y="80" width="20" height="20"/><rect x="100" y="80" width="20" height="20"/>
+            <rect x="20" y="100" width="20" height="20"/><rect x="40" y="100" width="20" height="20"/><rect x="60" y="100" width="20" height="20"/><rect x="80" y="100" width="20" height="20"/>
+          </g>
+        </svg>
+        <div class="victoire" data-i18n="aide.s4.tortue.victoire">L'anneau de 12 cases qui entoure le Cœur.</div>
+        <div class="points">3 pts</div>
+      </div>
+
+      <!-- Ours -->
+      <div class="clan-carte ours">
+        <h4>🐻 Ours</h4>
+        <div class="wendat">Yānionyen'</div>
+        <svg width="120" height="120" viewBox="0 0 120 120" aria-label="Quatre coins">
+          <g fill="#2c1a0e" stroke="#4a3020" stroke-width="1">
+            <!-- toutes les cases en fond -->
+            <rect x="20" y="0" width="20" height="20"/><rect x="40" y="0" width="20" height="20"/><rect x="60" y="0" width="20" height="20"/><rect x="80" y="0" width="20" height="20"/>
+            <rect x="0" y="20" width="20" height="20"/><rect x="20" y="20" width="20" height="20"/><rect x="40" y="20" width="20" height="20"/><rect x="60" y="20" width="20" height="20"/><rect x="80" y="20" width="20" height="20"/><rect x="100" y="20" width="20" height="20"/>
+            <rect x="0" y="40" width="20" height="20"/><rect x="20" y="40" width="20" height="20"/><rect x="80" y="40" width="20" height="20"/><rect x="100" y="40" width="20" height="20"/>
+            <rect x="0" y="60" width="20" height="20"/><rect x="20" y="60" width="20" height="20"/><rect x="80" y="60" width="20" height="20"/><rect x="100" y="60" width="20" height="20"/>
+            <rect x="0" y="80" width="20" height="20"/><rect x="20" y="80" width="20" height="20"/><rect x="40" y="80" width="20" height="20"/><rect x="60" y="80" width="20" height="20"/><rect x="80" y="80" width="20" height="20"/><rect x="100" y="80" width="20" height="20"/>
+            <rect x="20" y="100" width="20" height="20"/><rect x="40" y="100" width="20" height="20"/><rect x="60" y="100" width="20" height="20"/><rect x="80" y="100" width="20" height="20"/>
+          </g>
+          <g fill="#5a3a1a" stroke="#7a5a3a" stroke-width="1">
+            <rect x="40" y="40" width="20" height="20"/><rect x="60" y="40" width="20" height="20"/>
+            <rect x="40" y="60" width="20" height="20"/><rect x="60" y="60" width="20" height="20"/>
+          </g>
+          <!-- 4 coins en surbrillance -->
+          <g fill="#b8b8b8" stroke="#e0e0e0" stroke-width="1.5">
+            <rect x="0" y="0" width="20" height="20"/><rect x="100" y="0" width="20" height="20"/>
+            <rect x="0" y="100" width="20" height="20"/><rect x="100" y="100" width="20" height="20"/>
+          </g>
+        </svg>
+        <div class="victoire" data-i18n="aide.s4.ours.victoire">Les 4 coins de la carte.</div>
+        <div class="points">2 pts</div>
+      </div>
+
+      <!-- Loup -->
+      <div class="clan-carte loup">
+        <h4>🐺 Loup</h4>
+        <div class="wendat">Yānariskwa'</div>
         <!-- 6x6 grid SVG : une ligne horizontale + coeurs centraux décoratifs -->
         <svg width="120" height="120" viewBox="0 0 120 120" aria-label="Ligne horizontale">
           <!-- Cases de fond -->
@@ -466,102 +554,14 @@
             <rect x="40" y="40" width="20" height="20"/><rect x="60" y="40" width="20" height="20"/>
           </g>
         </svg>
-        <div class="victoire" data-i18n="aide.s4.chevreuil.victoire">Une ligne complète : horizontale, verticale ou diagonale.</div>
+        <div class="victoire" data-i18n="aide.s4.loup.victoire">Une ligne complète : horizontale, verticale ou diagonale.</div>
         <div class="points">1 pt</div>
-      </div>
-
-      <!-- Loup -->
-      <div class="clan-carte loup">
-        <h4>🐺 Loup</h4>
-        <div class="wendat">Yānariskwa'</div>
-        <svg width="120" height="120" viewBox="0 0 120 120" aria-label="Quatre coins">
-          <g fill="#2c1a0e" stroke="#4a3020" stroke-width="1">
-            <!-- toutes les cases en fond -->
-            <rect x="20" y="0" width="20" height="20"/><rect x="40" y="0" width="20" height="20"/><rect x="60" y="0" width="20" height="20"/><rect x="80" y="0" width="20" height="20"/>
-            <rect x="0" y="20" width="20" height="20"/><rect x="20" y="20" width="20" height="20"/><rect x="40" y="20" width="20" height="20"/><rect x="60" y="20" width="20" height="20"/><rect x="80" y="20" width="20" height="20"/><rect x="100" y="20" width="20" height="20"/>
-            <rect x="0" y="40" width="20" height="20"/><rect x="20" y="40" width="20" height="20"/><rect x="80" y="40" width="20" height="20"/><rect x="100" y="40" width="20" height="20"/>
-            <rect x="0" y="60" width="20" height="20"/><rect x="20" y="60" width="20" height="20"/><rect x="80" y="60" width="20" height="20"/><rect x="100" y="60" width="20" height="20"/>
-            <rect x="0" y="80" width="20" height="20"/><rect x="20" y="80" width="20" height="20"/><rect x="40" y="80" width="20" height="20"/><rect x="60" y="80" width="20" height="20"/><rect x="80" y="80" width="20" height="20"/><rect x="100" y="80" width="20" height="20"/>
-            <rect x="20" y="100" width="20" height="20"/><rect x="40" y="100" width="20" height="20"/><rect x="60" y="100" width="20" height="20"/><rect x="80" y="100" width="20" height="20"/>
-          </g>
-          <g fill="#5a3a1a" stroke="#7a5a3a" stroke-width="1">
-            <rect x="40" y="40" width="20" height="20"/><rect x="60" y="40" width="20" height="20"/>
-            <rect x="40" y="60" width="20" height="20"/><rect x="60" y="60" width="20" height="20"/>
-          </g>
-          <!-- 4 coins en surbrillance -->
-          <g fill="#b8b8b8" stroke="#e0e0e0" stroke-width="1.5">
-            <rect x="0" y="0" width="20" height="20"/><rect x="100" y="0" width="20" height="20"/>
-            <rect x="0" y="100" width="20" height="20"/><rect x="100" y="100" width="20" height="20"/>
-          </g>
-        </svg>
-        <div class="victoire" data-i18n="aide.s4.loup.victoire">Les 4 coins de la carte.</div>
-        <div class="points">2 pts</div>
-      </div>
-
-      <!-- Ours -->
-      <div class="clan-carte ours">
-        <h4>🐻 Ours</h4>
-        <div class="wendat">Yānionyen'</div>
-        <svg width="120" height="120" viewBox="0 0 120 120" aria-label="Anneau central">
-          <g fill="#2c1a0e" stroke="#4a3020" stroke-width="1">
-            <rect x="0" y="0" width="20" height="20"/><rect x="100" y="0" width="20" height="20"/>
-            <rect x="0" y="100" width="20" height="20"/><rect x="100" y="100" width="20" height="20"/>
-            <rect x="40" y="40" width="20" height="20"/><rect x="60" y="40" width="20" height="20"/>
-            <rect x="40" y="60" width="20" height="20"/><rect x="60" y="60" width="20" height="20"/>
-          </g>
-          <!-- Anneau 12 cases autour du centre (lignes 1-4, cols 1-4) -->
-          <g fill="#c8704a" stroke="#e0815a" stroke-width="1.5">
-            <!-- Ligne 1 : 4 cases (cols 1,2,3,4) -->
-            <rect x="20" y="20" width="20" height="20"/><rect x="40" y="20" width="20" height="20"/><rect x="60" y="20" width="20" height="20"/><rect x="80" y="20" width="20" height="20"/>
-            <!-- Ligne 2 : cols 1 et 4 -->
-            <rect x="20" y="40" width="20" height="20"/><rect x="80" y="40" width="20" height="20"/>
-            <!-- Ligne 3 : cols 1 et 4 -->
-            <rect x="20" y="60" width="20" height="20"/><rect x="80" y="60" width="20" height="20"/>
-            <!-- Ligne 4 : 4 cases -->
-            <rect x="20" y="80" width="20" height="20"/><rect x="40" y="80" width="20" height="20"/><rect x="60" y="80" width="20" height="20"/><rect x="80" y="80" width="20" height="20"/>
-          </g>
-          <!-- Reste en fond -->
-          <g fill="#2c1a0e" stroke="#4a3020" stroke-width="1">
-            <rect x="20" y="0" width="20" height="20"/><rect x="40" y="0" width="20" height="20"/><rect x="60" y="0" width="20" height="20"/><rect x="80" y="0" width="20" height="20"/>
-            <rect x="0" y="20" width="20" height="20"/><rect x="100" y="20" width="20" height="20"/>
-            <rect x="0" y="40" width="20" height="20"/><rect x="100" y="40" width="20" height="20"/>
-            <rect x="0" y="60" width="20" height="20"/><rect x="100" y="60" width="20" height="20"/>
-            <rect x="0" y="80" width="20" height="20"/><rect x="100" y="80" width="20" height="20"/>
-            <rect x="20" y="100" width="20" height="20"/><rect x="40" y="100" width="20" height="20"/><rect x="60" y="100" width="20" height="20"/><rect x="80" y="100" width="20" height="20"/>
-          </g>
-        </svg>
-        <div class="victoire" data-i18n="aide.s4.ours.victoire">L'anneau de 12 cases qui entoure le Cœur.</div>
-        <div class="points">3 pts</div>
-      </div>
-
-      <!-- Tortue -->
-      <div class="clan-carte tortue">
-        <h4>🐢 Tortue</h4>
-        <div class="wendat">Yāndia'wich</div>
-        <svg width="120" height="120" viewBox="0 0 120 120" aria-label="Carte pleine">
-          <!-- Toutes les cases numérotées (32) en vert -->
-          <g fill="#82c060" stroke="#a0d878" stroke-width="1.5">
-            <rect x="0" y="0" width="20" height="20"/><rect x="20" y="0" width="20" height="20"/><rect x="40" y="0" width="20" height="20"/><rect x="60" y="0" width="20" height="20"/><rect x="80" y="0" width="20" height="20"/><rect x="100" y="0" width="20" height="20"/>
-            <rect x="0" y="20" width="20" height="20"/><rect x="20" y="20" width="20" height="20"/><rect x="40" y="20" width="20" height="20"/><rect x="60" y="20" width="20" height="20"/><rect x="80" y="20" width="20" height="20"/><rect x="100" y="20" width="20" height="20"/>
-            <rect x="0" y="40" width="20" height="20"/><rect x="20" y="40" width="20" height="20"/><rect x="80" y="40" width="20" height="20"/><rect x="100" y="40" width="20" height="20"/>
-            <rect x="0" y="60" width="20" height="20"/><rect x="20" y="60" width="20" height="20"/><rect x="80" y="60" width="20" height="20"/><rect x="100" y="60" width="20" height="20"/>
-            <rect x="0" y="80" width="20" height="20"/><rect x="20" y="80" width="20" height="20"/><rect x="40" y="80" width="20" height="20"/><rect x="60" y="80" width="20" height="20"/><rect x="80" y="80" width="20" height="20"/><rect x="100" y="80" width="20" height="20"/>
-            <rect x="0" y="100" width="20" height="20"/><rect x="20" y="100" width="20" height="20"/><rect x="40" y="100" width="20" height="20"/><rect x="60" y="100" width="20" height="20"/><rect x="80" y="100" width="20" height="20"/><rect x="100" y="100" width="20" height="20"/>
-          </g>
-          <!-- Coeur central -->
-          <g fill="#5a3a1a" stroke="#7a5a3a" stroke-width="1">
-            <rect x="40" y="40" width="20" height="20"/><rect x="60" y="40" width="20" height="20"/>
-            <rect x="40" y="60" width="20" height="20"/><rect x="60" y="60" width="20" height="20"/>
-          </g>
-        </svg>
-        <div class="victoire" data-i18n="aide.s4.tortue.victoire">Les 32 cases numérotées de la carte.</div>
-        <div class="points">4 pts</div>
       </div>
     </div>
 
     <div class="encadre astuce">
       <b data-i18n="aide.s4.astuce.titre">Quel clan choisir ?</b>
-      <span data-i18n="aide.s4.astuce.txt">Pour une partie courte (5-10 min), choisis <strong>Chevreuil</strong> ou <strong>Loup</strong>. Pour une partie pédagogique longue qui fait entendre tous les numéros, choisis <strong>Tortue</strong>. <strong>Ours</strong> est un bon équilibre.</span>
+      <span data-i18n="aide.s4.astuce.txt">Pour une partie courte (5-10 min), choisis <strong>Loup</strong> ou <strong>Ours</strong>. Pour une partie pédagogique longue qui fait entendre tous les numéros, choisis <strong>Chevreuil</strong>. <strong>Tortue</strong> est un bon équilibre.</span>
     </div>
   </section>
 
