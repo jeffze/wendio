@@ -11,11 +11,14 @@ const CONFIG = {
   O: { min: 61, max: 72, count: 6, couleur: '#c0392b' },
 };
 
+// Ordre = préséance du mythe de création wendat (Chevreuil, Tortue, Ours, Loup).
+// Il fait foi partout : meneur.html, imprimer.html et imprimer-trophees.html
+// itèrent sur Object.keys/Object.entries(CLANS).
 const CLANS = {
-  Chevreuil: { icon: '🦌', wendat: "Ohskënonton'", victoire: 'ligne',  points: 1, label: 'Ligne complète (horizontale, verticale ou diagonale)' },
-  Loup:      { icon: '🐺', wendat: "Yānariskwa'",  victoire: 'coins',  points: 2, label: 'Les 4 coins' },
-  Ours:      { icon: '🐻', wendat: "Yānionyen'",   victoire: 'carre',  points: 3, label: 'Carré protecteur (12 cases)' },
-  Tortue:    { icon: '🐢', wendat: "Yāndia'wich",  victoire: 'pleine', points: 4, label: 'Carte pleine (32 cases)' },
+  Chevreuil: { icon: '🦌', wendat: "Ohskënonton'", victoire: 'pleine', points: 4, label: 'Carte pleine (32 cases)',  image: 'cartes/clan-chevreuil.jpg' },
+  Tortue:    { icon: '🐢', wendat: "Yāndia'wich",  victoire: 'carre',  points: 3, label: 'Carré protecteur (12 cases)', image: 'cartes/clan-tortue.jpg' },
+  Ours:      { icon: '🐻', wendat: "Yānionyen'",   victoire: 'coins',  points: 2, label: 'Les 4 coins',              image: 'cartes/clan-ours.jpg' },
+  Loup:      { icon: '🐺', wendat: "Yānariskwa'",  victoire: 'ligne',  points: 1, label: 'Ligne complète (horizontale, verticale ou diagonale)', image: 'cartes/clan-loup.jpg' },
 };
 
 // support #29 — masquer le mode « tirage physique » avant présentation.

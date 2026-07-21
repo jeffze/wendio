@@ -38,12 +38,14 @@ function tiragesPour(carte, cond) {
 }
 
 test('mapping clan → condition → points', () => {
+  // Ordre et points fixés par la recommandation d'Andrée : préséance du mythe
+  // de création (Chevreuil, Tortue, Ours, Loup) = ordre décroissant de points.
   const actuel = Object.entries(CLANS).map(([nom, c]) => [nom, c.victoire, c.points]);
   assert.deepEqual(actuel, [
-    ['Chevreuil', 'ligne',  1],
-    ['Loup',      'coins',  2],
-    ['Ours',      'carre',  3],
-    ['Tortue',    'pleine', 4],
+    ['Chevreuil', 'pleine', 4],
+    ['Tortue',    'carre',  3],
+    ['Ours',      'coins',  2],
+    ['Loup',      'ligne',  1],
   ]);
 });
 
