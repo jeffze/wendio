@@ -1429,7 +1429,7 @@
     winClanEl.textContent  = clan + ' \u2014 ' + clanLabel(clan);
     const trophee = document.getElementById('win-trophee');
     if (c.points) {
-      trophee.src = 'cartes/clan-' + c.points + 'pt.jpg';
+      trophee.src = c.image;
       trophee.classList.add('visible');
     } else {
       trophee.classList.remove('visible');
