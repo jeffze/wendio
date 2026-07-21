@@ -231,23 +231,8 @@ app.get(/\.html$|^\/$/, (req, res, next) => {
 app.use(express.static(path.join(__dirname)));
 
 // ── Config grille + règles de victoire : source unique dans data.js ──
-const { LIGNES, CONFIG, CLANS, estCoeur, valeurCase, victoireValide } = require('./data');
+const { LIGNES, CLANS, genererCarte, victoireValide } = require('./data');
 const CLANS_VALIDES = new Set(Object.keys(CLANS));
-
-function genererCarte() {
-  const carte = {};
-  LIGNES.forEach(ligne => {
-    const { min, max, count } = CONFIG[ligne];
-    const pool = [];
-    for (let i = min; i <= max; i++) pool.push(i);
-    for (let i = pool.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [pool[i], pool[j]] = [pool[j], pool[i]];
-    }
-    carte[ligne] = pool.slice(0, count);
-  });
-  return carte;
-}
 
 function carteHash(carte) {
   return LIGNES.map(l => carte[l].join(',')).join('|');

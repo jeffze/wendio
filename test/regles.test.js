@@ -2,6 +2,8 @@
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
 
 const { LIGNES, CONFIG, CLANS, valeurCase, estCoeur, victoireValide } = require('../data');
 
@@ -84,4 +86,13 @@ test('un clan inconnu ne gagne jamais', () => {
   const tirages = tiragesPour(carte, 'pleine');
   assert.equal(victoireValide(carte, 'Castor', tirages), false);
   assert.equal(victoireValide(carte, undefined, tirages), false);
+});
+
+test('chaque clan pointe vers sa carte-gagnant·e existante', () => {
+  for (const [nom, clan] of Object.entries(CLANS)) {
+    const attendu = `cartes/clan-${nom.toLowerCase()}.jpg`;
+    assert.equal(clan.image, attendu, `${nom}.image devrait valoir ${attendu}`);
+    const chemin = path.join(__dirname, '..', clan.image);
+    assert.equal(fs.existsSync(chemin), true, `${chemin} devrait exister`);
+  }
 });
