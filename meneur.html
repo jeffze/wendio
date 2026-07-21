@@ -842,7 +842,7 @@
   <div class="win-card">
     <h2 data-i18n="meneur.win_titre">&#127805; WENDIO ! &#127805;</h2>
     <div class="win-joueur" id="win-joueur"></div>
-    <img class="win-trophee" id="win-trophee" alt="Carte-trophée du clan">
+    <img class="win-trophee" id="win-trophee" alt="Carte-gagnant·e du clan">
     <div class="win-clan"   id="win-clan"></div>
     <button data-i18n="meneur.btn_fermer_partie" onclick="nouvellePartieMeneur()">🏁 Fermer la partie</button>
   </div>
@@ -1416,7 +1416,9 @@
   function rejouerSon() { if (numeroActuel) jouerSon(numeroActuel); }
 
   // ── Gagnant ───────────────────────────────────────────────────────────
-  const TROPHEE = '\uD83C\uDFC6';
+  // Grain de maïs : même marqueur que les cases cochées (grain-mais.svg).
+  // Le trophée n'existe pas dans la philosophie wendat (recommandation d'Andrée).
+  const TROPHEE = '🌽';
 
   function afficherGagnant(nom, clan) {
     const c       = CLANS[clan] || {};

@@ -780,7 +780,7 @@
     <h2 data-i18n="joueur.rejoindre.titre">Rejoindre la partie</h2>
     <div class="code-badge" id="badge-code">----</div>
     <p style="font-size:.82rem;color:var(--muted);margin-bottom:6px;font-style:italic;" data-i18n="joueur.rejoindre.info_clan">
-      Le clan est imposé par le meneur — il sera affiché dès que vous rejoignez.
+      Le clan est proposé par le meneur — il sera affiché dès que vous rejoignez.
     </p>
     <label data-i18n="joueur.rejoindre.label_nom">Votre prénom</label>
     <input type="text" id="input-nom" placeholder="ex : Marie" maxlength="20"
@@ -813,7 +813,7 @@
   <div class="win-card">
     <h2 data-i18n="joueur.win.titre">&#127805; WENDIO ! &#127805;</h2>
     <div class="win-joueur" id="win-joueur"></div>
-    <img class="win-trophee" id="win-trophee" alt="Carte-trophée du clan">
+    <img class="win-trophee" id="win-trophee" alt="Carte-gagnant·e du clan">
     <div class="win-clan"   id="win-clan"></div>
     <button onclick="fermerWin()"   data-i18n="joueur.win.btn_voir">Voir ma carte</button>
     <button onclick="quitterPartie()" data-i18n="joueur.win.btn_quitter">🚪 Quitter la partie</button>
@@ -1542,7 +1542,9 @@
     socket.emit('victoire', { code: codePartie, nom: nomJoueur, clan: clanActuel });
   }
 
-  const TROPHEE = '\uD83C\uDFC6';
+  // Grain de maïs : même marqueur que les cases cochées (grain-mais.svg).
+  // Le trophée n'existe pas dans la philosophie wendat (recommandation d'Andrée).
+  const TROPHEE = '🌽';
 
   function afficherGagnant(nom, clan, isMoi) {
     const c = CLANS[clan] || {};
