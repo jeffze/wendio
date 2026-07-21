@@ -9,7 +9,7 @@
 // Usage :
 //   node scripts/eclaircir-fond-cartes.js          # toutes les cartes → cartes-pales/
 //   node scripts/eclaircir-fond-cartes.js 12       # une carte précise (12.jpg)
-//   node scripts/eclaircir-fond-cartes.js clan-1pt # idem
+//   node scripts/eclaircir-fond-cartes.js clan-loup.jpg # idem (clan-loup.jpg)
 
 const sharp = require('sharp');
 const fs = require('fs');
