@@ -842,7 +842,7 @@
   <div class="win-card">
     <h2 data-i18n="meneur.win_titre">&#127805; WENDIO ! &#127805;</h2>
     <div class="win-joueur" id="win-joueur"></div>
-    <img class="win-trophee" id="win-trophee" alt="Carte-trophée du clan">
+    <img class="win-trophee" id="win-trophee" alt="Carte-gagnant·e du clan">
     <div class="win-clan"   id="win-clan"></div>
     <button data-i18n="meneur.btn_fermer_partie" onclick="nouvellePartieMeneur()">🏁 Fermer la partie</button>
   </div>
@@ -948,7 +948,7 @@
 <div id="tableau">
   <h2 data-i18n="meneur.tableau_titre">Tableau des tirages</h2>
   <div id="bandeau-gagnant">
-    <div class="bandeau-titre" data-i18n="meneur.bandeau_gagnant">&#127942; Gagnant</div>
+    <div class="bandeau-titre" data-i18n="meneur.bandeau_gagnant">&#127805; Gagnant</div>
     <div id="gagnants-liste"></div>
   </div>
   <div class="suivi-grille" id="suivi-grille"></div>
@@ -1416,7 +1416,9 @@
   function rejouerSon() { if (numeroActuel) jouerSon(numeroActuel); }
 
   // ── Gagnant ───────────────────────────────────────────────────────────
-  const TROPHEE = '\uD83C\uDFC6';
+  // Grain de maïs : même marqueur que les cases cochées (grain-mais.svg).
+  // Le trophée n'existe pas dans la philosophie wendat (recommandation d'Andrée).
+  const TROPHEE = '🌽';
 
   function afficherGagnant(nom, clan) {
     const c       = CLANS[clan] || {};
@@ -1429,7 +1431,7 @@
     winClanEl.textContent  = clan + ' \u2014 ' + clanLabel(clan);
     const trophee = document.getElementById('win-trophee');
     if (c.points) {
-      trophee.src = 'cartes/clan-' + c.points + 'pt.jpg';
+      trophee.src = c.image;
       trophee.classList.add('visible');
     } else {
       trophee.classList.remove('visible');

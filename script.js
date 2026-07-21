@@ -1,3 +1,9 @@
+// Fichier obsolète — stub legacy, chargé par aucune page (voir CLAUDE.md :
+// "script.js / style.css — Legacy stubs — not used; all logic and styles
+// are inline"). Le mapping `clans` ci-dessous reflète l'ANCIENNE attribution
+// clan ↔ condition, périmée depuis la recommandation d'Andrée. data.js
+// (const CLANS) fait foi ; ne pas corriger ce mapping ici, ce serait
+// maintenir du code mort.
 const letters = ['W', 'E', 'N', 'D', 'A', 'O'];
 const clans = [
     { name: 'Chevreuil', goal: 'Ligne complète' },

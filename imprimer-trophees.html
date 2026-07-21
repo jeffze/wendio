@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>WENDIO — Trophées à imprimer</title>
+  <title>WENDIO — Cartes-gagnant·e à imprimer</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -180,7 +180,7 @@
   </div>
 
   <div class="controls-section">
-    <div class="controls-titre" data-i18n="trophees.nom_titre">Nom du gagnant (optionnel)</div>
+    <div class="controls-titre" data-i18n="trophees.nom_titre">Nom du gagnant ou de la gagnante (optionnel)</div>
     <input type="text" id="input-nom" placeholder="ex : Marie, Jean…"
            data-i18n-attr="placeholder:trophees.nom_ph" maxlength="40">
   </div>
@@ -197,7 +197,7 @@
 </div>
 
 <div class="pages-wrap" id="pages-wrap">
-  <div class="empty-state" data-i18n="trophees.empty">Choisissez un ou plusieurs clans ci-dessus pour générer les pages-trophées.</div>
+  <div class="empty-state" data-i18n="trophees.empty">Choisissez un ou plusieurs clans ci-dessus pour générer les cartes-gagnant·e.</div>
 </div>
 
 <script src="data.js"></script>
@@ -259,7 +259,8 @@
     const nom  = document.getElementById('input-nom').value.trim();
     const date = document.getElementById('input-date').value.trim();
 
-    // Ordre fixe : on respecte l'ordre WENDIO logique (Chevreuil → Loup → Ours → Tortue)
+    // Ordre fixe : préséance du mythe de création (Chevreuil → Tortue → Ours → Loup),
+    // porté par l'ordre des clés de CLANS dans data.js.
     Object.keys(CLANS).forEach(clanNom => {
       if (!clansSelectionnes.has(clanNom)) return;
       wrap.appendChild(creerPage(clanNom, nom, date));
@@ -296,8 +297,8 @@
     const imgWrap = document.createElement('div');
     imgWrap.className = 'trophee-img-wrap';
     const img = document.createElement('img');
-    img.src = 'cartes/clan-' + clan.points + 'pt.jpg';
-    img.alt = 'Carte-trophée ' + clanNom;
+    img.src = clan.image;
+    img.alt = 'Carte-gagnant·e ' + clanNom;
     imgWrap.appendChild(img);
     page.appendChild(imgWrap);
 

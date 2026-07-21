@@ -11,11 +11,14 @@ const CONFIG = {
   O: { min: 61, max: 72, count: 6, couleur: '#c0392b' },
 };
 
+// Ordre = préséance du mythe de création wendat (Chevreuil, Tortue, Ours, Loup).
+// Il fait foi partout : meneur.html, imprimer.html et imprimer-trophees.html
+// itèrent sur Object.keys/Object.entries(CLANS).
 const CLANS = {
-  Chevreuil: { icon: '🦌', wendat: "Ohskënonton'", victoire: 'ligne',  points: 1, label: 'Ligne complète (horizontale, verticale ou diagonale)' },
-  Loup:      { icon: '🐺', wendat: "Yānariskwa'",  victoire: 'coins',  points: 2, label: 'Les 4 coins' },
-  Ours:      { icon: '🐻', wendat: "Yānionyen'",   victoire: 'carre',  points: 3, label: 'Carré protecteur (12 cases)' },
-  Tortue:    { icon: '🐢', wendat: "Yāndia'wich",  victoire: 'pleine', points: 4, label: 'Carte pleine (32 cases)' },
+  Chevreuil: { icon: '🦌', wendat: "Ohskënonton'", victoire: 'pleine', points: 4, label: 'Carte pleine (32 cases)',  image: 'cartes/clan-chevreuil.jpg' },
+  Tortue:    { icon: '🐢', wendat: "Yāndia'wich",  victoire: 'carre',  points: 3, label: 'Carré protecteur (12 cases)', image: 'cartes/clan-tortue.jpg' },
+  Ours:      { icon: '🐻', wendat: "Yānionyen'",   victoire: 'coins',  points: 2, label: 'Les 4 coins',              image: 'cartes/clan-ours.jpg' },
+  Loup:      { icon: '🐺', wendat: "Yānariskwa'",  victoire: 'ligne',  points: 1, label: 'Ligne complète (horizontale, verticale ou diagonale)', image: 'cartes/clan-loup.jpg' },
 };
 
 // support #29 — masquer le mode « tirage physique » avant présentation.
@@ -75,6 +78,66 @@ function estCoeur(ligne, colIdx) {
   return (ligne === 'N' || ligne === 'D') && (colIdx === 2 || colIdx === 3);
 }
 
+// Vérifie qu'une carte remplit la condition de victoire pour un clan donné.
+// Répliqué nulle part ailleurs : server.js require ce fichier (validation
+// anti-triche), joueur.html a sa propre verifierVictoire() côté UI.
+function victoireValide(carte, clan, tirages) {
+  const cond = CLANS[clan] && CLANS[clan].victoire;
+  if (!cond) return false;
+  const tireSet = new Set(tirages);
+  const has = (l, c) => {
+    if (estCoeur(l, c)) return false;
+    return tireSet.has(valeurCase(carte, l, c));
+  };
+  if (cond === 'coins') {
+    return has('W', 0) && has('W', 5) && has('O', 0) && has('O', 5);
+  }
+  if (cond === 'pleine') {
+    let n = 0;
+    for (const l of LIGNES) for (let c = 0; c < 6; c++) if (!estCoeur(l, c) && has(l, c)) n++;
+    return n >= 32;
+  }
+  if (cond === 'carre') {
+    for (let li = 1; li <= 4; li++) for (let ci = 1; ci <= 4; ci++) {
+      const l = LIGNES[li];
+      if (!estCoeur(l, ci) && !has(l, ci)) return false;
+    }
+    return true;
+  }
+  if (cond === 'ligne') {
+    // Horizontale : une des 6 rangées
+    for (let li = 0; li < 6; li++) {
+      const l = LIGNES[li]; let ok = true;
+      for (let ci = 0; ci < 6; ci++) if (!estCoeur(l, ci) && !has(l, ci)) { ok = false; break; }
+      if (ok) return true;
+    }
+    // Verticale : une des 6 colonnes
+    for (let ci = 0; ci < 6; ci++) {
+      let ok = true;
+      for (let li = 0; li < 6; li++) {
+        const l = LIGNES[li];
+        if (!estCoeur(l, ci) && !has(l, ci)) { ok = false; break; }
+      }
+      if (ok) return true;
+    }
+    // Diagonale principale (\) : (0,0) à (5,5)
+    let okDiag = true;
+    for (let i = 0; i < 6; i++) {
+      const l = LIGNES[i];
+      if (!estCoeur(l, i) && !has(l, i)) { okDiag = false; break; }
+    }
+    if (okDiag) return true;
+    // Diagonale anti (/) : (0,5) à (5,0)
+    okDiag = true;
+    for (let i = 0; i < 6; i++) {
+      const l = LIGNES[i]; const ci = 5 - i;
+      if (!estCoeur(l, ci) && !has(l, ci)) { okDiag = false; break; }
+    }
+    return okDiag;
+  }
+  return false;
+}
+
 // Chemin audio
 function cheminAudio(num) {
   return `sound/Wendat numbers ${num}.wav`;
@@ -82,4 +145,13 @@ function cheminAudio(num) {
 
 function jouerSon(num) {
   new Audio(cheminAudio(num)).play().catch(() => {});
+}
+
+// Export Node — le fichier reste chargeable tel quel par <script> dans le
+// navigateur, où `module` est undefined et ce bloc est ignoré.
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    LIGNES, CONFIG, CLANS, COEUR, COEUR_CLAN, NOMBRES,
+    ligneDeNumero, genererCarte, valeurCase, estCoeur, victoireValide,
+  };
 }

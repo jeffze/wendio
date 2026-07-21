@@ -2,6 +2,7 @@
 const fs = require('fs');
 const path = require('path');
 const sharp = require('sharp');
+const { CLANS } = require('../data');
 
 const SRC = path.resolve(__dirname, '..', '..', '_sources', 'Wendio', 'Carte5');
 const DST = path.resolve(__dirname, '..', 'cartes');
@@ -10,9 +11,18 @@ const QUALITY = 85;
 function targetName(file) {
   const m1 = file.match(/^carte chiffre (\d+)\.png$/i);
   if (m1) return `${m1[1]}.jpg`;
-  // Trophées clan : nouveau nommage « Carte point N.png » + ancien « N point(s).png »
+  // Trophées clan : dérivé depuis CLANS[].image (points → clan).
+  // Source « Carte point N.png » ou ancien « N point(s).png » où N est la valeur points.
+  // Recherche le clan avec points=N et retourne le basename de son champ image.
   const m2 = file.match(/^carte point (\d+)\.png$/i) || file.match(/^(\d+) points?\.png$/i);
-  if (m2) return `clan-${m2[1]}pt.jpg`;
+  if (m2) {
+    const pointsValue = Number(m2[1]);
+    const clanEntry = Object.entries(CLANS).find(([, clan]) => clan.points === pointsValue);
+    if (clanEntry) {
+      return path.basename(clanEntry[1].image);
+    }
+    return null;
+  }
   return null;
 }
 
