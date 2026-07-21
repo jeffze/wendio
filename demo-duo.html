@@ -252,7 +252,7 @@
     <div class="label">🎲 Meneur</div>
     <div class="device size-tablet-landscape" id="device-meneur">
       <iframe id="iframe-meneur"
-              src="/meneur.html?mode=online&tirage=aleatoire&clan=Chevreuil&demo=1"
+              src="/meneur.html?mode=online&tirage=aleatoire&clan=Loup&demo=1"
               title="Vue meneur"
               allow="autoplay"></iframe>
     </div>
@@ -373,7 +373,7 @@ const itv = setInterval(() => {
 btnReset.addEventListener('click', () => {
   joueurNumeroDemo += 1;
   codeLu = null;
-  iframeMeneur.src = '/meneur.html?mode=online&tirage=aleatoire&clan=Chevreuil&demo=1&_=' + Date.now();
+  iframeMeneur.src = '/meneur.html?mode=online&tirage=aleatoire&clan=Loup&demo=1&_=' + Date.now();
   frameJoueur.classList.add('waiting');
   // Reconstruit le placeholder dans device-joueur
   deviceJoueur.replaceChildren();
