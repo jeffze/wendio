@@ -1,15 +1,19 @@
 // Fichier obsolète — stub legacy, chargé par aucune page (voir CLAUDE.md :
 // "script.js / style.css — Legacy stubs — not used; all logic and styles
-// are inline"). Le mapping `clans` ci-dessous reflète l'ANCIENNE attribution
-// clan ↔ condition, périmée depuis la recommandation d'Andrée. data.js
-// (const CLANS) fait foi ; ne pas corriger ce mapping ici, ce serait
-// maintenir du code mort.
+// are inline"). data.js (const CLANS) reste la SEULE source de vérité.
+//
+// Le mapping `clans` ci-dessous a été réaligné sur CLANS le 2026-08-04 : il
+// portait encore l'ANCIENNE attribution clan ↔ condition (Chevreuil → ligne,
+// Loup → 4 coins…), fausse depuis la recommandation d'Andrée, et induisait en
+// erreur quiconque ouvrait ce fichier en cherchant les règles. Il n'est pas
+// synchronisé automatiquement : si CLANS change dans data.js, ce tableau ne
+// suit pas. Ordre = préséance du mythe de création, comme dans data.js.
 const letters = ['W', 'E', 'N', 'D', 'A', 'O'];
 const clans = [
-    { name: 'Chevreuil', goal: 'Ligne complète' },
-    { name: 'Loup', goal: 'Les 4 coins' },
-    { name: 'Ours', goal: 'Carré protecteur' },
-    { name: 'Tortue', goal: 'Carte pleine' }
+    { name: 'Chevreuil', goal: 'Carte pleine (32 cases)' },
+    { name: 'Tortue', goal: 'Carré protecteur (12 cases)' },
+    { name: 'Ours', goal: 'Les 4 coins' },
+    { name: 'Loup', goal: 'Ligne complète (horizontale, verticale ou diagonale)' }
 ];
 
 function initGrid() {
