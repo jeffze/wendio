@@ -1286,7 +1286,7 @@
 
     // Carte image (toute l'info — numéro, ligne, nom Wendat, phonétique, traductions — est dans l'image)
     const img = document.getElementById('annonce-image');
-    img.src = `cartes/${num}.jpg`;
+    img.src = urlVersionnee(`cartes/${num}.jpg`);
     img.style.display = 'block';
     img.title = t('joueur.carte_tooltip', { n: num });
 
@@ -1307,7 +1307,7 @@
     if (!num) return;
     const overlay = document.getElementById('popup-carte');
     const img     = document.getElementById('popup-carte-img');
-    img.src = `cartes/${num}.jpg`;
+    img.src = urlVersionnee(`cartes/${num}.jpg`);
     const progress = overlay.querySelector('.progress');
     const newProgress = progress.cloneNode();
     progress.replaceWith(newProgress);
@@ -1376,7 +1376,7 @@
         imgEl.src = oursDataUrl;
       } catch (e) { /* fallback silencieux (file://) */ }
     };
-    src.src = 'sources/Ours.png';
+    src.src = urlVersionnee('sources/Ours.png');
   }
 
   // ── Rendu grille ─────────────────────────────────────────────────────
@@ -1402,10 +1402,10 @@
           img.alt = clan;
           img.className = 'coeur-animal';
           if (clan === 'Ours') {
-            img.src = 'sources/Ours.png'; // placeholder pendant le traitement
+            img.src = urlVersionnee('sources/Ours.png'); // placeholder pendant le traitement
             prepareOursImage(img);
           } else {
-            img.src = 'sources/' + clan + '.png';
+            img.src = urlVersionnee('sources/' + clan + '.png');
           }
           cell.appendChild(img);
         } else {
@@ -1562,7 +1562,7 @@
     winClanEl.textContent = clanNomTrad + ' \u2014 ' + clanLabel(clan);
     const trophee = document.getElementById('win-trophee');
     if (c.points) {
-      trophee.src = c.image;
+      trophee.src = urlVersionnee(c.image);
       trophee.classList.add('visible');
     } else {
       trophee.classList.remove('visible');

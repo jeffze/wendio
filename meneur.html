@@ -1292,7 +1292,7 @@
 
     // Carte image (toute l'info — numéro, ligne, nom Wendat, phonétique, traductions — est dans l'image)
     const img = document.getElementById('carte-image');
-    img.src = `cartes/${num}.jpg`;
+    img.src = urlVersionnee(`cartes/${num}.jpg`);
     img.style.display = 'block';
     img.title = t('meneur.carte_tooltip', { n: num });
 
@@ -1310,7 +1310,7 @@
     if (!num) return;
     const overlay = document.getElementById('popup-carte');
     const img     = document.getElementById('popup-carte-img');
-    img.src = `cartes/${num}.jpg`;
+    img.src = urlVersionnee(`cartes/${num}.jpg`);
     // Re-trigger CSS animation en clonant le node (sinon la progress bar
     // ne redemarre pas si on rouvre le popup pour la meme carte).
     const progress = overlay.querySelector('.progress');
@@ -1431,7 +1431,7 @@
     winClanEl.textContent  = clan + ' \u2014 ' + clanLabel(clan);
     const trophee = document.getElementById('win-trophee');
     if (c.points) {
-      trophee.src = c.image;
+      trophee.src = urlVersionnee(c.image);
       trophee.classList.add('visible');
     } else {
       trophee.classList.remove('visible');

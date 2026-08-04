@@ -37,10 +37,27 @@ const VERSIONED_FILES = [
   'login.html', 'aide-meneur.html', 'aide-joueur.html', 'admin-meneurs.html', 'accueil.html',
   'credits.html',
 ];
+// Dossiers d'images dont le contenu doit faire bouger le hash : un nouveau
+// lot de cartes ne touche aucun .html ni .js, donc sans ca la version
+// resterait identique et les anciennes images resteraient en cache.
+// On empreinte nom+taille+mtime (76 stats, negligeable au boot) plutot que
+// de relire ~8 Mo de JPG.
+const VERSIONED_DIRS = ['cartes', 'sources'];
+function empreinteDossier(dir) {
+  try {
+    return fs.readdirSync(path.join(ROOT_DIR, dir)).sort().map(f => {
+      try {
+        const st = fs.statSync(path.join(ROOT_DIR, dir, f));
+        return `${f}:${st.size}:${st.mtimeMs}`;
+      } catch (_) { return f; }
+    }).join(',');
+  } catch (_) { return ''; }
+}
 let ASSET_VERSION = 'dev';
 try {
   const content = VERSIONED_FILES
     .map(f => { try { return fs.readFileSync(path.join(ROOT_DIR, f), 'utf8'); } catch (_) { return ''; } })
+    .concat(VERSIONED_DIRS.map(empreinteDossier))
     .join('|');
   ASSET_VERSION = crypto.createHash('sha1').update(content).digest('hex').slice(0, 10);
 } catch (_e) {
@@ -48,12 +65,15 @@ try {
 }
 console.log(`[wendio] asset version: ${ASSET_VERSION}`);
 
-// Injecte ?v=HASH sur les <script src> et <link href> qui pointent vers
-// un fichier local (.js ou .css), absolu ou relatif. Skip les externes
-// (https://, //, data:) et ceux qui ont deja un ?... ou #...
+// Injecte ?v=HASH sur les <script src>, <link href> et <img src> qui
+// pointent vers un fichier local (.js, .css ou une image), absolu ou
+// relatif. Skip les externes (https://, //, data:) et ceux qui ont deja
+// un ?... ou #...
+// Les images posees en JS ne passent pas ici : elles utilisent
+// urlVersionnee() de data.js, qui relit ce meme ?v= depuis sa balise.
 function injectAssetVersion(html) {
   return html.replace(
-    /((?:src|href)=["'])((?!https?:|\/\/|data:|#)[^"'?#]+\.(?:js|css))(["'])/g,
+    /((?:src|href)=["'])((?!https?:|\/\/|data:|#)[^"'?#]+\.(?:js|css|jpg|jpeg|png|svg|webp))(["'])/gi,
     (_m, prefix, url, suffix) => `${prefix}${url}?v=${ASSET_VERSION}${suffix}`
   );
 }

@@ -1,5 +1,28 @@
 'use strict';
 
+// ── Versionnement des images posées en JS ────────────────────────────
+// Le serveur réécrit déjà <script src="data.js"> en "data.js?v=HASH".
+// On relit ce ?v= depuis notre propre balise : toute image dont l'URL est
+// construite en JS (cartes, animaux des clans) peut ainsi porter le même
+// jeton, et un nouveau lot d'images produit une URL neuve.
+// Indispensable : Cloudflare réécrit le Cache-Control de l'origine
+// (no-cache → max-age=14400), donc l'en-tête seul ne suffit pas à forcer
+// le rafraîchissement. Une URL différente, elle, ne peut pas être servie
+// depuis un cache.
+// Vide côté Node (pas de document) et si la page n'a pas été versionnée :
+// urlVersionnee() retourne alors le chemin inchangé.
+const ASSET_V = (function () {
+  if (typeof document === 'undefined') return '';
+  const src = document.currentScript && document.currentScript.src;
+  const m = src && src.match(/[?&]v=([^&#]+)/);
+  return m ? m[1] : '';
+})();
+
+function urlVersionnee(chemin) {
+  if (!ASSET_V || !chemin) return chemin;
+  return chemin + (chemin.includes('?') ? '&' : '?') + 'v=' + ASSET_V;
+}
+
 const LIGNES = ['W', 'E', 'N', 'D', 'I', 'O'];
 
 const CONFIG = {
@@ -152,6 +175,6 @@ function jouerSon(num) {
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
     LIGNES, CONFIG, CLANS, COEUR, COEUR_CLAN, NOMBRES,
-    ligneDeNumero, genererCarte, valeurCase, estCoeur, victoireValide,
+    ligneDeNumero, genererCarte, valeurCase, estCoeur, victoireValide, urlVersionnee,
   };
 }

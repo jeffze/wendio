@@ -492,7 +492,7 @@
         document.querySelectorAll('img[data-ours]').forEach(el => el.src = oursDataUrl);
       } catch (e) { /* fallback silencieux */ }
     };
-    src.src = 'sources/Ours.png';
+    src.src = urlVersionnee('sources/Ours.png');
   }
 
   // Mosaïque 2×2 d'images animaux fusionnant les 4 cases cœur
@@ -510,10 +510,10 @@
       img.alt = clan;
       if (clan === 'Ours') {
         img.dataset.ours = '1';
-        img.src = 'sources/Ours.png';
+        img.src = urlVersionnee('sources/Ours.png');
         prepareOursImage(img);
       } else {
-        img.src = 'sources/' + clan + '.png';
+        img.src = urlVersionnee('sources/' + clan + '.png');
       }
       wrap.appendChild(img);
       merged.appendChild(wrap);
