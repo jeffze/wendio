@@ -65,7 +65,7 @@ Then open `http://localhost:3000` (redirects to `lobby.html`).
 | `i18n.js` | Toggle FR/EN injecté automatiquement en haut à droite de chaque page ; dictionnaire centralisé, persistance `localStorage['wendio-lang']`, hook `i18n.onLangChange(cb)` pour ré-render les textes composés (cf. section i18n) |
 | `server.js` | Node.js + Express + Socket.io multiplayer server (bind `HOST` env var, défaut `0.0.0.0` en dev, `127.0.0.1` en prod via systemd) |
 | `qrcode.min.js` | QR code generation library (used by meneur to share game code) |
-| `script.js` / `style.css` | Legacy stubs — **not used**; all logic and styles are inline |
+| `style.css` | Legacy stub — **not used**; all styles are inline. (`script.js`, l'autre stub, a été supprimé le 2026-08-04 : il portait un mapping de clans périmé et ne pouvait pas s'exécuter.) |
 | `cartes/` | 72 cartes numérotées + 4 cartes-gagnant·e par clan (`clan-<nom>.jpg`, chemin déclaré dans `CLANS[].image`). Voir `cartes/README-images-clans.md` |
 | `sound/` | WAV audio files named `Wendat numbers {num}.wav` |
 | `sources/` | PNG des 4 animaux clans (utilisés dans `accueil.html`) |
