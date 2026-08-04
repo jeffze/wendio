@@ -154,6 +154,12 @@
       outline: 1.5px solid var(--clan-c, #d35400);
       outline-offset: -1.5px;
     }
+    /* Ligne d'exemple (clan Loup) : en tirets et sans fond plein, pour se lire
+       comme une illustration et non comme la seule ligne gagnante possible. */
+    .cell.cible-exemple {
+      outline: 1.5px dashed var(--clan-c, #d35400);
+      outline-offset: -1.5px;
+    }
 
     /* ── Cœur fusionné — mosaïque 2×2 d'animaux ── */
     .coeur-merged {
@@ -413,7 +419,8 @@
         }
         const val  = valeurCase(donnees, ligne, col);
         const cell = document.createElement('div');
-        cell.className   = estCible(clan, ligneIdx, col) ? 'cell cible' : 'cell';
+        const cls  = classeCible(clan, ligneIdx, col);
+        cell.className   = cls ? 'cell ' + cls : 'cell';
         cell.textContent = val || '';
         grid.appendChild(cell);
       }
@@ -515,15 +522,21 @@
     return merged;
   }
 
-  // Cases cibles à surligner selon le clan
-  function estCible(clan, ligneIdx, colIdx) {
-    if (!clan || clan === 'melange') return false;
+  // Cases cibles à surligner selon le clan.
+  // Retourne la classe CSS à poser ('cible' ou 'cible-exemple'), ou '' si la
+  // case n'est pas visée par la condition de victoire du clan.
+  function classeCible(clan, ligneIdx, colIdx) {
+    if (!clan || clan === 'melange') return '';
     const ligne = LIGNES[ligneIdx];
     const v = CLANS[clan].victoire;
-    if (v === 'coins')  return (ligneIdx === 0 || ligneIdx === 5) && (colIdx === 0 || colIdx === 5);
-    if (v === 'carre')  return ligneIdx >= 1 && ligneIdx <= 4 && colIdx >= 1 && colIdx <= 4 && !estCoeur(ligne, colIdx);
-    if (v === 'pleine') return !estCoeur(ligne, colIdx);
-    return false;
+    if (v === 'coins')  return ((ligneIdx === 0 || ligneIdx === 5) && (colIdx === 0 || colIdx === 5)) ? 'cible' : '';
+    if (v === 'carre')  return (ligneIdx >= 1 && ligneIdx <= 4 && colIdx >= 1 && colIdx <= 4 && !estCoeur(ligne, colIdx)) ? 'cible' : '';
+    if (v === 'pleine') return estCoeur(ligne, colIdx) ? '' : 'cible';
+    // 'ligne' (Loup) : n'importe quelle rangée, colonne ou diagonale convient.
+    // On illustre la première rangée en tirets — la surligner en plein
+    // laisserait croire que c'est la seule ligne gagnante.
+    if (v === 'ligne')  return ligneIdx === 0 ? 'cible-exemple' : '';
+    return '';
   }
 
   initSelector();

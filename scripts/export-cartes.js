@@ -4,7 +4,7 @@ const path = require('path');
 const sharp = require('sharp');
 const { CLANS } = require('../data');
 
-const SRC = path.resolve(__dirname, '..', '..', '_sources', 'Wendio', 'Carte5');
+const SRC = path.resolve(__dirname, '..', '..', '_sources', 'Wendio', 'Carte6');
 const DST = path.resolve(__dirname, '..', 'cartes');
 const QUALITY = 85;
 

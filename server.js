@@ -313,6 +313,15 @@ app.get(/\.html$|^\/$/, (req, res, next) => {
   }
 });
 
+// Les cartes sont remplacees a chaque lot fourni par le client, et leurs URLs
+// sont posees en JS (CLANS[].image) — donc hors du systeme ?v=HASH qui ne
+// couvre que les <script>/<link>. On force navigateur et Cloudflare a
+// revalider : 304 tant que rien ne bouge, image a jour des le deploiement.
+// Sans ca, il faut passer en navigation privee pour voir les nouvelles cartes.
+app.use('/cartes', express.static(path.join(__dirname, 'cartes'), {
+  setHeaders: res => res.setHeader('Cache-Control', 'no-cache, must-revalidate'),
+}));
+
 // Sert tous les fichiers statiques (JS, CSS, audio, images, et les HTML
 // non interceptes par la regex ci-dessus en fallback).
 app.use(express.static(path.join(__dirname)));

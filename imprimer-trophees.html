@@ -52,7 +52,15 @@
     .btn-print:disabled { background: #ccc; cursor: not-allowed; opacity: 1; }
 
     /* ── Page A4 portrait ── */
-    .pages-wrap { display: flex; flex-direction: column; gap: 12px; align-items: center; }
+    /* À l'écran, les pages sont réduites (--k, posé par rendre()) et disposées
+       en ligne : la carte qu'on vient de sélectionner est visible sans défiler.
+       La page garde ses dimensions réelles — seul l'affichage est mis à
+       l'échelle, l'impression est inchangée (cf. @media print plus bas). */
+    .pages-wrap { display: flex; flex-direction: row; flex-wrap: wrap; gap: 12px; justify-content: center; }
+    /* Le slot réserve la place occupée après mise à l'échelle : sans lui, le
+       transform laisserait un trou de 297mm dans le flux. */
+    .page-slot { width: calc(210mm * var(--k, 1)); height: calc(297mm * var(--k, 1)); }
+    .page-slot > .page { transform: scale(var(--k, 1)); transform-origin: top left; }
     .page {
       width: 210mm; height: 297mm;
       background: white;
@@ -158,7 +166,10 @@
     @media print {
       body { background: white; padding: 0; }
       .controls, .empty-state { display: none; }
-      .pages-wrap { gap: 0; }
+      /* Annule la mise à l'échelle de l'aperçu : on imprime en A4 réel. */
+      .pages-wrap { display: block; gap: 0; }
+      .page-slot { width: auto; height: auto; }
+      .page-slot > .page { transform: none; }
       .page { box-shadow: none; margin: 0; }
       @page { size: A4 portrait; margin: 0; }
     }
@@ -259,11 +270,18 @@
     const nom  = document.getElementById('input-nom').value.trim();
     const date = document.getElementById('input-date').value.trim();
 
+    // Échelle de l'aperçu : une seule carte reste lisible, quatre tiennent ensemble.
+    const taille = clansSelectionnes.size;
+    wrap.style.setProperty('--k', taille === 1 ? '.62' : taille === 2 ? '.5' : '.34');
+
     // Ordre fixe : préséance du mythe de création (Chevreuil → Tortue → Ours → Loup),
     // porté par l'ordre des clés de CLANS dans data.js.
     Object.keys(CLANS).forEach(clanNom => {
       if (!clansSelectionnes.has(clanNom)) return;
-      wrap.appendChild(creerPage(clanNom, nom, date));
+      const slot = document.createElement('div');
+      slot.className = 'page-slot';
+      slot.appendChild(creerPage(clanNom, nom, date));
+      wrap.appendChild(slot);
     });
   }
 

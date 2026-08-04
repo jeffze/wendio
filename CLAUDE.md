@@ -69,7 +69,7 @@ Then open `http://localhost:3000` (redirects to `lobby.html`).
 | `cartes/` | 72 cartes numérotées + 4 cartes-gagnant·e par clan (`clan-<nom>.jpg`, chemin déclaré dans `CLANS[].image`). Voir `cartes/README-images-clans.md` |
 | `sound/` | WAV audio files named `Wendat numbers {num}.wav` |
 | `sources/` | PNG des 4 animaux clans (utilisés dans `accueil.html`) |
-| `scripts/export-cartes.js` | Conversion `D:/_sources/Wendio/Carte5/*.png` → `cartes/*.jpg` (sharp, qualité 85). `SRC` = dernier lot Sylvain rangé dans `_sources/Wendio/CarteN` (v1=`Carte`, v2=`Carte2`… v5=`Carte5`) ; bumper `SRC` à chaque nouveau lot. Sans filtre — le client gère le rendu côté source |
+| `scripts/export-cartes.js` | Conversion `D:/_sources/Wendio/Carte6/*.png` → `cartes/*.jpg` (sharp, qualité 85). `SRC` = dernier lot Sylvain rangé dans `_sources/Wendio/CarteN` (v1=`Carte`, v2=`Carte2`… v6=`Carte6`) ; bumper `SRC` à chaque nouveau lot. **Un dossier `CarteN` = un lot complet (76 PNG)** : si Sylvain ne refournit qu'une partie des cartes, recopier les autres depuis le lot précédent. Sans filtre — le client gère le rendu côté source |
 | `deploy/` | Scripts de déploiement VPS Ubuntu 24.04 dédié jeux Sylvain : `setup-vps.sh`, `Caddyfile`, `wendio.service`, `install-wendio.sh`, `deploy.sh` (cf. section Déploiement) |
 | `Manual/` | Documents de référence (gitignored) : PPTX, PDFs règles, vidéo démo |
 
