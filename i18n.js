@@ -45,6 +45,8 @@ const TRANSLATIONS = {
   // ── Lobby ──────────────────────────────────────────────────────────
   'lobby.subtitle':            { fr: 'Le Jeu des Clans',
                                  en: 'The Game of Clans' },
+  'lobby.retour_couverture':   { fr: '← Couverture',
+                                 en: '← Cover' },
   'lobby.devise':              { fr: '« Une main sur le passé, une oreille sur l’avenir. »',
                                  en: '« One hand on the past, one ear on the future. »' },
   'lobby.conseil_fs':          { fr: 'Pour une expérience optimale sur tablette, utilisez le mode plein écran — un bouton est disponible sur chaque écran de jeu.',

@@ -19,6 +19,17 @@
       padding: 24px;
     }
 
+    /* ── Retour à la couverture ── */
+    /* En miroir du sélecteur de langue, posé en fixed top-right par i18n.js. */
+    .btn-couverture {
+      position: fixed; top: 12px; left: 12px; z-index: 9999;
+      background: rgba(0,0,0,.45); backdrop-filter: blur(6px);
+      border-radius: 8px; padding: 8px 14px;
+      color: #a08060; text-decoration: none; font-size: .9rem;
+      transition: color .15s, background .15s;
+    }
+    .btn-couverture:hover { color: #f4e7d3; background: rgba(0,0,0,.65); }
+
     /* ── Titre ── */
     .titre-bloc { text-align: center; margin-bottom: 48px; }
 
@@ -149,6 +160,8 @@
   </style>
 </head>
 <body>
+
+  <a class="btn-couverture" href="/" data-i18n="lobby.retour_couverture">← Couverture</a>
 
   <div class="titre-bloc">
     <div class="titre">WENDIO</div>
