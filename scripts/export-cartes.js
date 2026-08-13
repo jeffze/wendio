@@ -45,7 +45,14 @@ async function run() {
   let ok = 0, fail = 0;
   for (const j of jobs) {
     try {
-      const buf = await sharp(j.src).flatten({ background: '#ffffff' }).jpeg({ quality: QUALITY, mozjpeg: true }).toBuffer();
+      // Rogne le vide transparent laissé autour du dessin quand le fond a été
+      // détouré : sans ça, le flatten le transforme en bande blanche et la
+      // carte paraît décentrée dans son cadre (ticket #44, cartes 2 et 4).
+      const buf = await sharp(j.src)
+        .trim({ background: { r: 0, g: 0, b: 0, alpha: 0 }, threshold: 0 })
+        .flatten({ background: '#ffffff' })
+        .jpeg({ quality: QUALITY, mozjpeg: true })
+        .toBuffer();
       fs.writeFileSync(j.dst, buf);
       const kb = Math.round(buf.length / 1024);
       console.log(`  ✓ ${j.srcName.padEnd(28)} → ${j.dstName.padEnd(14)} ${kb}KB`);
