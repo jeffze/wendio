@@ -293,6 +293,17 @@ Depuis 2026-05-15 (phase 1), Wendio supporte plusieurs Premières Nations sur la
 - `/auth/verify` rejette les magic links cross-tenant
 - `/auth/request` retourne 404 si pas de tenant correspondant au hostname
 
+### Confirmation humaine du magic link
+
+`GET /auth/verify` ne consomme jamais le jeton : il affiche une page de confirmation. `POST /auth/verify` ne le consomme que sur une preuve humaine :
+
+- le cookie `ml_confirm`, déposé **à la demande** du lien (`POST /auth/request`) dans le navigateur du meneur — seule son empreinte SHA-256 est stockée dans `magic_tokens.nonce_hash` ;
+- ou le **code à 6 chiffres** joint au courriel, saisi à la main (5 essais, `code_attempts`).
+
+Sans l'un des deux, la page redemande le code **sans rien consommer**. Même navigateur = un clic comme avant ; autre appareil = saisie du code.
+
+Pourquoi : les protections de liens des messageries institutionnelles n'ouvrent pas seulement le lien en GET, elles affichent la page de confirmation et **soumettent le formulaire**, ce qui brûlait le jeton avant le clic du meneur (« Lien déjà utilisé »). Le nonce `verify_csrf` ne protège pas de ça, car il est posé **au GET** : le scanner le reçoit avec la page. La règle est isolée dans `auth-gate.js`, module pur sans accès base, couvert par `test/magic-link-gate.test.js` et `test/magic-link-db.test.js`.
+
 ### Dev local
 
 Pour tester un autre tenant en local sans DNS, utiliser le header `X-Tenant-Slug: cree` (non-prod uniquement).

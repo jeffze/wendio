@@ -81,9 +81,19 @@ function shell({ title, body, ctaUrl, ctaLabel }) {
 
 function p(text) { return `<p style="margin:0 0 12px;color:${C.inkSoft};font-size:15px;line-height:1.6">${text}</p>`; }
 
-function sendMagicLink({ to, link }) {
+// Code de secours quand le lien est ouvert ailleurs que dans le navigateur qui a
+// fait la demande. C'est aussi ce qu'un scanner de courriels ne peut pas taper.
+function codeBlock(code) {
+  return `<div style="background:${C.bg};border:1px solid ${C.line};border-radius:8px;padding:16px;text-align:center;margin:0 0 20px">
+  <div style="color:${C.muted};font-size:13px;margin-bottom:6px">Si la page te demande un code, saisis celui-ci :</div>
+  <div style="font-family:Consolas,Menlo,monospace;font-size:26px;font-weight:700;letter-spacing:.28em;color:${C.text}">${code}</div>
+</div>`;
+}
+
+function sendMagicLink({ to, link, code }) {
   const body = p('Bonjour,') +
     p('Voici ton lien pour te connecter à WENDIO comme meneur. Il expire dans <strong>15 minutes</strong> et ne fonctionne qu\'une seule fois.') +
+    (code ? codeBlock(code) : '') +
     p(`<span style="color:${C.muted}">Si tu n'as pas demandé cette connexion, ignore ce courriel.</span>`);
   return send({
     to,

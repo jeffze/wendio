@@ -3,6 +3,7 @@
 
 const crypto = require('crypto');
 const db = require('./db');
+const { generateCode, hashNonce } = require('./auth-gate');
 
 const MAGIC_TTL_MIN = 15;
 const SESSION_TTL_DAYS = 30;
@@ -17,17 +18,29 @@ function isValidEmail(email) {
   return e.length > 0 && e.length <= 254 && EMAIL_RE.test(e);
 }
 
-function createMagicToken(email, { ip, userAgent } = {}) {
+// confirmNonce : secret déposé en cookie dans le navigateur QUI DEMANDE le lien.
+// Seule son empreinte est stockée. Permet la connexion en un clic depuis ce
+// navigateur ; sinon le meneur tape le code à 6 chiffres du courriel.
+// Retourne { token, code }.
+function createMagicToken(email, { ip, userAgent, confirmNonce } = {}) {
   const token = crypto.randomBytes(32).toString('hex');
+  const code = generateCode();
   // expires_at stocké au format SQLite (datetime('now', '+N minutes')) pour que la
   // comparaison `expires_at > datetime('now')` soit correcte. Un ISO toISOString()
   // ('2026-...T..Z') se comparait lexicographiquement au format SQLite ('2026-... ..')
   // et le 'T' > ' ' faisait que le TTL ne se déclenchait jamais dans la même journée.
   db.prepare(
-    `INSERT INTO magic_tokens (token, email, expires_at, ip, user_agent)
-     VALUES (?, ?, datetime('now', ?), ?, ?)`
-  ).run(token, email, `+${MAGIC_TTL_MIN} minutes`, ip || null, userAgent || null);
-  return token;
+    `INSERT INTO magic_tokens (token, email, expires_at, ip, user_agent, code, nonce_hash)
+     VALUES (?, ?, datetime('now', ?), ?, ?, ?, ?)`
+  ).run(token, email, `+${MAGIC_TTL_MIN} minutes`, ip || null, userAgent || null,
+        code, hashNonce(confirmNonce));
+  return { token, code };
+}
+
+function bumpCodeAttempts(token) {
+  db.prepare(
+    `UPDATE magic_tokens SET code_attempts = code_attempts + 1 WHERE token = ?`
+  ).run(token);
 }
 
 // Valide un jeton SANS le consommer (jeton non consommé + non expiré).
@@ -178,6 +191,7 @@ module.exports = {
   normEmail,
   isValidEmail,
   createMagicToken,
+  bumpCodeAttempts,
   peekMagicToken,
   consumeMagicToken,
   getUser,

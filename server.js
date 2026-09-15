@@ -8,6 +8,7 @@ const fs       = require('fs');
 const crypto   = require('crypto');
 
 const auth   = require('./auth');
+const { confirmationGate } = require('./auth-gate');
 const email  = require('./email');
 const tenantMw = require('./tenant');
 
@@ -128,18 +129,24 @@ app.post('/auth/request', async (req, res) => {
 
   // Anti-énumération : on retourne toujours OK, mais on n'envoie l'email
   // que si le compte existe DANS CE TENANT (scope cross-nation isolation).
+  // Posé quelle que soit l'issue : si on ne déposait le cookie que pour un
+  // compte existant, sa présence révélerait quels meneurs existent.
+  const confirmNonce = crypto.randomBytes(24).toString('hex');
+  res.setHeader('Set-Cookie', confirmCookie(confirmNonce));
+
   const user = auth.getUser(emailIn, req.tenant.id);
   if (!user) return res.json({ ok: true });
 
-  const token = auth.createMagicToken(emailIn, {
+  const { token, code } = auth.createMagicToken(emailIn, {
     ip: req.ip,
     userAgent: req.get('user-agent'),
+    confirmNonce,
   });
   const base = process.env.PUBLIC_URL || `${req.protocol}://${req.get('host')}`;
   const next_ = encodeURIComponent(req.body?.next || '/lobby.html');
   const link = `${base}/auth/verify?token=${encodeURIComponent(token)}&next=${next_}`;
 
-  email.sendMagicLink({ to: emailIn, link }).catch(err => console.error('[auth] email send:', err));
+  email.sendMagicLink({ to: emailIn, link, code }).catch(err => console.error('[auth] email send:', err));
   res.json({ ok: true });
 });
 
@@ -152,6 +159,23 @@ function sanitizeNext(next_) {
 // dans un champ caché, revérifié au POST. Empêche un POST forgé cross-site de
 // connecter la victime dans un compte tiers (login-CSRF). Le cookie SameSite=Lax
 // n'accompagne pas un POST cross-site → le nonce ne matche pas.
+// Cookie déposé dans le navigateur qui DEMANDE le lien : preuve que la
+// confirmation vient de ce navigateur, et pas d'un scanner de courriels qui
+// soumet le formulaire lui-même. À ne pas confondre avec verify_csrf ci-dessous,
+// posé AU GET, et que le scanner reçoit donc avec la page.
+const CONFIRM_COOKIE = 'ml_confirm';
+function confirmCookie(nonce) {
+  return auth.serializeCookie(CONFIRM_COOKIE, nonce, {
+    httpOnly: true, secure: process.env.NODE_ENV === 'production',
+    // Lax : doit survivre à la navigation de premier niveau depuis le client de
+    // messagerie, redirection de réécriture de liens comprise.
+    sameSite: 'Lax', maxAge: 30 * 60 * 1000, path: '/auth/verify',
+  });
+}
+function confirmNonceDe(req) {
+  return auth.parseCookies(req.headers.cookie)[CONFIRM_COOKIE] || null;
+}
+
 const VERIFY_CSRF_COOKIE = 'verify_csrf';
 function verifyCsrfCookie(nonce, { clear = false } = {}) {
   return auth.serializeCookie(VERIFY_CSRF_COOKIE, nonce, {
@@ -184,7 +208,9 @@ app.get('/auth/verify', (req, res) => {
   const nonce = crypto.randomBytes(16).toString('hex');
   res.setHeader('Cache-Control', 'no-store');
   res.setHeader('Set-Cookie', verifyCsrfCookie(nonce));
-  res.type('html').send(renderConfirmPage(token, next_, nonce));
+  // 'ok' = ce navigateur est bien celui qui a demandé le lien : un clic suffira.
+  const etat = confirmationGate(row, confirmNonceDe(req), null);
+  res.type('html').send(renderConfirmPage(token, next_, nonce, { needCode: etat !== 'ok' }));
 });
 
 // POST = confirmation humaine : c'est ici qu'on consomme le jeton et crée la session.
@@ -198,6 +224,27 @@ app.post('/auth/verify', (req, res) => {
       'Ta page de confirmation a expiré. Demande un nouveau lien depuis la page de connexion.'
     ));
   }
+  const pending = auth.peekMagicToken(token);
+  const etat = confirmationGate(pending, confirmNonceDe(req), req.body?.code);
+
+  if (etat === 'locked') {
+    return res.status(400).type('html').send(renderErrorPage(
+      'Trop de tentatives',
+      'Ce code est bloqué. Demande un nouveau lien depuis la page de connexion.'
+    ));
+  }
+  if (etat === 'need_code' || etat === 'bad_code') {
+    // C'est ici que le scanner de courriels s'arrête : il soumet le formulaire
+    // mais n'a ni le cookie ni le code. Rien n'est consommé.
+    if (etat === 'bad_code') auth.bumpCodeAttempts(token);
+    const nonce2 = crypto.randomBytes(16).toString('hex');
+    res.setHeader('Cache-Control', 'no-store');
+    res.setHeader('Set-Cookie', verifyCsrfCookie(nonce2));
+    return res.status(etat === 'bad_code' ? 400 : 200).type('html').send(
+      renderConfirmPage(token, next_, nonce2, { needCode: true, erreur: etat === 'bad_code' })
+    );
+  }
+
   const row = auth.consumeMagicToken(token);
   if (!row) {
     return res.status(400).type('html').send(renderErrorPage(
@@ -286,7 +333,7 @@ a:hover{color:#f39c12;text-decoration:underline}
 // consommé que lorsque l'humain soumet ce formulaire (POST). Les scanners d'email
 // suivent les GET mais ne soumettent pas de formulaire — le jeton reste valide
 // pour le vrai clic de l'utilisateur (ticket #38).
-function renderConfirmPage(token, next_, csrf) {
+function renderConfirmPage(token, next_, csrf, { needCode = false, erreur = false } = {}) {
   function esc(s) { return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;' }[c])); }
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Confirmer ta connexion</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -304,11 +351,13 @@ a:hover{color:#f39c12;text-decoration:underline}
 </style></head>
 <body><div class="card"><div class="label">WENDIO · Feu de conseil</div>
 <h1>Confirmer ta connexion</h1>
-<p>Clique sur le bouton pour ouvrir ta session de meneur.</p>
+<p>${needCode ? 'Saisis le code à 6 chiffres qui figure dans ton courriel.' : 'Clique sur le bouton pour ouvrir ta session de meneur.'}</p>
+${erreur ? '<p style="color:#e8a85a">Code incorrect. Vérifie les 6 chiffres du courriel.</p>' : ''}
 <form method="POST" action="/auth/verify">
 <input type="hidden" name="token" value="${esc(token)}">
 <input type="hidden" name="next" value="${esc(next_)}">
 <input type="hidden" name="csrf" value="${esc(csrf)}">
+${needCode ? `<input type="text" name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]*" placeholder="000000" required autofocus style="width:100%;box-sizing:border-box;margin:0 0 16px;padding:12px;text-align:center;font-size:22px;letter-spacing:.35em;font-family:Consolas,Menlo,monospace;background:#1a1008;color:#f4e7d3;border:1px solid rgba(244,231,211,.18);border-radius:8px;">` : ''}
 <button type="submit">Se connecter →</button>
 </form>
 <p style="margin:18px 0 0"><a href="/login">Demander un nouveau lien</a></p>

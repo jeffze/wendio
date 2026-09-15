@@ -72,6 +72,14 @@ function ensureColumn(table, column, ddl) {
 }
 
 ensureColumn('meneurs', 'tenant_id', 'tenant_id INTEGER');
+
+// Confirmation humaine du magic link : les scanners de liens des messageries
+// institutionnelles soumettent eux-mêmes le formulaire de confirmation, donc le
+// POST seul ne prouve plus rien. On exige le nonce du navigateur demandeur ou le
+// code du courriel. Cf. auth-gate.js.
+ensureColumn('magic_tokens', 'code', 'code TEXT');
+ensureColumn('magic_tokens', 'nonce_hash', 'nonce_hash TEXT');
+ensureColumn('magic_tokens', 'code_attempts', 'code_attempts INTEGER NOT NULL DEFAULT 0');
 db.prepare(`CREATE INDEX IF NOT EXISTS idx_meneurs_tenant ON meneurs(tenant_id)`).run();
 db.prepare(`CREATE INDEX IF NOT EXISTS idx_tenants_slug ON tenants(slug) WHERE active = 1`).run();
 
